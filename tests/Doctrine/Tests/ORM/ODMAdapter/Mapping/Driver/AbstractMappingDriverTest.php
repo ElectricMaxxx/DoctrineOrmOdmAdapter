@@ -68,8 +68,80 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
 
         $driver = $this->loadDriverForTestMappingDocuments();
         $classes = $driver->getAllClassNames();
-        print_r($classes);
+
         $this->assertContains($rightClassName, $classes);
     }
 
+    public function testGetAllClassNamesReturnsOnlyTheAppropriateClasses()
+    {
+        $extraneousClassName = 'Doctrine\Tests\Models\ECommerce\ECommerceCart';
+        $this->ensureIsLoaded($extraneousClassName);
+
+        $driver = $this->loadDriverForTestMappingDocuments();
+        $classes = $driver->getAllClassNames();
+
+        $this->assertNotContains($extraneousClassName, $classes);
+    }
+
+    /**
+     * @covers Doctrine\ODM\PHPCR\Mapping\Driver\XmlDriver::loadMetadataForClass
+     */
+    public function testLoadFieldMapping()
+    {
+        $className = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject';
+
+        return $this->loadMetadataForClassName($className);
+    }
+
+    /**
+     * @depends testLoadFieldMapping
+     * @param ClassMetadata $class
+     * @return \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata
+     */
+    public function testFieldMappings($class)
+    {
+        $this->assertCount(3, $class->mappings);
+        $this->assertCount(1, $class->commonFieldMappings);
+        $this->assertTrue(isset($class->mappings['uuid']));
+        $this->assertEquals('uuid', $class->mappings['uuid']['type']);
+        $this->assertTrue(isset($class->mappings['document']));
+        $this->assertEquals('document', $class->mappings['document']['type']);
+        $this->assertTrue(isset($class->mappings['entityName']));
+        $this->assertEquals('common-field', $class->mappings['entityName']['type']);
+
+        return $class;
+    }
+
+    /**
+     * @depends testLoadFieldMapping
+     * @param   ClassMetadata $class
+     */
+    public function testUuidFieldMapping($class)
+    {
+        $this->assertEquals('uuid', $class->mappings['uuid']['property']);
+        $this->assertEquals('uuid', $class->mappings['uuid']['type']);
+
+    }
+
+    /**
+     * @depends testLoadFieldMapping
+     * @param   ClassMetadata $class
+     */
+    public function testDocumentFieldMapping($class)
+    {
+        $this->assertEquals('document', $class->mappings['document']['property']);
+        $this->assertEquals('document', $class->mappings['document']['type']);
+
+    }
+
+    /**
+     * @depends testLoadFieldMapping
+     * @param   ClassMetadata $class
+     */
+    public function testcommonFieldMapping($class)
+    {
+        $this->assertEquals('common-field', $class->mappings['entityName']['type']);
+        $this->assertEquals('entityName', $class->mappings['entityName']['property']);
+        $this->assertEquals('docName', $class->mappings['entityName']['document-name']);
+    }
 } 

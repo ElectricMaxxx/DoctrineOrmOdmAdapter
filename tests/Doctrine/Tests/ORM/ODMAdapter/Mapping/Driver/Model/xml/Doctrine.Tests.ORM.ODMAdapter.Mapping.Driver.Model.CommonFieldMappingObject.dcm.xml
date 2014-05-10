@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping
+        xmlns="http://doctrine-project.org/schemas/orm-odm-adapter/adapter-mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://doctrine-project.org/schemas/orm-odm-adapter/adapter-mapping
+        https://github.com/ElectricMaxxx/DoctrineOrmOdmAdapter/blob/master/doctrine-orm-odm-adapter-mapping.xsd ">
+    <document-adapter name="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject">
+        <uuid name="uuid"/>
+        <document name="document"/>
+        <common-field document-name="docName" name="entityName" />
+    </document-adapter>
+</doctrine-mapping>

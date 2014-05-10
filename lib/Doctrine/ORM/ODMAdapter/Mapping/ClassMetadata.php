@@ -47,14 +47,14 @@ class ClassMetadata implements CommonClassMetadata
      *
      * @var array
      */
-    protected $mappings = array();
+    public $mappings = array();
 
     /**
      * READ-ONLY: The common field mappings of the class.
      *
      * @var array
      */
-    protected $commonFieldMappings = array();
+    public $commonFieldMappings = array();
 
 
     /**
@@ -263,11 +263,11 @@ class ClassMetadata implements CommonClassMetadata
     protected function validateAndCompleteFieldMapping(array $mapping, ClassMetadata $inherited = null, $isField = true, $phpcrLabel = 'property')
     {
         if (empty($mapping['fieldName'])) {
-            throw new MappingException("Mapping a property requires to specify the field name in '{$this->name}'.");
+            throw new MappingException("Mapping a property requires to specify the name in '{$this->className}'.");
         }
 
         if (!is_string($mapping['fieldName'])) {
-            throw new MappingException("Field name must be of type string in '{$this->className}'.");
+            throw new MappingException("Attribute name must be of type string in '{$this->className}'.");
         }
 
         if (!$this->reflectionClass->hasProperty($mapping['fieldName'])) {
@@ -316,14 +316,14 @@ class ClassMetadata implements CommonClassMetadata
     {
         $mapping['type'] = 'uuid';
         $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
-        $this->uuidFieldName = $mapping['fieldname'];
+        $this->uuidFieldName = $mapping['fieldName'];
     }
 
     public function mapDocument(array $mapping, ClassMetadata $inherited = null)
     {
         $mapping['type'] = 'document';
         $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
-        $this->documentFieldName = $mapping['fieldname'];
+        $this->documentFieldName = $mapping['fieldName'];
     }
 
     /**
@@ -345,6 +345,8 @@ class ClassMetadata implements CommonClassMetadata
         }
 
         $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
+
+        $this->commonFieldMappings[] = $mapping['fieldName'];
     }
 
     /**

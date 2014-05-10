@@ -46,12 +46,13 @@ class XmlDriver extends FileDriver{
      * Loads the metadata for the specified class into the provided container.
      *
      * @param string $className
-     * @param ClassMetadata $metadata
-     *
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
      * @throws \Doctrine\ORM\ODMAdapter\Mapping\MappingException
+     * @internal param \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
+     *
      * @return void
      */
-    public function loadMetadataForClass($className, ClassMetadata $metadata)
+    public function loadMetadataForClass($className, ClassMetadata $class)
     {
         /** @var $class \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata */
         try {
@@ -81,16 +82,18 @@ class XmlDriver extends FileDriver{
                 $mapping = array('type' => 'common-field');
                 $attributes = $field->attributes();
                 foreach ($attributes as $key => $value) {
-                    $mapping[$key] = $value;
+                    $mapping[$key] = (string)$value;
                 }
 
                 if (!$mapping['document-name']) {
                     throw new MappingException(sprintf('Missing document-name attribute for field of %s', $className));
                 }
 
-                if (!$mapping['entity-name']) {
-                    throw new MappingException(sprintf('Missing entity-name attribute for field of %s', $className));
+                if (!$mapping['name']) {
+                    throw new MappingException(sprintf('Missing name attribute for field on entity of %s', $className));
                 }
+
+                $mapping['fieldName'] = $mapping['name'];
 
                 $class->mapCommonField($mapping);
             }
