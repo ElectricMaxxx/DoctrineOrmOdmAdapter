@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+    <xs:annotation>
+        <xs:documentation><![CDATA[
+       This is the XML Schema for the ORM-ODM-Adapter
+       mapping.
+     ]]></xs:documentation>
+    </xs:annotation>
+
+    <xs:element name="doctrine-mapping">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element name="document-adapter" type="adapter-type" minOccurs="0" maxOccurs="unbounded" />
+                <xs:any minOccurs="0" maxOccurs="unbounded" namespace="##other"/>
+            </xs:choice>
+            <xs:anyAttribute namespace="##other"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="adapter-type">
+        <xs:choice>
+            <xs:element name="uuid" type="uuid" />
+            <xs:element name="document" type="document" />
+            <xs:element name="common-field" type="common-field" minOccurs="0" maxOccurs="unbounded" />
+        </xs:choice>
+        <xs:attribute name="entity" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="uuid">
+        <xs:attribute name="name" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="document">
+        <xs:attribute name="name" type="xs:string" />
+    </xs:complexType>
+    <xs:complexType name="common-field">
+        <xs:attribute name="document-field" type="xs:string" use="required" />
+        <xs:attribute name="entity-field" type="xs:string" use="required" />
+    </xs:complexType>
+</xs:schema>

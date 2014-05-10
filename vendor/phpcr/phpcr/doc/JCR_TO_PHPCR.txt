@@ -1,0 +1,365 @@
+Version: 2011-06-29
+http://phpcr.github.com
+
+
+The Java Content Repository specification is targeted at strongly typed
+languages. PHP is weak typed. PHPCR is meant to implement JCR in the spirit
+of PHP, not literally.
+
+This page documents where PHPCR diverges from the JCR 283 API.
+
+Short Summary of the important changes
+**************************************
+
+ * Get rid of Value and ValueFactory. They are only relevant with strong typing
+ * Mark Node, Property and NamespaceRegistry with the Traversable interface for
+    ease of use with foreach.
+ * Drop the RangeIterator and Sub-Interfaces in favor of declaring return types
+    implementing PHP iterators. The type specific iterators again are only
+    relevant with strong typing.
+ * Provide shortcut methods Node::getPropertyValue and Node::getPropertiesValues
+    to avoid instantiating property objects when not needed.
+ * NOTE: All deprecated methods coming from JSR-170 have been completely left
+    out
+
+Basic conversion
+****************
+
+Most PHP coding standards require that interfaces have the Interface in their
+name. This has been followed, thus Node becomes NodeInterface and so on.
+
+PHP does not allow method overloading (having the same method name with
+different parameter numbers and/or types). PHP uses optional parameters with
+default values instead. Wherever this was encountered in JCR, the methods are
+mapped to one. For example, ItemVisitor::visit is only one method expecting
+ItemInterface instead of two visit methods expecting Node and Property.
+The implementing visitor will have to do a type-check.
+
+ * In PHP you can not have a class method called "clone" because it is a
+    reserved keyword. Workspace::clone is named Workspace::cloneFrom as it clones
+    a node from a workspace into the current workspace.
+ * For java.io.InputStream PHP streams (resources) are used. For java.util.Calendar
+    we use the DateTime class. For the java.math.BigDecimal, strings are used that
+    can be used with the bcmath PHP extension.
+
+For some notes about value conversion, see the Value section below.
+
+Note that the effort for implementing PHPCR can be reduced by relying on
+https://github.com/phpcr/phpcr-utils which provides several helpers, f.e. for
+property value conversion and UUID generation. This repository also provides high
+level features like classes to walk a PHPCR tree, a fluent QOM interface, support
+for CND files and CLI scripts to manage workspaces and PHPCR trees.
+
+Iterators
+*********
+
+JCR defines many iterators with the single purpose of avoiding class-casting:
+RangeIterator, NodeIterator, PropertyIterator, NodeTypeIterator, VersionIterator,
+AccessControlPolicyIterator, RowIterator, EventIterator, EventListenerIterator
+We loose nothing by dropping them.
+EventJournal is a special case, containing "skipTo($date)". This iterator
+is the only one that is kept.
+
+(Probably JCR would better use a parametrized class for that anyway, available
+since Java 1.5.)
+
+Wherever the iterators are used, PHPCR requires iterators implementing
+SeekableIterator and Countable. Together, those iterators have the same
+expressiveness as the JCR RangeIterator.
+
+Note: Plain PHP arrays would be even simpler than any interfaces, while still
+allowing to use foreach. But they would have the major drawback that no lazy
+loading is possible, all data has to be instantiated immediately.
+If an implementation does not want lazy loading, it can just create an
+ArrayIterator from the array. Client code must not forget however that the API
+does *not* require the ArrayAccess interface with random access by key.
+
+
+Additionally, API elements have been declared as Traversable where it makes sense.
+This allows to directly use the objects in a foreach statement.
+The implementation either has to implement IteratorAggregate::getIterator to
+return a suitable iterator, or be an iterator itself.
+
+PHP NOTE: When implementing the interfaces, you have to declare either
+implements Iterator or IteratorAggregate explicitly in your class signature.
+Do NOT put 'implements Traversable' into the class signature, it confuses PHP.
+
+ * NodeInterface iterates over all children (like getNodes() without filters)
+    The keys are the node names, the values the node objects.
+ * PropertyInterface iterates over all values of that property. (Except for
+    multivalue properties, there is exactly 1 value. The iterator keys have no
+    significant meaning.
+ * NamespaceRegistryInterface iterates over all namespaces. Keys are the
+    prefixes, values are the URIs.
+ * Lock/LockManagerInterface iterates over all lock tokens
+    (like getLockTokens()). The iterator keys have no significant meaning.
+ * NodeType/NodeTypeManager iterates over all node types
+    (like getAllNodeTypes()). The iterator keys have no significant meaning.
+ * Observation/ObservationManagerInterface iterates over all registered event
+    listeners (like getRegisteredEventListeners()). The iterator keys have no
+    significant meaning.
+
+ * Query/QueryResultInterface iterates over the rows (node is only a special case)
+
+ * Query/RowInterface iterates over all row values, like getValues(). Keys are
+    the column names, values the corresponding values.
+
+ * Security/AccessControlEntryInterface iterates over all privileges, like
+    getPrivileges(). The iterator keys have no significant meaning.
+ * Security/AccessControlListInterface iterates over all entries, like
+    getAccessControlEntries(). The iterator keys have no significant meaning.
+
+For other interfaces, there is no obvious default iterator, so they are left without.
+Version/VersionHistoryInterface extends the NodeInterface. Even though iterating
+over the versions seems natural, we did not want to change the behaviour for
+this subclass of NodeInterface.
+
+
+Value and ValueFactory
+**********************
+
+PHPCR got rid of both Value and ValueFactory. They only make sense in the
+context of strong typing.
+
+The PropertyInterface methods directly access the native property values.
+Type conversions are still possible with the type-specific getters.
+
+ * PropertyInterface::getValue returns the value in its default format,
+    dereferencing (WEAK)REFERENCES but not PATH properties.
+ * Multivalue properties use getValue / getLength as well, they just return
+    arrays instead of a single value.
+ * The type specific getters return a native value or an array of such values
+    in case of multivalue properties.
+ * PropertyInterface::setValue got an optional parameter for specifying the
+    desired type if wanted. The method takes all functionality of
+    ValueFactory::createValue. (See Helpers below for the PropertyType
+    type conversion helper methods)
+
+In all places where Value objects where used, this is changed to plain PHP
+variables. This is true even for the Binary interface, as it adds no value over
+plain streams. PropertyInterface::getBinaryStream returns a PHP resource which
+is compatible with fpassthru and stream_get_contents.
+If you need the data size, you can use the PropertyInterface::getLength method.
+To allow optimizing copying binary properties, PHPCR allows to use a
+PropertyInterface as $value argument, which will copy the property value.
+Implementations should optimize this case to avoid unnecessarily transferring
+binary data.
+
+Note that the boolean conversion follows PHP conventions, which are different
+from Java. java.lang.Boolean.valueOf(String) compares the String with "true",
+anything else is interpreted as false. In PHP, every value except
+false|0|null|"" is true.
+We chose to follow the PHP way to avoid confusion. When sharing data with a
+Jackrabbit backend, you should be aware of the difference when converting
+integer or string to boolean values.
+
+For the DECIMAL strings, bcmath can live with some character garbage and
+interprets that as 0, contrary to the more strict java.math.BigDecimal(String)
+constructor.
+The encoding must always encode using the C locale because of
+http://bugs.php.net/bug.php?id=16532
+
+Dynamic re-binding of property types: Dropping the Value interface, the methods
+NodeInterface::setProperty() and PropertyInterface::setValue() got an
+additional parameter to force a type. If a change is attempted and the
+implementation does not support re-binding, it has to throw the
+UnsupportedRepositoryOperationException.
+
+
+Property
+********
+
+Instantiating property objects is often not needed. Instead of the JSR-333
+getPropertyAs and getPropertyAsString and so on, we defined the
+getPropertyValue($name, $type=false) that returns the native property value
+(or array of values in case of a multivalue property).
+
+Additionally, we added the NodeInterface::getPropertiesValues() method with the
+same logic as NodeInterface::getProperties($filter) to get an array of all
+property name => property value (resp value array for multivalue properties).
+To further increase performance, an optional parameter allows to not
+dereference reference properties for this array.
+
+For performance reason, implementations should delay instantiating the
+PropertyInterface objects until they are actually needed.
+
+The getValues and getLengths methods for *multivalue properties* where dropped
+in favor of returning either a single value or an array of values in the same
+method.
+
+PropertyInterface::addValue() has been added to quickly append a value to
+multi-value properties instead of requiring getValue()/append/setValue().
+
+Note: We discussed even completely dropping the Property interface. But the
+separation between Node and Property does make sense, plus allows for things
+like the ItemVisitor.
+
+
+NamespaceRegistry
+*****************
+
+In PHP, arrays are actually hashmaps, that is keys can be any values. This
+makes it natural to have a getNamespaces method with the prefixes as keys and
+the URIs as values, in addition to the getURIs and getPrefixes methods.
+
+
+Import and export
+*****************
+
+JCR uses the org.xml.sax.ContentHandler to allow import and export over SAX
+events. There is no matching generic interface in PHP, so we dropped the
+ContentHandler for now. Good and generic ideas are welcome, if it makes sense
+we happily add something for this.
+
+
+Repository
+**********
+
+We changed getDescriptor() to return both single value descriptors and arrays.
+isSingleValueDescriptor() has been removed.
+getDescriptorValue() and getDescriptorValues() are removed too, see the Values
+topic.
+
+Note: The RepositoryFactory class uses the "Java Standard Edition Service
+Provider mechanism". There is no equivalent in PHP. However, having a defined
+way how to create the repository instance makes a lot of sense. It allows to
+easily use different implementations. We kept the getRepository method and
+added a getConfigurationKeys() method to allow for generic interactive setup.
+
+
+Transactions
+************
+
+As there is a standard for transactions in Java (Java Transaction API (JTA))
+the JCR spec does not define any own methods to perform transactions but refers
+to the Java standard.
+
+So transactions are not part of the JCR spec. To give the user the ability for
+transactions PHPCR specifies it's own interface which is derived from the Java
+interface javax.transaction.UserTransaction.
+
+The JTA comes with two general approaches to transactions, container managed
+transactions and user managed transactions. Container managed transactions are
+completely left out in PHPCR even though it's required by the JCR spec.
+
+The PHPCR UserTransaction interface shall provide a transaction mechanism in
+a way the original Java UserTransaction interface can be used for transactions
+while working with the JCR API. Have a look at the JCR spec for an example how
+you can work with transactions. You can obtain a UserTransaction object by
+calling Workspace::getTransactionManager().
+
+Main differences to the original Java UserTransaction:
+ * The Java method getStatus() is named inTransaction().
+ * The Java method setRollbackOnly() is dropped.
+ * Some exceptions specified by the Java spec are replaced by exceptions already
+   specified by PHPCR:
+   - NotSupportedException -> \PHPCR\UnsupportedRepositoryOperationException
+   - SystemException -> \PHPCR\RepositoryException
+   - java.lang.SecurityException -> \PHPCR\AccessDeniedException
+ * New PHPCR exception specified by the Java spec:
+   - RollbackException -> \PHPCR\Transaction\RollbackException
+ * Standard Java exception exchanged by SPL PHP exception:
+   - java.lang.IllegalStateException -> LogicException
+ * Two Java exceptions were dropped:
+   - HeuristicMixedException
+   - HeuristicRollbackException
+
+An implementation of the UserTransaction interface has to take care of that if
+a transaction is started every following request to the repository will be
+done in the transactions context.
+
+It shall also be possible to use the UserTransaction interface on a deeper
+level of a PHPCR implementation e.g. that a $session->save() automatically
+starts and ends a transaction before and after persisting all changes to the
+backend (if the session is not yet in a transaction).
+
+
+Locking
+*******
+
+This works exactly as with JCR. For no timeout, instead of the java
+Long.MAX_VALUE the PHP constant PHP_MAX_INT is used.
+
+LockManager::lock has operator overloading in Java. For PHP, the variant with
+LockInfo is called lockWithInfo.
+
+
+Observation
+***********
+
+JCR observation has two models: The event journal allows to poll for events,
+event listeners are callbacks that happen when an event happens. While the
+journal translates naturally to PHP, the event listeners do not at all.
+Events in PHPCR always are about all users of the repository, not only about
+the current session. To get and handle events from others without polling, the
+code would have to be multithreaded, which PHP usually is not.
+It is left to the PHPCR implementation how to implement event listeners.
+The easiest is probably to offer a "poll" method on the ObservationManager and
+let the application set up the listeners, then trigger the poll. This could be
+done in a cronjob, or a long running process, or with multiple threads.
+
+
+Security
+********
+
+JCR provides an ACL model built on top of the java.security.Principal
+interface. The interfaces have been ported to PHPCR, and a PrincipalInterface
+similar to the Java one had to be added to PHPCR as well, as there is no
+equivalent in PHP.
+
+This chapter has not been implemented yet and might still need to be adjusted
+to fit PHP.
+
+
+Drawing the line
+****************
+
+Further additions have been discussed but decided not to do. One example are
+hashmaps, the PHP key - value arrays. They could be stored as a multivalue
+property with keys. However, we decided not to support this as its too close to
+an unstructured child node with named properties. You can still serialize a
+hashmap into a property if you really need it.
+
+Another idea was to return a node with all its properties as an array instead
+of the node object. But with Node::getPropertiesValues, the implementation can
+instantiate just the Node and keep the overhead minimal, but preserve the
+expressiveness of the API.
+
+
+Changes & Improvements
+**********************
+
+If you think something ought to be done better, you need good arguments. We are
+reluctant to change the API signatures. However, clarifications to the
+documentation will happily be made where necessary.
+At the time of this writing, some JCR features have not been implemented in any
+PHPCR implementation. In those areas, changes are more likely to happen, once
+implementation starts and people figure out what needs to be done. Those areas
+are:
+
+* Observation (partially)
+* Retention and Hold
+* Security
+
+
+Remark
+******
+
+If you don't agree with the choices of what was left out, you can re-add
+methods and classes in your implementation. Thanks to the weak typing, PHP
+won't complain when using those methods even if they are not declared in the
+PHPCR interfaces. Of course, your implementation would no longer be compatible
+with PHPCR and your client code not be able to use other PHPCR implementations.
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Contributors:
+
+* Karsten Dambekalns <karsten (at) typo3.org>
+* David Buchmann <david (at) liip.ch>
+* Lukas Kahwe Smith <lukas (at) liip.ch>
+* Henri Bergius <henri.bergius (at) iki.fi>
+* Jordi Boggiano <j.boggiano (at) seld.be>
+* Christian Stocker <chregu (at) liip.ch>
+* And others: https://github.com/phpcr/phpcr/graphs/contributors
