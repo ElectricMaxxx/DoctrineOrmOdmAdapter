@@ -3,9 +3,11 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
-use Doctrine\ORM\ODMAdapter\Configuration;
+use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 
 /**
  * The DocumentAdapterManager will combine persistence operation
@@ -26,7 +28,7 @@ class DocumentAdapterManager
     protected $em;
 
     /**
-     * @var
+     * @var ClassMetadataFactory
      */
     protected $classMetdataFactory;
 
@@ -84,9 +86,13 @@ class DocumentAdapterManager
 
     }
 
+    /**
+     * @param  string        $className
+     * @return ClassMetadata
+     */
     public function getClassMetadata($className)
     {
-
+        return $this->classMetdataFactory->getMetadataFor($className);
     }
 
     /**
@@ -119,6 +125,22 @@ class DocumentAdapterManager
     public function getEventManager()
     {
         return $this->eventManager;
+    }
+
+    /**
+     * @return DocumentManager
+     */
+    public function getDocumentManager()
+    {
+        return $this->dm;
+    }
+
+    /**
+     * @return ObjectManager
+     */
+    public function getObjectManager()
+    {
+        return $this->em;
     }
 
 

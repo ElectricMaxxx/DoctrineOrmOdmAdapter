@@ -1,0 +1,117 @@
+<?php
+
+
+namespace Doctrine\ORM;
+use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ODM\PHPCR\DocumentManager;
+use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
+use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+
+/**
+ * Unit of work class
+ *
+ * @license     http://www.opensource.org/licenses/MIT-license.php MIT license
+ * @link        www.doctrine-project.com
+ * @since       1.0
+ * @author      Maximilian Berghoff <Maximilian.Berghoff@gmx.de>
+ */
+class UnitOfWork
+{
+    /**
+     * @var ODMAdapter\DocumentAdapterManager
+     */
+    private $documentAdapterManager;
+
+    /**
+     * @var DocumentManager
+     */
+    private $documentManager;
+
+    /**
+     * @var ObjectManager
+     */
+    private $objectManager;
+
+    /**
+     * @var EventManager
+     */
+    private $eventManager;
+
+    /**
+     * @param DocumentAdapterManager $documentAdapterManager
+     */
+    public function __construct(DocumentAdapterManager $documentAdapterManager)
+    {
+
+        $this->documentAdapterManager = $documentAdapterManager;
+        $this->documentManager = $documentAdapterManager->getDocumentManager();
+        $this->objectManager = $documentAdapterManager->getObjectManager();
+        $this->eventManager = $documentAdapterManager->getEventManager();
+    }
+
+    /**
+     * This method will get the object's document reference by its field
+     * mapping, persist that one and store the document's uuid on the object.
+     *
+     * @param $object
+     * @throws ODMAdapter\Exception\UnitOfWorkException
+     */
+    public function persistNew($object)
+    {
+        $classMetadata = $this->documentAdapterManager->getClassMetadata(get_class($object));
+
+        $document = $this->extractDocument($object, $classMetadata);
+
+        $this->documentManager->persist($document);
+
+        $this->insertUuid($object, $document, $classMetadata);
+    }
+
+    private function extractDocument($object, ClassMetadata $classMetadata)
+    {
+        $objectReflection = new \ReflectionClass($object);
+        $property = $objectReflection->getProperty($classMetadata->documentFieldName);
+        $property->setAccessible(true);
+        $document = $property->getValue();
+
+        if (!$document) {
+            throw new UnitOfWorkException(
+                sprintf(
+                    'No document found on %s with mapped document field %s',
+                    get_class($object),
+                    $classMetadata->documentFieldName
+                )
+            );
+        }
+
+        return $document;
+    }
+
+    /**
+     * Easy helper for setting the uuid to the object.
+     *
+     * @param object        $object
+     * @param object        $document
+     * @param ClassMetadata $classMetadata
+     */
+    private function insertUuid($object, $document, ClassMetadata $classMetadata)
+    {
+        // todo create mapping for the document uuid field instead
+        $uuid = $document->getUuid();
+        $objectReflection = new \ReflectionClass($object);
+        $property = $objectReflection->getProperty($classMetadata->uuidFieldName);
+        $property->setAccessible(true);
+        $property->setValue($object, $uuid);
+    }
+    public function updateDocument($object)
+    {
+
+    }
+
+    public function removeDocument($object)
+    {
+
+    }
+} 
