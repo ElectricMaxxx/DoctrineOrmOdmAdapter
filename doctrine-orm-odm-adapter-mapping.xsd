@@ -22,7 +22,7 @@
 
     <xs:complexType name="adapter-type">
         <xs:choice>
-            <xs:element name="reference-one-document" type="reference-one-document-type" />
+            <xs:element name="reference-document" type="reference-document"  minOccurs="0" maxOccurs="unbounded"/>
             <xs:element name="common-field" type="common-field" minOccurs="0" maxOccurs="unbounded" />
         </xs:choice>
         <xs:attribute name="entity" type="xs:string" />
@@ -34,13 +34,16 @@
         <xs:attribute name="sync-type" type="sync-type" default="to-entity" />
     </xs:complexType>
 
-    <xs:complexType name="reference-one-document-type">
+    <xs:complexType name="reference-document">
         <xs:attribute name="target-document" type="xs:string" default="null" />
         <xs:attribute name="referenced-by" type="xs:string" use="required" />
         <xs:attribute name="inversed-by" type="xs:string" use="required" />
     </xs:complexType>
 
-    <xs:complexType name="sync-type">
-        <!-- todo list options -->
-    </xs:complexType>
+    <xs:simpleType name="sync-type">
+        <xs:restriction>
+            <xs:enumeration value="to-document" />
+            <xs:enumeration value="to-entity" />
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

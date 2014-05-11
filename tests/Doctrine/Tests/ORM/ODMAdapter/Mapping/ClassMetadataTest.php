@@ -79,7 +79,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testMapReferenceOneDocument(ClassMetadata $cm)
     {
         $cm->mapRefereceOneDocument(array(
-            'type'            => 'reference-one-document',
+            'type'            => 'reference-document',
             'inversed-by'     => 'uuid',
             'referenced-by'   => 'uuid',
             'target-document' => 'document',
@@ -91,7 +91,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             array(
-                'type'            => 'reference-one-document',
+                'type'            => 'reference-document',
                 'fieldName'       => 'document',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',

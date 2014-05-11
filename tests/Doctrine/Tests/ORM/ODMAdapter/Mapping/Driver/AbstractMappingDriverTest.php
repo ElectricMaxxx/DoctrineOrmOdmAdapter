@@ -106,7 +106,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($class->getReferencedDocument());
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
-        $this->assertEquals('reference-one-document', $class->mappings['document']['type']);
+        $this->assertEquals('reference-document', $class->mappings['document']['type']);
         return $class;
     }
 
@@ -123,7 +123,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $expectedMapping['inversed-by'] = 'uuid';
         $expectedMapping['inversed-entity'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject';
         $expectedMapping['fieldName'] = 'document';
-        $expectedMapping['type'] = 'reference-one-document';
+        $expectedMapping['type'] = 'reference-document';
         $expectedMapping['property'] = 'document';
         $expectedMapping['name'] = 'document';
 

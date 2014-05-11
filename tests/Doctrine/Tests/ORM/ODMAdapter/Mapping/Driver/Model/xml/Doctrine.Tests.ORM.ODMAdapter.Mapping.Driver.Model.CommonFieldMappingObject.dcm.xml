@@ -7,7 +7,7 @@
     <document-adapter name="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject">
         <common-field document-name="docName" name="entityName" />
 
-        <reference-one-document
+        <reference-document
                 target-document="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document"
                 referenced-by="uuid"
                 inversed-by="uuid"

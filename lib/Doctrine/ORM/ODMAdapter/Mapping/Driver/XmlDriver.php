@@ -7,6 +7,8 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\Common\Persistence\Mapping\MappingException as DoctrineMappingException;
+use DOMElement;
+use SimpleXMLElement;
 
 class XmlDriver extends FileDriver{
 
@@ -46,9 +48,8 @@ class XmlDriver extends FileDriver{
      * Loads the metadata for the specified class into the provided container.
      *
      * @param string $className
-     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $class
-     * @throws \Doctrine\ORM\ODMAdapter\Mapping\MappingException
-     * @internal param \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
+     * @param ClassMetadata $class
+     * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      *
      * @return void
      */
@@ -66,48 +67,65 @@ class XmlDriver extends FileDriver{
             return;
         }
 
-        // extract the common fields
-        if (isset($xmlRoot->{'common-field'})) {
-            foreach ($xmlRoot->{'common-field'} as $field) {
-                $mapping = array('type' => 'common-field');
-                $attributes = $field->attributes();
-                foreach ($attributes as $key => $value) {
-                    $mapping[$key] = (string)$value;
-                }
+        $this->extractCommonFields($xmlRoot, $class);
 
-                if (!$mapping['document-name']) {
-                    throw new MappingException(sprintf('Missing document-name attribute for field of %s', $className));
-                }
+        $this->extractReferencedDocuments($xmlRoot, $class, $className);
 
-                if (!$mapping['name']) {
-                    throw new MappingException(sprintf('Missing name attribute for field on entity of %s', $className));
-                }
+    }
 
-                $mapping['fieldName'] = $mapping['name'];
-
-                $class->mapCommonField($mapping);
-            }
+    /**
+     * @param SimpleXMLElement                                             $xmlRoot
+     * @param \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata|ClassMetadata $class
+     * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
+     */
+    protected function extractCommonFields(SimpleXMLElement $xmlRoot, ClassMetadata $class)
+    {
+        if (!isset($xmlRoot->{'common-field'})) {
+            return;
         }
 
-        // extraction the referenced document
-        if (isset($xmlRoot->{'reference-one-document'})) {
-            $documentAttributes = $xmlRoot->{'reference-one-document'}->attributes();
-            $mapping = array(
-                'type' => 'reference-one-document'
-            );
-
-            foreach ($documentAttributes as $key => $value) {
-                $value = 'null' !== $value ? $value : null;
-                $mapping[$key] = (string) $value;
+        foreach ($xmlRoot->{'common-field'} as $field) {
+            $mapping = array('type' => 'common-field');
+            $attributes = $field->attributes();
+            foreach ($attributes as $key => $value) {
+                $mapping[$key] = (string)$value;
             }
 
-            $mapping['inversed-entity'] = $className;
-
-            if (isset($mapping['name'])) {
+            if ($mapping['name']) {
                 $mapping['fieldName'] = $mapping['name'];
             }
 
-            $class->mapRefereceOneDocument($mapping);
+            $class->mapCommonField($mapping);
         }
+    }
+
+    /**
+     * @param SimpleXMLElement                                             $xmlRoot
+     * @param \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata|ClassMetadata $class
+     * @param string                                                       $className
+     */
+    protected function extractReferencedDocuments(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className)
+    {
+        if (!isset($xmlRoot->{'reference-document'})) {
+            return;
+        }
+
+        $documentAttributes = $xmlRoot->{'reference-document'}->attributes();
+        $mapping = array(
+            'type' => 'reference-document'
+        );
+
+        foreach ($documentAttributes as $key => $value) {
+            $value = 'null' !== $value ? $value : null;
+            $mapping[$key] = (string) $value;
+        }
+
+        $mapping['inversed-entity'] = $className;
+
+        if (isset($mapping['name'])) {
+            $mapping['fieldName'] = $mapping['name'];
+        }
+
+        $class->mapRefereceOneDocument($mapping);
     }
 }

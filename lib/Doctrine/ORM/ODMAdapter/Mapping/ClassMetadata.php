@@ -314,8 +314,8 @@ class ClassMetadata implements CommonClassMetadata
             throw new MappingException('It is allowed to map just one document by referenced-one-document');
         }
 
-        if (!$mapping['type'] || $mapping['type'] !== 'reference-one-document') {
-            throw new MappingException('Mapping type needs to be reference-one-document');
+        if (!$mapping['type'] || $mapping['type'] !== 'reference-document') {
+            throw new MappingException('Mapping type needs to be reference-document');
         }
         $referenceOneDocument = new ReferencedOneDocument();
 
