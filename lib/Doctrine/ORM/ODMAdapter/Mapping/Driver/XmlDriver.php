@@ -5,7 +5,7 @@ namespace Doctrine\ORM\ODMAdapter\Mapping\Driver;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
-use Doctrine\ORM\ODMAdapter\Mapping\MappingException;
+use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\Common\Persistence\Mapping\MappingException as DoctrineMappingException;
 
 class XmlDriver extends FileDriver{

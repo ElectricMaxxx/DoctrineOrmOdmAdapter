@@ -46,7 +46,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
 
         $driver = $this->loadDriver();
 
-        $this->setExpectedException('Doctrine\ORM\ODMAdapter\Mapping\MappingException');
+        $this->setExpectedException('Doctrine\ORM\ODMAdapter\Exception\MappingException');
         $driver->loadMetadataForClass('stdClass', $cm);
     }
 

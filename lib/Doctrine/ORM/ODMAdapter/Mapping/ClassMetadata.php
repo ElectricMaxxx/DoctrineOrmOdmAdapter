@@ -6,6 +6,7 @@ namespace Doctrine\ORM\ODMAdapter\Mapping;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as CommonClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\ORM\ODMAdapter\Event;
+use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use PHPCR\Util\UUIDHelper;
 use ReflectionProperty;
 
@@ -69,7 +70,7 @@ class ClassMetadata implements CommonClassMetadata
      *
      * @var array
      */
-    protected $lifecycleCallbacks;
+    protected $lifecycleCallbacks = array();
 
     /**
      * The mapped field for the uuid.
@@ -115,7 +116,7 @@ class ClassMetadata implements CommonClassMetadata
     {
         $this->reflectionClass = $reflectionService->getClass($this->className);
         $this->namespace = $reflectionService->getClassNamespace($this->className);
-        $fieldNames = array_merge($this->getFieldNames(), $this->getAssociationNames());
+        $fieldNames = $this->getFieldNames();
         foreach ($fieldNames as $fieldName) {
             $reflectionField = isset($this->mappings[$fieldName]['declared'])
                 ? new ReflectionProperty($this->mappings[$fieldName]['declared'], $fieldName)

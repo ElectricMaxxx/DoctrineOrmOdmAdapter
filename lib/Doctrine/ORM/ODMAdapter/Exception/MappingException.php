@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Doctrine\ORM\ODMAdapter\Mapping;
+namespace Doctrine\ORM\ODMAdapter\Exception;
 
 
 class MappingException extends \Exception
@@ -39,7 +39,7 @@ class MappingException extends \Exception
     /**
      * @param string $document The document's name
      * @param string $fieldName The name of the field that was already declared
-     * @return \Doctrine\ORM\ODMAdapter\Mapping\MappingException
+     * @return \Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
     public static function duplicateFieldMapping($document, $fieldName)
     {
@@ -54,5 +54,10 @@ class MappingException extends \Exception
     public static function missingTypeDefinition($document, $fieldName)
     {
         return new self("Property '$fieldName' in '$document' must have a type attribute defined");
+    }
+
+    public static function classNotMapped($className)
+    {
+        return new self("Class '$className' is not mapped to a document");
     }
 } 

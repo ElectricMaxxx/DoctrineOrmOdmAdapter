@@ -26,3 +26,5 @@
  * The file is kept for backwards compatibility and will be removed in a future
  * version of phpcr-odm.
  */
+
+require_once __DIR__ . '/DocumentAdapter.php';

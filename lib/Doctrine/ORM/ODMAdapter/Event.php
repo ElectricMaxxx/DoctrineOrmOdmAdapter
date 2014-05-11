@@ -16,6 +16,7 @@ final class Event {
     const postUpdateDocument = 'postUpdateDocument';
     const preRemoveDocument = 'preRemoveDocument';
     const postRemoveDocument = 'preRemoveDocument';
+    const loadClassMetadata = 'loadClassMetadata';
 
     public static $lifecycleCallbacks = array();
 } 
