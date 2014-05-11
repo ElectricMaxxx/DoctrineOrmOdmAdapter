@@ -70,7 +70,7 @@ class ClassMetadata implements CommonClassMetadata
      *
      * @var array
      */
-    protected $lifecycleCallbacks = array();
+    public $lifecycleCallbacks = array();
 
     /**
      * The mapped field for the uuid.

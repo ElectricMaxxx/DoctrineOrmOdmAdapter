@@ -2,10 +2,14 @@
 
 
 namespace Doctrine\ORM;
+
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
+use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
+use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 
@@ -49,6 +53,7 @@ class UnitOfWork
         $this->documentManager = $documentAdapterManager->getDocumentManager();
         $this->objectManager = $documentAdapterManager->getObjectManager();
         $this->eventManager = $documentAdapterManager->getEventManager();
+        $this->eventListenersInvoker = new ListenersInvoker($documentAdapterManager);
     }
 
     /**
@@ -56,7 +61,7 @@ class UnitOfWork
      * mapping, persist that one and store the document's uuid on the object.
      *
      * @param $object
-     * @throws ODMAdapter\Exception\UnitOfWorkException
+     * @throws UnitOfWorkException
      */
     public function persistNew($object)
     {
@@ -64,7 +69,27 @@ class UnitOfWork
 
         $document = $this->extractDocument($object, $classMetadata);
 
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::preBindDocument,
+                $document,
+                new LifecycleEventArgs($this->documentAdapterManager, $document, $object),
+                $invoke
+            );
+        }
+
         $this->documentManager->persist($document);
+
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::postBindDocument,
+                $document,
+                new LifecycleEventArgs($this->documentAdapterManager, $document, $object),
+                $invoke
+            );
+        }
 
         $this->insertUuid($object, $document, $classMetadata);
     }
