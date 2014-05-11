@@ -66,16 +66,6 @@ class XmlDriver extends FileDriver{
             return;
         }
 
-        // extract the uuid field name
-        if (isset($xmlRoot->uuid)) {
-            $class->mapUuid(array('fieldName' => (string) $xmlRoot->uuid->attributes()->name));
-        }
-
-        // extract the document field name
-        if (isset($xmlRoot->document)) {
-            $class->mapDocument(array('fieldName' => (string) $xmlRoot->document->attributes()->name));
-        }
-
         // extract the common fields
         if (isset($xmlRoot->{'common-field'})) {
             foreach ($xmlRoot->{'common-field'} as $field) {
@@ -97,6 +87,27 @@ class XmlDriver extends FileDriver{
 
                 $class->mapCommonField($mapping);
             }
+        }
+
+        // extraction the referenced document
+        if (isset($xmlRoot->{'reference-one-document'})) {
+            $documentAttributes = $xmlRoot->{'reference-one-document'}->attributes();
+            $mapping = array(
+                'type' => 'reference-one-document'
+            );
+
+            foreach ($documentAttributes as $key => $value) {
+                $value = 'null' !== $value ? $value : null;
+                $mapping[$key] = (string) $value;
+            }
+
+            $mapping['inversed-entity'] = $className;
+
+            if (isset($mapping['name'])) {
+                $mapping['fieldName'] = $mapping['name'];
+            }
+
+            $class->mapRefereceOneDocument($mapping);
         }
     }
 }

@@ -4,6 +4,7 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver;
 
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 
 abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
 {
@@ -100,38 +101,33 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
      */
     public function testFieldMappings($class)
     {
-        $this->assertCount(3, $class->mappings);
+        $this->assertCount(2, $class->mappings);
         $this->assertCount(1, $class->commonFieldMappings);
-        $this->assertTrue(isset($class->mappings['uuid']));
-        $this->assertEquals('uuid', $class->mappings['uuid']['type']);
-        $this->assertTrue(isset($class->mappings['document']));
-        $this->assertEquals('document', $class->mappings['document']['type']);
+        $this->assertNotNull($class->getReferencedDocument());
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
-
+        $this->assertEquals('reference-one-document', $class->mappings['document']['type']);
         return $class;
     }
 
     /**
-     * @depends testLoadFieldMapping
-     * @param   ClassMetadata $class
+     * @depends testFieldMappings
+     * @param $class
      */
-    public function testUuidFieldMapping($class)
+    public function testReferencedOneDocumentMapping($class)
     {
-        $this->assertEquals('uuid', $class->mappings['uuid']['property']);
-        $this->assertEquals('uuid', $class->mappings['uuid']['type']);
 
-    }
+        $expectedMapping = array();
+        $expectedMapping['target-document'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document';
+        $expectedMapping['referenced-by'] = 'uuid';
+        $expectedMapping['inversed-by'] = 'uuid';
+        $expectedMapping['inversed-entity'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject';
+        $expectedMapping['fieldName'] = 'document';
+        $expectedMapping['type'] = 'reference-one-document';
+        $expectedMapping['property'] = 'document';
+        $expectedMapping['name'] = 'document';
 
-    /**
-     * @depends testLoadFieldMapping
-     * @param   ClassMetadata $class
-     */
-    public function testDocumentFieldMapping($class)
-    {
-        $this->assertEquals('document', $class->mappings['document']['property']);
-        $this->assertEquals('document', $class->mappings['document']['type']);
-
+        $this->assertEquals($expectedMapping, $class->mappings['document']);
     }
 
     /**

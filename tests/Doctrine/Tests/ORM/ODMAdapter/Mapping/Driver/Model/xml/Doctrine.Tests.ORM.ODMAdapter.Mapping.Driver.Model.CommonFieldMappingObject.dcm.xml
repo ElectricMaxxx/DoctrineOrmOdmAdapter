@@ -5,8 +5,12 @@
         xsi:schemaLocation="http://doctrine-project.org/schemas/orm-odm-adapter/adapter-mapping
         https://github.com/ElectricMaxxx/DoctrineOrmOdmAdapter/blob/master/doctrine-orm-odm-adapter-mapping.xsd ">
     <document-adapter name="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject">
-        <uuid name="uuid"/>
-        <document name="document"/>
         <common-field document-name="docName" name="entityName" />
+
+        <reference-one-document
+                target-document="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document"
+                referenced-by="uuid"
+                inversed-by="uuid"
+                name="document" />
     </document-adapter>
 </doctrine-mapping>

@@ -97,7 +97,7 @@ class UnitOfWork
     private function extractDocument($object, ClassMetadata $classMetadata)
     {
         $objectReflection = new \ReflectionClass($object);
-        $property = $objectReflection->getProperty($classMetadata->documentFieldName);
+        $property = $objectReflection->getProperty($classMetadata->getReferencedDocument()->fieldName);
         $property->setAccessible(true);
         $document = $property->getValue();
 
@@ -106,7 +106,7 @@ class UnitOfWork
                 sprintf(
                     'No document found on %s with mapped document field %s',
                     get_class($object),
-                    $classMetadata->documentFieldName
+                    $classMetadata->getReferencedDocument()->fieldName
                 )
             );
         }
@@ -123,12 +123,16 @@ class UnitOfWork
      */
     private function insertUuid($object, $document, ClassMetadata $classMetadata)
     {
-        // todo create mapping for the document uuid field instead
+        $documentReflection = new \ReflectionClass($document);
+        $property = $documentReflection->getProperty($classMetadata->getReferencedDocument()->referencedBy);
+        $property->setAccessible(true);
+        $referencedValue = $property->getValue($document);
+
         $uuid = $document->getUuid();
         $objectReflection = new \ReflectionClass($object);
-        $property = $objectReflection->getProperty($classMetadata->uuidFieldName);
+        $property = $objectReflection->getProperty($classMetadata->getReferencedDocument()->inversedBy);
         $property->setAccessible(true);
-        $property->setValue($object, $uuid);
+        $property->setValue($object, $referencedValue);
     }
     public function updateDocument($object)
     {

@@ -6,6 +6,7 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping;
 
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 
 class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 {
@@ -50,7 +51,11 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapFields(ClassMetadata $cm)
     {
-        $cm->mapCommonField(array('fieldName' => 'entityName', 'document-name' => 'docName', 'type' => 'common-field'));
+        $cm->mapCommonField(array(
+            'fieldName' => 'entityName',
+            'document-name' => 'docName',
+            'type' => 'common-field'
+        ));
 
         $this->assertTrue(isset($cm->mappings['entityName']));
 
@@ -71,42 +76,41 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      * @depends testMapField
      * @param ClassMetadata $cm
      */
-    public function testMapUuid(ClassMetadata $cm)
+    public function testMapReferenceOneDocument(ClassMetadata $cm)
     {
-        $cm->mapUuid(array('fieldName' => 'uuid', 'type' => 'uuid'));
-
-        $this->assertTrue(isset($cm->mappings['uuid']));
-
-        $this->assertEquals(
-            array(
-                'fieldName' => 'uuid',
-                'type'      => 'uuid',
-                'property'  => 'uuid',
-            ),
-            $cm->mappings['uuid']
-        );
-    }
-
-    /**
-     * @depends testMapField
-     * @param ClassMetadata $cm
-     */
-    public function testMapDocument(ClassMetadata $cm)
-    {
-        $cm->mapDocument(array('fieldName' => 'document', 'type' => 'document'));
+        $cm->mapRefereceOneDocument(array(
+            'type'            => 'reference-one-document',
+            'inversed-by'     => 'uuid',
+            'referenced-by'   => 'uuid',
+            'target-document' => 'document',
+            'fieldName'       => 'document',
+            'inversed-entity' => 'entity',
+        ));
 
         $this->assertTrue(isset($cm->mappings['document']));
 
         $this->assertEquals(
             array(
-                'fieldName' => 'document',
-                'type'      => 'document',
-                'property'  => 'document',
+                'type'            => 'reference-one-document',
+                'fieldName'       => 'document',
+                'referenced-by'   => 'uuid',
+                'inversed-by'     => 'uuid',
+                'target-document' => 'document',
+                'inversed-entity'  => 'entity',
+                'property'        => 'document',
             ),
             $cm->mappings['document']
         );
-    }
 
+        $referencedOneDocument = new ReferencedOneDocument();
+        $referencedOneDocument->targetDocument = 'document';
+        $referencedOneDocument->referencingEntity = 'entity';
+        $referencedOneDocument->inversedBy = 'uuid';
+        $referencedOneDocument->referencedBy = 'uuid';
+        $referencedOneDocument->fieldName = 'document';
+
+        $this->assertEquals($referencedOneDocument, $cm->getReferencedDocument());
+    }
     /**
      * @depends testMapField
      */

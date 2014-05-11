@@ -22,22 +22,25 @@
 
     <xs:complexType name="adapter-type">
         <xs:choice>
-            <xs:element name="uuid" type="uuid" />
-            <xs:element name="document" type="document" />
+            <xs:element name="reference-one-document" type="reference-one-document-type" />
             <xs:element name="common-field" type="common-field" minOccurs="0" maxOccurs="unbounded" />
         </xs:choice>
         <xs:attribute name="entity" type="xs:string" />
     </xs:complexType>
 
-    <xs:complexType name="uuid">
-        <xs:attribute name="name" type="xs:string" />
-    </xs:complexType>
-
-    <xs:complexType name="document">
-        <xs:attribute name="name" type="xs:string" />
-    </xs:complexType>
     <xs:complexType name="common-field">
         <xs:attribute name="document-field" type="xs:string" use="required" />
         <xs:attribute name="entity-field" type="xs:string" use="required" />
+        <xs:attribute name="sync-type" type="sync-type" default="to-entity" />
+    </xs:complexType>
+
+    <xs:complexType name="reference-one-document-type">
+        <xs:attribute name="target-document" type="xs:string" default="null" />
+        <xs:attribute name="referenced-by" type="xs:string" use="required" />
+        <xs:attribute name="inversed-by" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="sync-type">
+        <!-- todo list options -->
     </xs:complexType>
 </xs:schema>

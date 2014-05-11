@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as CommonClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
+use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 use PHPCR\Util\UUIDHelper;
 use ReflectionProperty;
 
@@ -73,19 +74,10 @@ class ClassMetadata implements CommonClassMetadata
     public $lifecycleCallbacks = array();
 
     /**
-     * The mapped field for the uuid.
-     *
-     * @var string
+     * Contains all referenced documents with the inverse info on entity
+     * @var ReferencedOneDocument
      */
-    public $uuidFieldName;
-
-    /**
-     * The mapped field for the document.
-     *
-     * @var string
-     */
-    public $documentFieldName;
-
+    public $referencedDocument;
 
     protected $prototype;
 
@@ -316,18 +308,43 @@ class ClassMetadata implements CommonClassMetadata
         return $mapping;
     }
 
-    public function mapUuid(array $mapping, ClassMetadata $inherited = null)
+    public function mapRefereceOneDocument(array $mapping, ClassMetadata $inherit = null)
     {
-        $mapping['type'] = 'uuid';
-        $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
-        $this->uuidFieldName = $mapping['fieldName'];
-    }
+        if (null !== $this->getReferencedDocument()) {
+            throw new MappingException('It is allowed to map just one document by referenced-one-document');
+        }
 
-    public function mapDocument(array $mapping, ClassMetadata $inherited = null)
-    {
-        $mapping['type'] = 'document';
-        $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
-        $this->documentFieldName = $mapping['fieldName'];
+        if (!$mapping['type'] || $mapping['type'] !== 'reference-one-document') {
+            throw new MappingException('Mapping type needs to be reference-one-document');
+        }
+        $referenceOneDocument = new ReferencedOneDocument();
+
+        if (!isset($mapping['fieldName'])) {
+            throw new MappingException('No field name for referenced document found');
+        }
+        $referenceOneDocument->fieldName = $mapping['fieldName'];
+        $mapping['property'] = $mapping['fieldName'];
+
+        if (!isset($mapping['referenced-by'])) {
+            throw new MappingException('Documents mapping for referenced-by is missing');
+        }
+        $referenceOneDocument->referencedBy = (string) $mapping['referenced-by'];
+
+        if (!isset($mapping['inversed-by'])) {
+            throw new MappingException('Entities mapping for inversed-by is missing');
+        }
+        $referenceOneDocument->inversedBy = $mapping['inversed-by'];
+
+        if (!isset($mapping['target-document'])) {
+            throw new MappingException('No target-document found while reference-one-document mapping.');
+        }
+
+        $referenceOneDocument->targetDocument = $mapping['target-document'];
+        $referenceOneDocument->referencingEntity = $mapping['inversed-entity'];
+
+        $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
+
+        $this->referencedDocument = $referenceOneDocument;
     }
 
     /**
@@ -469,11 +486,16 @@ class ClassMetadata implements CommonClassMetadata
     public function getFieldNames()
     {
         $fields = $this->commonFieldMappings;
-        if ($this->uuidFieldName) {
-            $fields[] = $this->uuidFieldName;
-        }
-        if ($this->documentFieldName) {
-            $fields[] = $this->documentFieldName;
+        if (null !== $this->getReferencedDocument()) {
+            $fields[] = array(
+                'type' => 'referenced-one-document',
+                'property' => $this->referencedDocument->fieldName,
+                'fieldName' => $this->referencedDocument->fieldName,
+                'inversed-by' => $this->referencedDocument->inversedBy,
+                'referenced-by' => $this->referencedDocument->referencedBy,
+                'target-document' => $this->referencedDocument->targetDocument,
+                'inversed-entity' => $this->referencedDocument->referencingEntity,
+            );
         }
 
         return $fields;
@@ -596,5 +618,14 @@ class ClassMetadata implements CommonClassMetadata
         $this->assertTrue($cm->versionable);
         $this->assertEquals('Doctrine\Tests\ODM\PHPCR\Mapping\DocumentRepository', $cm->customRepositoryClassName);
     }
+
+    /**
+     * @return ReferencedOneDocument
+     */
+    public function getReferencedDocument()
+    {
+        return $this->referencedDocument;
+    }
+
 
 }
