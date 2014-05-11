@@ -17,7 +17,32 @@ this library was born. Atm i try to map the following fields/properties
 Current state:
  * [x] ClassMetadata + Test
  * [x] ClassMetadataFactory + Test
- * [X] XmlDriver + Test
+ * [x] XmlDriver + Test
+ * [ ] AnnotationDriver + Test
+ * [ ] YmDriver + Test
  * [ ] DocumentAdapter + Test
  * [ ] Kind of UnitOfWork for handling hard work
+ * [ ] implement the lifecycle events
  * [ ] Bundle to use that library
+
+ Usage
+ -----
+
+ ... would be to create a bundle which is able to hook on entities lifecycle events
+ and triggers the right method on the `DocumentAdapterManager`. That bundle would need
+ to inject the right managers (for document and entity).
+ The application which uses both would just need to do the mapping and hook on this libraries
+ events for further usage.
+
+ Example
+ -------
+
+ - create an entity which got a reference to a document
+ - map uuid/document field - means where to find them on the entity
+ - persist the entity
+ - OrmOdmAdapterBunle would hook on `postPersist`
+ - call `$documentAdapterManager->bindDocument($entity);`
+ - UoW would get the documents uuid and store it on the mapped field on the entity
+ - UoW would trigger persist on `DocumentManager` (that one that handles the document)
+ - a possible hook on `preBindDocument` could manage other work i.e. creating a route
+  for that document.
