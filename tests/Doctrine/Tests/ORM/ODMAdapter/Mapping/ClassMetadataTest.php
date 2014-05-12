@@ -69,6 +69,16 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
             $cm->mappings['entityName']
         );
 
+        $this->assertEquals(
+            array(
+                'fieldName'     => 'entityName',
+                'property'      => 'entityName',
+                'document-name' => 'docName',
+                'type'          => 'common-field',
+            ),
+            $cm->commonFieldMappings['entityName']
+        );
+
         return $cm;
     }
 
@@ -109,8 +119,58 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $referencedOneDocument->referencedBy = 'uuid';
         $referencedOneDocument->fieldName = 'document';
 
-        $this->assertEquals($referencedOneDocument, $cm->getReferencedDocument());
+        $this->assertEquals(array(
+            'type'            => 'reference-document',
+            'fieldName'       => 'document',
+            'referenced-by'   => 'uuid',
+            'inversed-by'     => 'uuid',
+            'target-document' => 'document',
+            'inversed-entity'  => 'entity',
+            'property'        => 'document',
+            ),
+            $cm->getReferencedDocument('document'));
     }
+
+    /**
+     * @depends             testMapField
+     * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
+     * @param               ClassMetadata $cm
+     */
+    public function testMapReferenceThrowsExceptionOnEmtpyType(ClassMetadata $cm)
+    {
+        $cm->mapCommonField(array());
+    }
+
+    /**
+     * @depends            testMapField
+     * @expectedException  Doctrine\ORM\ODMAdapter\Exception\MappingException
+     * @param              ClassMetadata $cm
+     */
+    public function testMapFieldThrowsExceptionOnWrongType(ClassMetadata $cm)
+    {
+        $cm->mapCommonField(array('type' => 'some_type'));
+    }
+
+    /**
+     * @depends             testMapField
+     * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
+     * @param               ClassMetadata $cm
+     */
+    public function testMapFieldThrowsExceptionOnEmtpyType(ClassMetadata $cm)
+    {
+        $cm->mapRefereceOneDocument(array());
+    }
+
+    /**
+     * @depends            testMapField
+     * @expectedException  Doctrine\ORM\ODMAdapter\Exception\MappingException
+     * @param              ClassMetadata $cm
+     */
+    public function testMapReferenceThrowsExceptionOnWrongType(ClassMetadata $cm)
+    {
+        $cm->mapRefereceOneDocument(array('type' => 'some_type'));
+    }
+
     /**
      * @depends testMapField
      */

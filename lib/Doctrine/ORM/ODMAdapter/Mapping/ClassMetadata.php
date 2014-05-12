@@ -62,7 +62,7 @@ class ClassMetadata implements CommonClassMetadata
     /**
      * READ-ONLY: The ReflectionProperty instances of the mapped class.
      *
-     * @var ReflectionProperty[]
+     * @var array|ReflectionProperty[]
      */
     public $reflectionFields = array();
 
@@ -75,12 +75,12 @@ class ClassMetadata implements CommonClassMetadata
 
     /**
      * Contains all referenced documents with the inverse info on entity
-     * @var ReferencedOneDocument
+     *
+     * @var array
      */
-    public $referencedDocument;
+    public $referencedDocuments;
 
     protected $prototype;
-
 
     public function __construct($className)
     {
@@ -308,52 +308,33 @@ class ClassMetadata implements CommonClassMetadata
         return $mapping;
     }
 
+    /**
+     * @param array $mapping
+     * @param ClassMetadata $inherit
+     * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
+     */
     public function mapRefereceOneDocument(array $mapping, ClassMetadata $inherit = null)
     {
-        if (null !== $this->getReferencedDocument()) {
-            throw new MappingException('It is allowed to map just one document by referenced-one-document');
-        }
-
-        if (!$mapping['type'] || $mapping['type'] !== 'reference-document') {
+        if (!isset($mapping['type']) || $mapping['type'] !== 'reference-document') {
             throw new MappingException('Mapping type needs to be reference-document');
         }
-        $referenceOneDocument = new ReferencedOneDocument();
-
-        if (!isset($mapping['fieldName'])) {
-            throw new MappingException('No field name for referenced document found');
-        }
-        $referenceOneDocument->fieldName = $mapping['fieldName'];
-        $mapping['property'] = $mapping['fieldName'];
-
         if (!isset($mapping['referenced-by'])) {
             throw new MappingException('Documents mapping for referenced-by is missing');
         }
-        $referenceOneDocument->referencedBy = (string) $mapping['referenced-by'];
-
         if (!isset($mapping['inversed-by'])) {
             throw new MappingException('Entities mapping for inversed-by is missing');
         }
-        $referenceOneDocument->inversedBy = $mapping['inversed-by'];
-
         if (!isset($mapping['target-document'])) {
             throw new MappingException('No target-document found while reference-one-document mapping.');
         }
 
-        $referenceOneDocument->targetDocument = $mapping['target-document'];
-        $referenceOneDocument->referencingEntity = $mapping['inversed-entity'];
+        $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
 
-        $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
-
-        $this->referencedDocument = $referenceOneDocument;
+        $this->referencedDocuments[$mapping['property']] = $mapping;
     }
 
     /**
-     * Map a field.
-     *
-     * - type - The Doctrine Type of this field.
-     * - fieldName - The name of the property/field on the mapped php class
-     * - name - The Property key of this field in the PHPCR document
-     * - id - True for an ID field.
+     * Map the common fields. They are persisted in commonFields property too.
      *
      * @param array $mapping The mapping information.
      * @param ClassMetadata $inherited
@@ -361,13 +342,12 @@ class ClassMetadata implements CommonClassMetadata
      */
     public function mapCommonField(array $mapping, ClassMetadata $inherited = null)
     {
-        if (!$mapping['type'] || $mapping['type'] !== 'common-field') {
+        if (!isset($mapping['type']) || $mapping['type'] !== 'common-field') {
             throw new MappingException('Wrong mapping type given.');
         }
+        $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
 
-        $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
-
-        $this->commonFieldMappings[] = $mapping['fieldName'];
+        $this->commonFieldMappings[$mapping['fieldName']] = $mapping;
     }
 
     /**
@@ -424,8 +404,7 @@ class ClassMetadata implements CommonClassMetadata
             return false;
         }
         return in_array($fieldName, $this->commonFieldMappings)
-        || $this->uuidFieldName === $fieldName
-        || $this->documentFieldName === $fieldName
+            || in_array($fieldName, $this->referencedDocuments)
             ;
     }
 
@@ -486,16 +465,11 @@ class ClassMetadata implements CommonClassMetadata
     public function getFieldNames()
     {
         $fields = $this->commonFieldMappings;
-        if (null !== $this->getReferencedDocument()) {
-            $fields[] = array(
-                'type' => 'referenced-one-document',
-                'property' => $this->referencedDocument->fieldName,
-                'fieldName' => $this->referencedDocument->fieldName,
-                'inversed-by' => $this->referencedDocument->inversedBy,
-                'referenced-by' => $this->referencedDocument->referencedBy,
-                'target-document' => $this->referencedDocument->targetDocument,
-                'inversed-entity' => $this->referencedDocument->referencingEntity,
-            );
+        $referencedDocuments = $this->getReferencedDocuments();
+        if (count($referencedDocuments) !== 0) {
+            foreach ($referencedDocuments as $document) {
+                $fields[] = $document['fieldName'];
+            }
         }
 
         return $fields;
@@ -620,12 +594,24 @@ class ClassMetadata implements CommonClassMetadata
     }
 
     /**
-     * @return ReferencedOneDocument
+     * @return array
      */
-    public function getReferencedDocument()
+    public function getReferencedDocuments()
     {
-        return $this->referencedDocument;
+        return $this->referencedDocuments;
     }
 
+    /**
+     * Will return the reference-document mappings for the given property.
+     *
+     * @param $property
+     * @return array
+     */
+    public function getReferencedDocument($property)
+    {
+        if (array_key_exists($property, $this->referencedDocuments)) {
+            return $this->referencedDocuments[$property];
+        }
+    }
 
 }

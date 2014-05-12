@@ -103,7 +103,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertCount(2, $class->mappings);
         $this->assertCount(1, $class->commonFieldMappings);
-        $this->assertNotNull($class->getReferencedDocument());
+        $this->assertNotNull($class->getReferencedDocuments());
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
         $this->assertEquals('reference-document', $class->mappings['document']['type']);
