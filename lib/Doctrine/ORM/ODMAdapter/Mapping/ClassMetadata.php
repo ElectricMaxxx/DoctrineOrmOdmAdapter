@@ -7,7 +7,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as CommonClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
-use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 use PHPCR\Util\UUIDHelper;
 use ReflectionProperty;
 
