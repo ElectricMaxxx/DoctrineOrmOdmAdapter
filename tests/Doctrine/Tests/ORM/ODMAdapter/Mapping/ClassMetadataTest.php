@@ -52,8 +52,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testMapFields(ClassMetadata $cm)
     {
         $cm->mapCommonField(array(
-            'fieldName' => 'entityName',
-            'document-name' => 'docName',
+            'inversed-by' => 'entityName',
+            'referenced-by' => 'docName',
             'type' => 'common-field'
         ));
 
@@ -62,9 +62,11 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             array(
                 'fieldName'      => 'entityName',
+                'inversed-by' => 'entityName',
                 'property'      => 'entityName',
-                'document-name' => 'docName',
+                'referenced-by' => 'docName',
                 'type'          => 'common-field',
+                'sync-type'     => 'to-entity',
             ),
             $cm->mappings['entityName']
         );
@@ -72,9 +74,11 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             array(
                 'fieldName'     => 'entityName',
+                'inversed-by' => 'entityName',
                 'property'      => 'entityName',
-                'document-name' => 'docName',
+                'referenced-by' => 'docName',
                 'type'          => 'common-field',
+                'sync-type'     => 'to-entity',
             ),
             $cm->commonFieldMappings['entityName']
         );
@@ -112,16 +116,30 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
             $cm->mappings['document']
         );
 
-        $this->assertEquals(array(
-            'type'            => 'reference-document',
-            'fieldName'       => 'document',
-            'referenced-by'   => 'uuid',
-            'inversed-by'     => 'uuid',
-            'target-document' => 'document',
-            'inversed-entity' => 'entity',
-            'property'        => 'document',
+        $this->assertEquals(
+            array(
+                'property'      => 'uuid',
+                'fieldName'     => 'uuid',
+                'type'          => 'common-field',
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'sync-type'     => 'to-entity',
             ),
-            $cm->getReferencedDocument('document'));
+            $cm->mappings['uuid']
+        );
+
+        $this->assertEquals(
+            array(
+                'type'            => 'reference-document',
+                'fieldName'       => 'document',
+                'referenced-by'   => 'uuid',
+                'inversed-by'     => 'uuid',
+                'target-document' => 'document',
+                'inversed-entity' => 'entity',
+                'property'        => 'document',
+            ),
+            $cm->getReferencedDocument('document')
+        );
     }
 
     /**

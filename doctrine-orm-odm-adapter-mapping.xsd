@@ -23,22 +23,26 @@
     <xs:complexType name="adapter-type">
         <xs:choice>
             <xs:element name="reference-document" type="reference-document"  minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="common-field" type="common-field" minOccurs="0" maxOccurs="unbounded" />
         </xs:choice>
         <xs:attribute name="entity" type="xs:string" />
     </xs:complexType>
 
-    <xs:complexType name="common-field">
-        <xs:attribute name="document-field" type="xs:string" use="required" />
-        <xs:attribute name="entity-field" type="xs:string" use="required" />
-        <xs:attribute name="sync-type" type="sync-type" default="to-entity" />
-    </xs:complexType>
-
     <xs:complexType name="reference-document">
+        <xs:choice>
+            <xs:element name="common-field" type="common-field" minOccurs="0" maxOccurs="unbounded" />
+        </xs:choice>
         <xs:attribute name="target-document" type="xs:string" default="null" />
         <xs:attribute name="referenced-by" type="xs:string" use="required" />
         <xs:attribute name="inversed-by" type="xs:string" use="required" />
     </xs:complexType>
+
+
+    <xs:complexType name="common-field">
+        <xs:attribute name="referenced-by" type="xs:string" use="required" />
+        <xs:attribute name="inversed-by" type="xs:string" use="required" />
+        <xs:attribute name="type" type="sync-type" default="to-entity" />
+    </xs:complexType>
+
 
     <xs:simpleType name="sync-type">
         <xs:restriction>

@@ -2,8 +2,11 @@
 
 namespace Doctrine\Tests\ORM\ODMAdapter;
 use Doctrine\ORM\ODMAdapter\UnitOfWork;
+use Doctrine\ORM\Query\AST\CoalesceExpression;
 use Doctrine\Tests\Models\ECommerce\Product;
+use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject;
+use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferencedDocument;
 use MyProject\Proxies\__CG__\OtherProject\Proxies\__CG__\stdClass;
 
 /**
@@ -85,8 +88,44 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                               ->method('persist')
                               ->with($this->equalTo($testDocument));
 
-        $this->UoW->persistNew($object);
+        $this->UoW->persist($object);
 
         $this->assertEquals('test-uuid', $object->uuid);
+    }
+
+    public function testPersistNewWithCommonFields()
+    {
+        // pre conditions
+        $object = new CommonFieldMappingObject();
+        $testDocument = new ReferencedDocument();
+        $object->document = $testDocument;
+        $testDocument->uuid = 'test-uuid';
+        $testDocument->docName = 'docName';
+
+        $reference = array('inversed-by' => 'uuid', 'referenced-by' => 'uuid');
+        $referenceMappings = array(
+            'document' => $reference,
+        );
+        $commonField = array('document-name' => 'docName', 'fieldName' => 'entityName');
+        $commonFieldMappings = array('entityName' => $commonField);
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedDocuments')
+                            ->will($this->returnValue($referenceMappings));
+        $this->classMetadata->expects($this->once())
+                            ->method('getReferencedDocument')
+                            ->with($this->equalTo('document'))
+                            ->will($this->returnValue($reference));
+        $this->classMetadata->expects($this->any())
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
+
+        $this->documentManager->expects($this->once())
+                              ->method('persist')
+                              ->with($this->equalTo($testDocument));
+
+        $this->UoW->persist($object);
+
+        $this->assertEquals('test-uuid', $object->uuid);
+        $this->assertEquals('doc-value', $object->entityName);
     }
 }

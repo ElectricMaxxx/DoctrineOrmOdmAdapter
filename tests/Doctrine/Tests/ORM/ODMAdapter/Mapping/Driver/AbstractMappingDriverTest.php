@@ -101,11 +101,12 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
      */
     public function testFieldMappings($class)
     {
-        $this->assertCount(2, $class->mappings);
-        $this->assertCount(1, $class->commonFieldMappings);
-        $this->assertNotNull($class->getReferencedDocuments());
+        $this->assertCount(3, $class->mappings);
+        $this->assertCount(2, $class->commonFieldMappings);
+        $this->assertCount(1, $class->getReferencedDocuments());
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
+        $this->assertEquals('common-field', $class->mappings['uuid']['type']);
         $this->assertEquals('reference-document', $class->mappings['document']['type']);
         return $class;
     }
@@ -138,6 +139,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
         $this->assertEquals('entityName', $class->mappings['entityName']['property']);
-        $this->assertEquals('docName', $class->mappings['entityName']['document-name']);
+        $this->assertEquals('entityName', $class->mappings['entityName']['inversed-by']);
+        $this->assertEquals('docName', $class->mappings['entityName']['referenced-by']);
     }
-} 
+}

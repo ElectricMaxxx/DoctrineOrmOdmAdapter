@@ -244,16 +244,16 @@ class ClassMetadata implements CommonClassMetadata
 
 
     /**
-     * @param array         $mapping
-     * @param ClassMetadata $inherited  same field of parent document, if any
-     * @param bool          $isField    whether this is a field or an association
-     * @param string        $phpcrLabel the name for the phpcr thing. usually property,
+     * @param array $mapping
+     * @param ClassMetadata $inherited same field of parent document, if any
+     * @param bool $isField whether this is a field or an association
+     * @param string $phpcrLabel the name for the phpcr thing. usually property,
      *                                  except for child where this is name. referrers
      *                                  use false to not set anything.
      *
-     * @return mixed
-     *
+     * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      * @throws MappingException
+     * @return mixed
      */
     protected function validateAndCompleteFieldMapping(array $mapping, ClassMetadata $inherited = null, $isField = true, $phpcrLabel = 'property')
     {
@@ -330,6 +330,14 @@ class ClassMetadata implements CommonClassMetadata
         $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
 
         $this->referencedDocuments[$mapping['property']] = $mapping;
+
+        // the mapping for both fields will be done by a sync of a common field
+        $commonFieldMapping = array(
+            'inversed-by' => $mapping['inversed-by'],
+            'referenced-by' => $mapping['referenced-by'],
+            'type'          => 'common-field'
+        );
+        $this->mapCommonField($commonFieldMapping);
     }
 
     /**
@@ -344,6 +352,20 @@ class ClassMetadata implements CommonClassMetadata
         if (!isset($mapping['type']) || $mapping['type'] !== 'common-field') {
             throw new MappingException('Wrong mapping type given.');
         }
+
+        if (!isset($mapping['sync-type']) || empty($mapping['sync-type'])) {
+            $mapping['sync-type'] = 'to-entity';
+        }
+
+        if (!isset($mapping['referenced-by']) || empty($mapping['referenced-by'])) {
+            throw new MappingException("referenced-by attribute needs to be set for common-field mapping.");
+        }
+
+        if (!isset($mapping['inversed-by']) || empty($mapping['inversed-by'])) {
+            throw new MappingException("inversed-by attribute needs to be set for common-field mapping.");
+        }
+
+        $mapping['fieldName'] = $mapping['inversed-by'];
         $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherited, false, false);
 
         $this->commonFieldMappings[$mapping['fieldName']] = $mapping;
@@ -613,4 +635,15 @@ class ClassMetadata implements CommonClassMetadata
         }
     }
 
+    public function getCommonFields()
+    {
+        return $this->commonFieldMappings;
+    }
+
+    public function getcommonField($property)
+    {
+        if (array_key_exists($property, $this->commonFieldMappings)) {
+            return $this->commonFieldMappings[$property];
+        }
+    }
 }

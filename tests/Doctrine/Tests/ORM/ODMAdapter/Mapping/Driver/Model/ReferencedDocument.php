@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model;
 
-
-class CommonFieldMappingObject
+class ReferencedDocument
 {
+    public $docName;
     public $uuid;
-    public $document;
-    public $entityName;
 }

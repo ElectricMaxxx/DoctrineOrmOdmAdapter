@@ -67,8 +67,6 @@ class XmlDriver extends FileDriver{
             return;
         }
 
-        $this->extractCommonFields($xmlRoot, $class);
-
         $this->extractReferencedDocuments($xmlRoot, $class, $className);
 
     }
@@ -89,10 +87,6 @@ class XmlDriver extends FileDriver{
             $attributes = $field->attributes();
             foreach ($attributes as $key => $value) {
                 $mapping[$key] = (string)$value;
-            }
-
-            if ($mapping['name']) {
-                $mapping['fieldName'] = $mapping['name'];
             }
 
             $class->mapCommonField($mapping);
@@ -123,7 +117,11 @@ class XmlDriver extends FileDriver{
         $mapping['inversed-entity'] = $className;
 
         if (isset($mapping['name'])) {
-            $mapping['fieldName'] = $mapping['name'];
+            $mapping['fieldName'] = (string) $mapping['name'];
+        }
+
+        if (isset($xmlRoot->{'reference-document'}->{'common-field'})) {
+            $this->extractCommonFields($xmlRoot->{'reference-document'}, $class, $className);
         }
 
         $class->mapRefereceOneDocument($mapping);

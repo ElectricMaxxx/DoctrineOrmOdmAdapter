@@ -24,6 +24,17 @@ use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 class UnitOfWork
 {
     /**
+     * An object state for referenced objects, means when fields for inversed-by
+     * mappings are set.
+     */
+    const STATE_REFERENCED = 1;
+
+    /**
+     * An object state, when one or more references arn't set.
+     */
+    const STATE_NEW = 2;
+
+    /**
      * @var DocumentAdapterManager
      */
     private $documentAdapterManager;
@@ -57,13 +68,37 @@ class UnitOfWork
     }
 
     /**
+     * Persist a referenced document on an object as part of the current unit of work.
+     *
+     * @param $object
+     */
+    public function persist($object)
+    {
+        $this->doPersist($object);
+    }
+
+    private function doPersist($object)
+    {
+        $classMetadata = $this->documentAdapterManager->getClassMetadata(get_class($object));
+        $objectState = $this->getObjectState($object, $classMetadata);
+
+        switch ($objectState) {
+            case self::STATE_REFERENCED:    // this object is still managed and got its reference
+                $this->updateReference($object, $classMetadata);
+                break;
+            case self::STATE_NEW:           // complete new reference
+                $this->persistNew($object, $classMetadata);
+                break;
+        }
+    }
+    /**
      * This method will get the object's document reference by its field
      * mapping, persist that one and store the document's uuid on the object.
      *
      * @param $object
      * @throws UnitOfWorkException
      */
-    public function persistNew($object)
+    private function persistNew($object)
     {
 
         $classMetadata = $this->documentAdapterManager->getClassMetadata(get_class($object));
@@ -93,6 +128,8 @@ class UnitOfWork
                     $invoke
                 );
             }
+
+            $this->syncCommonFields($object, $document, $classMetadata);
 
             $this->insertUuid($object, $document, $fieldName, $classMetadata);
         }
@@ -153,12 +190,45 @@ class UnitOfWork
         $fieldName->setAccessible(true);
         $fieldName->setValue($object, $referencedValue);
     }
-    public function updateDocument($object)
+
+
+    public function removeDocument($object)
     {
 
     }
 
-    public function removeDocument($object)
+    private function updateReference($object, $classMetadata)
+    {
+    }
+
+    /**
+     * Wil set return a state of the object depending on the value of the inversed-by field.
+     *
+     * @todo think about that decision.
+     * @param  object        $object
+     * @param  ClassMetadata $classMetadata
+     * @return int
+     */
+    private function getObjectState($object, ClassMetadata $classMetadata)
+    {
+        $referenceMapping = $classMetadata->getReferencedDocuments();
+        $countReferences = count($referenceMapping);
+        $matches = 0;
+        foreach ($referenceMapping as $reference) {
+            $objectReflection = new \ReflectionClass($object);
+            $property = $objectReflection->getProperty($reference['inversed-by']);
+            $property->setAccessible(true);
+            $inversedField = $property->getValue($object);
+
+            if (null !== $inversedField) {
+                $matches++;
+            }
+        }
+
+        return $matches === 0 ? self::STATE_NEW : self::STATE_REFERENCED;
+    }
+
+    private function syncCommonFields($object, $document, ClassMetadata $classMetadata)
     {
 
     }
