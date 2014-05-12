@@ -141,5 +141,6 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('entityName', $class->mappings['entityName']['property']);
         $this->assertEquals('entityName', $class->mappings['entityName']['inversed-by']);
         $this->assertEquals('docName', $class->mappings['entityName']['referenced-by']);
+        $this->assertEquals('document', $class->mappings['entityName']['target-field']);
     }
 }

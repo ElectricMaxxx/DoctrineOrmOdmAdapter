@@ -52,9 +52,10 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testMapFields(ClassMetadata $cm)
     {
         $cm->mapCommonField(array(
-            'inversed-by' => 'entityName',
+            'inversed-by'   => 'entityName',
             'referenced-by' => 'docName',
-            'type' => 'common-field'
+            'target-field'  => 'document',
+            'type'          => 'common-field',
         ));
 
         $this->assertTrue(isset($cm->mappings['entityName']));
@@ -66,6 +67,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'property'      => 'entityName',
                 'referenced-by' => 'docName',
                 'type'          => 'common-field',
+                'target-field'  => 'document',
                 'sync-type'     => 'to-entity',
             ),
             $cm->mappings['entityName']
@@ -78,6 +80,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'property'      => 'entityName',
                 'referenced-by' => 'docName',
                 'type'          => 'common-field',
+                'target-field'  => 'document',
                 'sync-type'     => 'to-entity',
             ),
             $cm->commonFieldMappings['entityName']
@@ -123,6 +126,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'type'          => 'common-field',
                 'inversed-by'   => 'uuid',
                 'referenced-by' => 'uuid',
+                'target-field'  => 'document',
                 'sync-type'     => 'to-entity',
             ),
             $cm->mappings['uuid']

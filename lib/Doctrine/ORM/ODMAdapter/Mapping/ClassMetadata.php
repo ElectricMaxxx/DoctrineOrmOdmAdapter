@@ -335,7 +335,8 @@ class ClassMetadata implements CommonClassMetadata
         $commonFieldMapping = array(
             'inversed-by' => $mapping['inversed-by'],
             'referenced-by' => $mapping['referenced-by'],
-            'type'          => 'common-field'
+            'type'          => 'common-field',
+            'target-field'  => $mapping['fieldName'],
         );
         $this->mapCommonField($commonFieldMapping);
     }
