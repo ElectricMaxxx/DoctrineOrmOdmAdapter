@@ -106,7 +106,7 @@ class UnitOfWork
 
         $documents = $this->extractDocuments($object, $classMetadata);
 
-        foreach ($documents as $fieldName => $document) {
+        foreach ($documents as $document) {
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
                 $this->eventListenersInvoker->invoke(
@@ -134,6 +134,16 @@ class UnitOfWork
         }
     }
 
+    /**
+     * Depending on the reference-document mapping there can be several mapped documents.
+     * This method tries to extract them based on the mapping from the object and return
+     * it as an array to persist or work on them.
+     *
+     * @param $object
+     * @param ClassMetadata $classMetadata
+     * @return array
+     * @throws Exception\UnitOfWorkException
+     */
     private function extractDocuments($object, ClassMetadata $classMetadata)
     {
         $referenceMappings = $classMetadata->getReferencedDocuments();
@@ -174,6 +184,7 @@ class UnitOfWork
      * Wil set return a state of the object depending on the value of the inversed-by field.
      *
      * @todo think about that decision.
+     *
      * @param  object        $object
      * @param  ClassMetadata $classMetadata
      * @return int
@@ -181,7 +192,7 @@ class UnitOfWork
     private function getObjectState($object, ClassMetadata $classMetadata)
     {
         $referenceMapping = $classMetadata->getReferencedDocuments();
-        $countReferences = count($referenceMapping);
+
         $matches = 0;
         foreach ($referenceMapping as $reference) {
             $objectReflection = new \ReflectionClass($object);
@@ -198,6 +209,9 @@ class UnitOfWork
     }
 
     /**
+     * This method will have a look into the mappings and figure out if the current
+     * document has got some mapped common fields and sync them by the mapped sync-type.
+     *
      * @param $object
      * @param $document
      * @param ClassMetadata $classMetadata
@@ -225,7 +239,7 @@ class UnitOfWork
 
             if (!$document) {
                 throw new MappingException(
-                    sprintf('Error when trying to get mapped %s from object %', $fieldName, get_class($object))
+                    sprintf('Error when trying to get mapped %s from object %s.', $fieldName, get_class($object))
                 );
             }
 
