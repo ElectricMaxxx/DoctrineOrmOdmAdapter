@@ -1,1 +1,0 @@
-THIS TUTORIAL HAS BEEN MOVED TO [phpcr-docs](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md)
