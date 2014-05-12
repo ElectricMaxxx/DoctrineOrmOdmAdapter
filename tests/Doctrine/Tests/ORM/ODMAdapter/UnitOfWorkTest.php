@@ -72,8 +72,15 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $object->document = $testDocument;
         $testDocument->uuid = 'test-uuid';
 
-        $reference = array('inversed-by' => 'uuid', 'referenced-by' => 'uuid');
+        $reference = array(
+            'inversed-by' => 'uuid',
+            'referenced-by' => 'uuid',
+            'target-document' => get_class($testDocument),
+            'fieldName' => 'document',
+            'sync-type'       => 'to-entity',
+        );
         $mapping = array(
+
             'document' => $reference,
         );
         $this->classMetadata->expects($this->any())
@@ -93,20 +100,30 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('test-uuid', $object->uuid);
     }
 
-    public function testPersistNewWithCommonFields()
+    public function testPersistNewWithCommonFieldsToEntity()
     {
         // pre conditions
         $object = new CommonFieldMappingObject();
         $testDocument = new ReferencedDocument();
         $object->document = $testDocument;
         $testDocument->uuid = 'test-uuid';
-        $testDocument->docName = 'docName';
+        $testDocument->docName = 'doc-value';
 
-        $reference = array('inversed-by' => 'uuid', 'referenced-by' => 'uuid');
+        $reference = array(
+            'inversed-by'     => 'uuid',
+            'referenced-by'   => 'uuid',
+            'fieldName'       => 'document',
+            'target-document' => get_class($testDocument),
+        );
         $referenceMappings = array(
             'document' => $reference,
         );
-        $commonField = array('document-name' => 'docName', 'fieldName' => 'entityName');
+        $commonField = array(
+            'referenced-by' => 'docName',
+            'inversed-by' => 'entityName',
+            'target-field' => 'document',
+            'sync-type'       => 'to-entity',
+        );
         $commonFieldMappings = array('entityName' => $commonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedDocuments')
@@ -127,5 +144,51 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test-uuid', $object->uuid);
         $this->assertEquals('doc-value', $object->entityName);
+    }
+
+    public function testPersistNewWithCommonFieldsToDocument()
+    {
+        // pre conditions
+        $object = new CommonFieldMappingObject();
+        $object->entityName = 'entity-value';
+        $testDocument = new ReferencedDocument();
+        $object->document = $testDocument;
+        $testDocument->uuid = 'test-uuid';
+
+        $reference = array(
+            'inversed-by'     => 'uuid',
+            'referenced-by'   => 'uuid',
+            'fieldName'       => 'document',
+            'target-document' => get_class($testDocument),
+        );
+        $referenceMappings = array(
+            'document' => $reference,
+        );
+        $commonField = array(
+            'referenced-by' => 'docName',
+            'inversed-by' => 'entityName',
+            'target-field' => 'document',
+            'sync-type'       => 'to-document',
+        );
+        $commonFieldMappings = array('entityName' => $commonField);
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedDocuments')
+                            ->will($this->returnValue($referenceMappings));
+        $this->classMetadata->expects($this->once())
+                            ->method('getReferencedDocument')
+                            ->with($this->equalTo('document'))
+                            ->will($this->returnValue($reference));
+        $this->classMetadata->expects($this->any())
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
+
+        $this->documentManager->expects($this->once())
+                              ->method('persist')
+                              ->with($this->equalTo($testDocument));
+
+        $this->UoW->persist($object);
+
+        $this->assertEquals('test-uuid', $object->uuid);
+        $this->assertEquals('entity-value', $testDocument->docName);
     }
 }

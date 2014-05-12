@@ -10,6 +10,7 @@ use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
 use Doctrine\ORM\ODMAdapter\Event;
+use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 
@@ -230,6 +231,58 @@ class UnitOfWork
 
     private function syncCommonFields($object, $document, ClassMetadata $classMetadata)
     {
+        $referencedDocument = array_filter(
+            $classMetadata->getReferencedDocuments(),
+            function ($refDocument) use ($document) {
+                return $refDocument['target-document'] === get_class($document);
+            }
+        );
 
+        if (!$referencedDocument || !is_array($referencedDocument)) {
+            return;
+        }
+
+        $objectReflection = new \ReflectionClass($object);
+        foreach ($referencedDocument as $fieldName => $reference) {
+            // get the current document from object
+            $objectFieldProperty = $objectReflection->getProperty($fieldName);
+            $objectFieldProperty->setAccessible(true);
+            $document = $objectFieldProperty->getValue($object);
+
+            if (!$document) {
+                throw new MappingException(
+                    sprintf('Error when trying to get mapped %s from object %', $fieldName, get_class($object))
+                );
+            }
+
+            // get the common-field mappings for that document
+            $commonFieldMappings = $classMetadata->getCommonFields();
+            if (!$commonFieldMappings) {
+                continue;
+            }
+
+            $commonFieldMappings = array_filter($commonFieldMappings, function ($field) use ($fieldName) {
+                 return $field['target-field'] === $fieldName;
+            });
+
+            $documentReflection = new \ReflectionClass($document);
+
+            foreach ($commonFieldMappings as $commonField) {
+                $documentProperty = $documentReflection->getProperty($commonField['referenced-by']);
+                $documentProperty->setAccessible(true);
+
+                $objectProperty = $objectReflection->getProperty($commonField['inversed-by']);
+                $objectProperty->setAccessible(true);
+
+                if ($commonField['sync-type'] === 'to-document') {
+                    $value = $objectProperty->getValue($object);
+                    $documentProperty->setValue($document, $value);
+                } elseif ($commonField['sync-type'] === 'to-entity') {
+                    $value = $documentProperty->getValue($document);
+                    $objectProperty->setValue($object, $value);
+                }
+            }
+
+        }
     }
 }
