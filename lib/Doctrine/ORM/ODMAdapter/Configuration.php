@@ -123,7 +123,7 @@ class Configuration
      */
     public function setMetadataDriverImpl(MappingDriver $driverImpl, $useBuildInDocumentsDriver = true)
     {
-        if ($useBuildInDocumentsDriver) { print(get_class($driverImpl));
+        if ($useBuildInDocumentsDriver) {
             $driverImpl = new BuiltinDocumentAdaptersDriver($driverImpl);
         }
         $this->attributes['metadataDriverImpl'] = $driverImpl;

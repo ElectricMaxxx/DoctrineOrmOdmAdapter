@@ -10,5 +10,7 @@ use Doctrine\ORM\ODMAdapter\Mapping\Annotations as ODMAdapter;
  */
 class DefaultMappingObject
 {
+    public $uuid;
 
+    public $document;
 }

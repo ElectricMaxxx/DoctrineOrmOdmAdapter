@@ -106,18 +106,11 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
                 'target-document' => 'document',
-                'inversed-entity'  => 'entity',
+                'inversed-entity' => 'entity',
                 'property'        => 'document',
             ),
             $cm->mappings['document']
         );
-
-        $referencedOneDocument = new ReferencedOneDocument();
-        $referencedOneDocument->targetDocument = 'document';
-        $referencedOneDocument->referencingEntity = 'entity';
-        $referencedOneDocument->inversedBy = 'uuid';
-        $referencedOneDocument->referencedBy = 'uuid';
-        $referencedOneDocument->fieldName = 'document';
 
         $this->assertEquals(array(
             'type'            => 'reference-document',
@@ -125,7 +118,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
             'referenced-by'   => 'uuid',
             'inversed-by'     => 'uuid',
             'target-document' => 'document',
-            'inversed-entity'  => 'entity',
+            'inversed-entity' => 'entity',
             'property'        => 'document',
             ),
             $cm->getReferencedDocument('document'));
