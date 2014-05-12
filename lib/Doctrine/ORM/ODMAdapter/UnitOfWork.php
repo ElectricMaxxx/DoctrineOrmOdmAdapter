@@ -131,8 +131,6 @@ class UnitOfWork
             }
 
             $this->syncCommonFields($object, $document, $classMetadata);
-
-            $this->insertUuid($object, $document, $fieldName, $classMetadata);
         }
     }
 
@@ -162,36 +160,6 @@ class UnitOfWork
 
         return $documents;
     }
-
-    /**
-     * Easy helper for setting the uuid to the object.
-     *
-     * @param object        $object
-     * @param object        $document
-     * @param string        $fieldName
-     * @param ClassMetadata $classMetadata
-     */
-    private function insertUuid($object, $document, $fieldName, ClassMetadata $classMetadata)
-    {
-        $referenceMapping = $classMetadata->getReferencedDocument($fieldName);
-
-        if (!$referenceMapping) {
-            return;
-        }
-
-        // todo implement a target-document check
-
-        $documentReflection = new \ReflectionClass($document);
-        $fieldName = $documentReflection->getProperty($referenceMapping['referenced-by']);
-        $fieldName->setAccessible(true);
-        $referencedValue = $fieldName->getValue($document);
-
-        $objectReflection = new \ReflectionClass($object);
-        $fieldName = $objectReflection->getProperty($referenceMapping['inversed-by']);
-        $fieldName->setAccessible(true);
-        $fieldName->setValue($object, $referencedValue);
-    }
-
 
     public function removeDocument($object)
     {
@@ -229,6 +197,12 @@ class UnitOfWork
         return $matches === 0 ? self::STATE_NEW : self::STATE_REFERENCED;
     }
 
+    /**
+     * @param $object
+     * @param $document
+     * @param ClassMetadata $classMetadata
+     * @throws Exception\MappingException
+     */
     private function syncCommonFields($object, $document, ClassMetadata $classMetadata)
     {
         $referencedDocument = array_filter(

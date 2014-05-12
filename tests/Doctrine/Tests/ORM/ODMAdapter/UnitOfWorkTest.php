@@ -79,18 +79,24 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
             'fieldName' => 'document',
             'sync-type'       => 'to-entity',
         );
+        // common fields for the pure referecne are to-entity by default for entiy -> document mapping
+        $referenceCommonField = array(
+            'referenced-by' => 'uuid',
+            'inversed-by'   => 'uuid',
+            'target-field'  => 'document',
+            'sync-type'     => 'to-entity',
+        );
         $mapping = array(
 
             'document' => $reference,
         );
+        $commonFieldMappings = array('uuid' => $referenceCommonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedDocuments')
                             ->will($this->returnValue($mapping));
-        $this->classMetadata->expects($this->once())
-                            ->method('getReferencedDocument')
-                            ->with($this->equalTo('document'))
-                            ->will($this->returnValue($reference));
-
+        $this->classMetadata->expects($this->any())
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
         $this->documentManager->expects($this->once())
                               ->method('persist')
                               ->with($this->equalTo($testDocument));
@@ -118,20 +124,24 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $referenceMappings = array(
             'document' => $reference,
         );
+        // common fields for the pure referecne are to-entity by default for entiy -> document mapping
+        $referenceCommonField = array(
+            'referenced-by' => 'uuid',
+            'inversed-by'   => 'uuid',
+            'target-field'  => 'document',
+            'sync-type'     => 'to-entity',
+        );
         $commonField = array(
-            'referenced-by' => 'docName',
-            'inversed-by' => 'entityName',
-            'target-field' => 'document',
+            'referenced-by'   => 'docName',
+            'inversed-by'     => 'entityName',
+            'target-field'    => 'document',
             'sync-type'       => 'to-entity',
         );
-        $commonFieldMappings = array('entityName' => $commonField);
+
+        $commonFieldMappings = array('entityName' => $commonField, 'uuid' => $referenceCommonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedDocuments')
                             ->will($this->returnValue($referenceMappings));
-        $this->classMetadata->expects($this->once())
-                            ->method('getReferencedDocument')
-                            ->with($this->equalTo('document'))
-                            ->will($this->returnValue($reference));
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
@@ -164,20 +174,24 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $referenceMappings = array(
             'document' => $reference,
         );
+        // common fields for the pure referecne are to-entity by default for entiy -> document mapping
+        $referenceCommonField = array(
+            'referenced-by' => 'uuid',
+            'inversed-by'   => 'uuid',
+            'target-field'  => 'document',
+            'sync-type'     => 'to-entity',
+        );
         $commonField = array(
             'referenced-by' => 'docName',
             'inversed-by' => 'entityName',
             'target-field' => 'document',
             'sync-type'       => 'to-document',
         );
-        $commonFieldMappings = array('entityName' => $commonField);
+        $commonFieldMappings = array('entityName' => $commonField, 'uuid' => $referenceCommonField);
+
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedDocuments')
                             ->will($this->returnValue($referenceMappings));
-        $this->classMetadata->expects($this->once())
-                            ->method('getReferencedDocument')
-                            ->with($this->equalTo('document'))
-                            ->will($this->returnValue($reference));
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
