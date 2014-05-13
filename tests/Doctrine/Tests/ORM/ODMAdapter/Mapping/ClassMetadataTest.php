@@ -6,6 +6,7 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping;
 
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use Doctrine\ORM\ODMAdapter\Reference;
 
 class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 {
@@ -95,7 +96,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testMapReferenceDocument(ClassMetadata $cm)
     {
         $cm->mapReferencedObject(array(
-            'type'            => 'reference-document',
+            'type'            => Reference::PHPCR,
             'inversed-by'     => 'uuid',
             'referenced-by'   => 'uuid',
             'target-object' => 'document',
@@ -107,7 +108,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             array(
-                'type'            => 'reference-document',
+                'type'            => Reference::PHPCR,
                 'fieldName'       => 'referencedField',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
@@ -133,7 +134,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             array(
-                'type'            => 'reference-document',
+                'type'            => Reference::PHPCR,
                 'fieldName'       => 'referencedField',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
@@ -163,7 +164,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapedReferenceType(ClassMetadata $cm)
     {
-        $this->assertEquals('reference-document', $cm->getReferenceType('referencedField'));
+        $this->assertEquals(Reference::PHPCR, $cm->getReferenceType('referencedField'));
     }
 
     /**

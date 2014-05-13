@@ -7,13 +7,13 @@
     <object-adapter name="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject">
 
 
-        <reference-document
+        <reference-phpcr
                 target-object="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document"
                 referenced-by="uuid"
                 inversed-by="uuid"
                 name="referencedField">
             <common-field referenced-by="docName" inversed-by="entityName" />
-        </reference-document>
+        </reference-phpcr>
 
     </object-adapter>
 </doctrine-mapping>

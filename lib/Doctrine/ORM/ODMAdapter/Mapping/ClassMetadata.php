@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as CommonClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
+use Doctrine\ORM\ODMAdapter\Reference;
 use PHPCR\Util\UUIDHelper;
 use ReflectionProperty;
 
@@ -83,8 +84,8 @@ class ClassMetadata implements CommonClassMetadata
 
     /**
      * The object's type can only be one of
-     * - reference-document
-     * - reference-object
+     * - reference-phpcr
+     * - reference-dbal-orm
      *
      * @var string
      */
@@ -330,9 +331,11 @@ class ClassMetadata implements CommonClassMetadata
         if (!isset($mapping['type']) || empty($mapping['type'])) {
             throw new MappingException('Type for reference mapping has to be set.');
         }
-
-        if ($mapping['type'] !== 'reference-document' && $mapping['type'] !== 'reference-object') {
-            throw new MappingException('Mapping type needs to be one of reference-document or reference-object');
+        $types = array(Reference::DBAL_ORM, Reference::PHPCR);
+        if (!in_array($mapping['type'], $types) ) {
+            throw new MappingException(
+                sprintf('Mapping type needs to be one of: %s', implode(', ', $types))
+            );
         }
 
         if (!isset($mapping['referenced-by'])) {

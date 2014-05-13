@@ -22,8 +22,8 @@
 
     <xs:complexType name="adapter">
         <xs:choice>
-            <xs:element name="reference-document" type="reference"  minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="reference-object" type="reference"  minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="reference-phpcr" type="reference"  minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="reference-dbal-orm" type="reference"  minOccurs="0" maxOccurs="unbounded"/>
         </xs:choice>
         <xs:attribute name="name" type="xs:string" />
     </xs:complexType>

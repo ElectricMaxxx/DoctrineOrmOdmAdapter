@@ -7,13 +7,13 @@
     <object-adapter name="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\InvertedReferenceMappingObject">
 
 
-        <reference-object
+        <reference-dbal-orm
                 target-object="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object"
                 referenced-by="id"
                 inversed-by="objectId"
                 name="referencedField">
             <common-field referenced-by="entityName" inversed-by="docName" />
-        </reference-object>
+        </reference-dbal-orm>
 
     </object-adapter>
 </doctrine-mapping>

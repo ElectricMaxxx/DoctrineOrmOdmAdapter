@@ -123,7 +123,7 @@ class UnitOfWork
     }
 
     /**
-     * Depending on the reference-document/referenced-object mapping there can
+     * Depending on the reference type mapping there can
      * be several mapped documents. This method tries to extract them based on
      * the mapping from the object and return
      * it as an array to persist or work on them.

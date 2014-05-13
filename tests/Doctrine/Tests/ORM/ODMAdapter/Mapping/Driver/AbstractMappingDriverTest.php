@@ -5,6 +5,7 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver;
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
+use Doctrine\ORM\ODMAdapter\Reference;
 
 abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
 {
@@ -111,7 +112,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
         $this->assertEquals('common-field', $class->mappings['uuid']['type']);
-        $this->assertEquals('reference-document', $class->mappings['referencedField']['type']);
+        $this->assertEquals(Reference::PHPCR, $class->mappings['referencedField']['type']);
         return $class;
     }
 
@@ -131,7 +132,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($class->mappings['referencedField']));
         $this->assertEquals('common-field', $class->mappings['docName']['type']);
         $this->assertEquals('common-field', $class->mappings['objectId']['type']);
-        $this->assertEquals('reference-object', $class->mappings['referencedField']['type']);
+        $this->assertEquals(Reference::DBAL_ORM, $class->mappings['referencedField']['type']);
         return $class;
     }
 
@@ -147,7 +148,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $expectedMapping['inversed-by'] = 'uuid';
         $expectedMapping['inversed-entity'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject';
         $expectedMapping['fieldName'] = 'referencedField';
-        $expectedMapping['type'] = 'reference-document';
+        $expectedMapping['type'] = Reference::PHPCR;
         $expectedMapping['property'] = 'referencedField';
         $expectedMapping['name'] = 'referencedField';
 
@@ -166,7 +167,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $expectedMapping['inversed-by'] = 'objectId';
         $expectedMapping['inversed-entity'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\InvertedReferenceMappingObject';
         $expectedMapping['fieldName'] = 'referencedField';
-        $expectedMapping['type'] = 'reference-object';
+        $expectedMapping['type'] = Reference::DBAL_ORM;
         $expectedMapping['property'] = 'referencedField';
         $expectedMapping['name'] = 'referencedField';
 

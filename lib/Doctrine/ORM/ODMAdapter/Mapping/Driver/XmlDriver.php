@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\Common\Persistence\Mapping\MappingException as DoctrineMappingException;
+use Doctrine\ORM\ODMAdapter\Reference;
 use DOMElement;
 use SimpleXMLElement;
 
@@ -69,20 +70,20 @@ class XmlDriver extends FileDriver{
 
         $rootElement = null;
         $mapping = array();
-        if (isset($xmlRoot->{'reference-document'})) {
-            $rootElement = $xmlRoot->{'reference-document'};
-            $mapping['type'] = 'reference-document';
-        } elseif (isset($xmlRoot->{'reference-object'})) {
-            $rootElement = $xmlRoot->{'reference-object'};
-            $mapping['type'] = 'reference-object';
+        $types = array(Reference::DBAL_ORM, Reference::PHPCR);
+
+        foreach ($types as $type) {
+            if (isset($xmlRoot->{$type})) {
+                $rootElement = $xmlRoot->{$type};
+                $mapping['type'] = $type;
+                break;
+            }
         }
 
+        // not supported types won't be parsed
         if ($rootElement instanceof \SimpleXMLElement) {
             $this->extractReferencedDocuments($rootElement, $class, $className, $mapping);
         }
-
-
-
     }
 
     /**
@@ -128,7 +129,7 @@ class XmlDriver extends FileDriver{
         $mapping['inversed-entity'] = $className;
 
         if (!isset($mapping['name'])) {
-            throw new MappingException('Attibute name needs to be set for reference-document mapping');
+            throw new MappingException('Attribute name needs to be set for reference mapping');
         }
 
         $mapping['fieldName'] = (string) $mapping['name'];

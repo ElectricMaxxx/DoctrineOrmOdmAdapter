@@ -161,6 +161,20 @@ class ObjectAdapterManager
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        return 'reference-document' == $type ? $this->getDocumentManager() : $this->getObjectManager();
+        $manager = null;
+        switch ($type) {
+            case Reference::PHPCR:
+                $manager = $this->getDocumentManager();
+                break;
+            case Reference::DBAL_ORM:
+                $manager = $this->getObjectManager();
+                break;
+        }
+
+        if (null === $manager) {
+            throw new MappingException(sprintf('No manager found for mapped reference type %s', $type));
+        }
+
+        return $manager;
     }
 }
