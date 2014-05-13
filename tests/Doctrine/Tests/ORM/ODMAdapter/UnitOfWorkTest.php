@@ -3,7 +3,7 @@
 namespace Doctrine\Tests\ORM\ODMAdapter;
 use Doctrine\ORM\ODMAdapter\UnitOfWork;
 use Doctrine\Tests\Models\ECommerce\Product;
-use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject;
+use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferencedObject;
 
@@ -107,7 +107,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testPersistNewWithCommonFieldsToEntity()
     {
         // pre conditions
-        $object = new CommonFieldMappingObject();
+        $object = new ReferenceMappingObject();
         $testReferencedObject = new ReferencedObject();
         $object->referencedField = $testReferencedObject;
         $testReferencedObject->uuid = 'test-uuid';
@@ -157,7 +157,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     public function testPersistNewWithCommonFieldsToObject()
     {
         // pre conditions
-        $object = new CommonFieldMappingObject();
+        $object = new ReferenceMappingObject();
         $object->entityName = 'entity-value';
         $testDocument = new ReferencedObject();
         $object->referencedField = $testDocument;

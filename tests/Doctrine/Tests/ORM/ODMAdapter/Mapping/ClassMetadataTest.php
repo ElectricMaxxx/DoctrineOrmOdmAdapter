@@ -6,7 +6,6 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping;
 
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
-use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 
 class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 {
@@ -40,7 +39,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
 
     public function testMapField()
     {
-        $cm = new ClassMetadata('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject');
+        $cm = new ClassMetadata('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject');
         $cm->initializeReflection(new RuntimeReflectionService());
 
         return $cm;
@@ -202,7 +201,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $instance1 = $cm->newInstance();
         $instance2 = $cm->newInstance();
 
-        $this->assertInstanceOf('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject', $instance1);
+        $this->assertInstanceOf('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject', $instance1);
         $this->assertNotSame($instance1, $instance2);
     }
 }

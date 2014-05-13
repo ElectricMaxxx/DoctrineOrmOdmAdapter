@@ -67,7 +67,21 @@ class XmlDriver extends FileDriver{
             return;
         }
 
-        $this->extractReferencedDocuments($xmlRoot, $class, $className);
+        $rootElement = null;
+        $mapping = array();
+        if (isset($xmlRoot->{'reference-document'})) {
+            $rootElement = $xmlRoot->{'reference-document'};
+            $mapping['type'] = 'reference-document';
+        } elseif (isset($xmlRoot->{'reference-object'})) {
+            $rootElement = $xmlRoot->{'reference-object'};
+            $mapping['type'] = 'reference-object';
+        }
+
+        if ($rootElement instanceof \SimpleXMLElement) {
+            $this->extractReferencedDocuments($rootElement, $class, $className, $mapping);
+        }
+
+
 
     }
 
@@ -100,20 +114,13 @@ class XmlDriver extends FileDriver{
      * @param SimpleXMLElement $xmlRoot
      * @param \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata|ClassMetadata $class
      * @param string $className
+     * @param array  $mapping
      * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
-    protected function extractReferencedDocuments(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className)
+    protected function extractReferencedDocuments(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className, $mapping)
     {
-        if (!isset($xmlRoot->{'reference-document'})) {
-            return;
-        }
-
-        $documentAttributes = $xmlRoot->{'reference-document'}->attributes();
-        $mapping = array(
-            'type' => 'reference-document'
-        );
-
-        foreach ($documentAttributes as $key => $value) {
+        $referenceAttributes = $xmlRoot->attributes();
+        foreach ($referenceAttributes as $key => $value) {
             $value = 'null' !== $value ? $value : null;
             $mapping[$key] = (string) $value;
         }
@@ -126,8 +133,8 @@ class XmlDriver extends FileDriver{
 
         $mapping['fieldName'] = (string) $mapping['name'];
 
-        if (isset($xmlRoot->{'reference-document'}->{'common-field'})) {
-            $this->extractCommonFields($xmlRoot->{'reference-document'}, $class, $className, $mapping['fieldName']);
+        if (isset($xmlRoot->{'common-field'})) {
+            $this->extractCommonFields($xmlRoot, $class, $className, $mapping['fieldName']);
         }
 
         $class->mapReferencedObject($mapping);

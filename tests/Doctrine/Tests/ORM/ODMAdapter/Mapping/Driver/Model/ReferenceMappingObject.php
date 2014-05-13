@@ -4,7 +4,7 @@
 namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model;
 
 
-class CommonFieldMappingObject
+class ReferenceMappingObject
 {
     public $uuid;
     public $referencedField;
