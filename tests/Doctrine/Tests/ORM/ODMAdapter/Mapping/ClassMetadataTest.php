@@ -37,7 +37,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($cm->hasField(null));
     }
 
-    public function testMapField()
+    public function testReferenceMapping()
     {
         $cm = new ClassMetadata('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject');
         $cm->initializeReflection(new RuntimeReflectionService());
@@ -46,9 +46,9 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testMapField
+     * @depends testReferenceMapping
      */
-    public function testMapFields(ClassMetadata $cm)
+    public function testReferenceMappings(ClassMetadata $cm)
     {
         $cm->mapCommonField(array(
             'inversed-by'   => 'entityName',
@@ -89,7 +89,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testMapField
+     * @depends testReferenceMapping
      * @param ClassMetadata $cm
      */
     public function testMapReferenceOneDocument(ClassMetadata $cm)
@@ -146,7 +146,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends             testMapField
+     * @depends             testReferenceMapping
      * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
      * @param               ClassMetadata $cm
      */
@@ -156,27 +156,27 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends            testMapField
+     * @depends            testReferenceMapping
      * @expectedException  Doctrine\ORM\ODMAdapter\Exception\MappingException
      * @param              ClassMetadata $cm
      */
-    public function testMapFieldThrowsExceptionOnWrongType(ClassMetadata $cm)
+    public function testReferenceMappingThrowsExceptionOnWrongType(ClassMetadata $cm)
     {
         $cm->mapCommonField(array('type' => 'some_type'));
     }
 
     /**
-     * @depends             testMapField
+     * @depends             testReferenceMapping
      * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
      * @param               ClassMetadata $cm
      */
-    public function testMapFieldThrowsExceptionOnEmtpyType(ClassMetadata $cm)
+    public function testReferenceMappingThrowsExceptionOnEmtpyType(ClassMetadata $cm)
     {
         $cm->mapReferencedObject(array());
     }
 
     /**
-     * @depends            testMapField
+     * @depends            testReferenceMapping
      * @expectedException  Doctrine\ORM\ODMAdapter\Exception\MappingException
      * @param              ClassMetadata $cm
      */
@@ -186,7 +186,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testMapField
+     * @depends testReferenceMapping
      */
     public function testReflectionProperties(ClassMetadata $cm)
     {
@@ -194,7 +194,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testMapField
+     * @depends testReferenceMapping
      */
     public function testNewInstance(ClassMetadata $cm)
     {
