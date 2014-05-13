@@ -335,18 +335,6 @@ class ClassMetadata implements CommonClassMetadata
             throw new MappingException('Mapping type needs to be one of reference-document or reference-object');
         }
 
-        if ($mapping['type'] === $this->referenceType) {
-            throw new MappingException(
-                sprintf(
-                    'Type still set on %s, you tried to set %s. Just one type is allowed per object.',
-                    $this->referenceType,
-                    $mapping['type']
-                )
-            );
-        }
-
-        $this->referenceType = $mapping['type'];
-
         if (!isset($mapping['referenced-by'])) {
             throw new MappingException('Objects mapping for referenced-by is missing');
         }
@@ -371,6 +359,9 @@ class ClassMetadata implements CommonClassMetadata
             'target-field'  => $mapping['fieldName'],
         );
         $this->mapCommonField($commonFieldMapping);
+
+        // create the type by fieldName mapping
+        $this->referenceType[$mapping['fieldName']]  = $mapping['type'];
     }
 
     /**
@@ -689,10 +680,13 @@ class ClassMetadata implements CommonClassMetadata
     /**
      * Just a READ-Only property.
      *
+     * @param $fieldName
      * @return string
      */
-    public function getReferenceType()
+    public function getReferenceType($fieldName)
     {
-        return $this->referenceType;
+        if (array_key_exists($fieldName, $this->referenceType)) {
+            return $this->referenceType[$fieldName];
+        }
     }
 }

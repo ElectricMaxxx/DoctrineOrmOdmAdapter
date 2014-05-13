@@ -106,7 +106,7 @@ class UnitOfWork
                 );
             }
 
-            $this->objectAdapterManager->getManager($referencedObject)->persist($referencedObject);
+            $this->objectAdapterManager->getManager($referencedObject, $fieldName)->persist($referencedObject);
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
                 $this->eventListenersInvoker->invoke(

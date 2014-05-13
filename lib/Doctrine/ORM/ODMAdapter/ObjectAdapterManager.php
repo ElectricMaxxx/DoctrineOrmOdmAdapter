@@ -146,16 +146,17 @@ class ObjectAdapterManager
 
     /**
      * This method makes the decision for the right manager depending
-     * on the type of mapping.
+     * on the type of mapping and the fieldName.
      *
      * @param object $object
-     * @return ObjectManager|DocumentManager
+     * @param $fieldName
      * @throws Exception\MappingException
+     * @return ObjectManager|DocumentManager
      */
-    public function getManager($object)
+    public function getManager($object, $fieldName)
     {
         $classMetdata = $this->getClassMetadata($object);
-        $type = $classMetdata->getReferenceType();
+        $type = $classMetdata->getReferenceType($fieldName);
         if (!$type) {
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }

@@ -143,6 +143,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
             ),
             $cm->getReferencedObject('referencedField')
         );
+
+        return $cm;
     }
 
     /**
@@ -156,19 +158,12 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends             testReferenceMapping
+     * @depends             testMapReferenceDocument
      * @param ClassMetadata $cm
-     * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
-    public function testMapReferenceThrowsExceptionOnDifferentTypes(ClassMetadata $cm)
+    public function testMapedReferenceType(ClassMetadata $cm)
     {
-        $cm->mapReferencedObject(array(
-            'type'            => 'reference-document',
-        ));
-
-        $cm->mapReferencedObject(array(
-            'type'            => 'reference-object',
-        ));
+        $this->assertEquals('reference-document', $cm->getReferenceType('referencedField'));
     }
 
     /**
