@@ -4,7 +4,9 @@ namespace Doctrine\Tests\ORM\ODMAdapter;
 use Doctrine\ORM\ODMAdapter\UnitOfWork;
 use Doctrine\Tests\Models\ECommerce\ProductDocument;
 use Doctrine\Tests\Models\ECommerce\ProductObject;
+use Doctrine\Tests\ODM\PHPCR\Mapping\Model\FieldMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingDocument;
+use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\InvertedReferenceMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferencedObject;
@@ -57,42 +59,48 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW = new UnitOfWork($this->objectAdapterManager);
     }
 
-
     public function testPersistNewReference()
     {
         // pre conditions
-        $object = new DefaultMappingObject();
+        $object = new ReferenceMappingObject();
+        $object->entityName = 'entity name on object';
         $testReferencedObject = new ProductDocument();
         $object->referencedField = $testReferencedObject;
         $testReferencedObject->uuid = 'test-uuid';
+        $testReferencedObject->docName = 'Name on document';
 
-        $reference = array(
-            'inversed-by' => 'uuid',
-            'referenced-by' => 'uuid',
-            'target-object' => get_class($testReferencedObject),
-            'fieldName' => 'referencedField',
-            'sync-type'       => 'from-reference',
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
         );
-        // common fields for the pure referecne are from-reference by default for entiy -> document mapping
-        $referenceCommonField = array(
-            'referenced-by' => 'uuid',
-            'inversed-by'   => 'uuid',
-            'target-field'  => 'referencedField',
-            'sync-type'     => 'from-reference',
+        $commonFieldMappings = array(
+            'uuid'      => array(
+                'referenced-by' => 'uuid',
+                'inversed-by'   => 'uuid',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
+                ),
+            'entityName' => array(
+                'referenced-by' => 'docName',
+                'inversed-by'   => 'entityName',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'to-reference',
+            ),
         );
-        $mapping = array(
-
-            'referencedField' => $reference,
-        );
-        $commonFieldMappings = array('uuid' => $referenceCommonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
-                            ->will($this->returnValue($mapping));
+                            ->will($this->returnValue($referenceMapping));
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->any())
+        $this->objectAdapterManager->expects($this->once())
                                    ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
                               ->method('persist')
@@ -101,42 +109,50 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->persist($object);
 
         $this->assertEquals('test-uuid', $object->uuid);
+        $this->assertEquals('entity name on object', $testReferencedObject->docName);
     }
+
     public function testPersistNewInvertedReference()
     {
         // pre conditions
-        $object = new DefaultMappingDocument();
+        $object = new InvertedReferenceMappingObject();
+        $object->docName = 'name on document';
         $testReferencedObject = new ProductObject();
         $object->referencedField = $testReferencedObject;
         $testReferencedObject->id = 'test-id';
 
-        $reference = array(
-            'inversed-by' => 'objectId',
-            'referenced-by' => 'id',
-            'target-object' => get_class($testReferencedObject),
-            'fieldName' => 'referencedField',
-            'sync-type'       => 'from-reference',
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'objectId',
+                'referenced-by' => 'id',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+            ),
         );
-        // common fields for the pure referecne are from-reference by default for entiy -> document mapping
-        $referenceCommonField = array(
-            'referenced-by' => 'id',
-            'inversed-by'   => 'objectId',
-            'target-field'  => 'referencedField',
-            'sync-type'     => 'from-reference',
+        $commonFieldMappings = array(
+            'objectId'      => array(
+                'referenced-by' => 'id',
+                'inversed-by'   => 'objectId',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+            'entityName' => array(
+                'referenced-by' => 'entityName',
+                'inversed-by'   => 'docName',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'to-reference',
+            ),
         );
-        $mapping = array(
 
-            'referencedField' => $reference,
-        );
-        $commonFieldMappings = array('uuid' => $referenceCommonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
-                            ->will($this->returnValue($mapping));
+                            ->will($this->returnValue($referenceMapping));
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->any())
+        $this->objectAdapterManager->expects($this->once())
                                    ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->objectManager));
         $this->objectManager->expects($this->once())
                               ->method('persist')
@@ -145,49 +161,52 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->persist($object);
 
         $this->assertEquals('test-id', $object->objectId);
+        $this->assertEquals('name on document', $testReferencedObject->entityName);
     }
 
-    public function testPersistNewWithCommonFieldsToEntity()
+    public function testUpdateReference()
     {
         // pre conditions
         $object = new ReferenceMappingObject();
-        $testReferencedObject = new ReferencedObject();
+        $object->entityName = 'entity name on object';
+        $object->uuid = 'i am there';
+        $testReferencedObject = new ProductDocument();
         $object->referencedField = $testReferencedObject;
         $testReferencedObject->uuid = 'test-uuid';
-        $testReferencedObject->docName = 'doc-value';
+        $testReferencedObject->docName = 'Name on document';
 
-        $reference = array(
-            'inversed-by'     => 'uuid',
-            'referenced-by'   => 'uuid',
-            'fieldName'       => 'referencedField',
-            'target-object' => get_class($testReferencedObject),
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
         );
-        $referenceMappings = array(
-            'referencedField' => $reference,
+        $commonFieldMappings = array(
+            'uuid'      => array(
+                'referenced-by' => 'uuid',
+                'inversed-by'   => 'uuid',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+            'entityName' => array(
+                'referenced-by' => 'docName',
+                'inversed-by'   => 'entityName',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'to-reference',
+            ),
         );
-        // common fields for the pure referecne are from-reference by default for entiy -> document mapping
-        $referenceCommonField = array(
-            'referenced-by' => 'uuid',
-            'inversed-by'   => 'uuid',
-            'target-field'  => 'referencedField',
-            'sync-type'     => 'from-reference',
-        );
-        $commonField = array(
-            'referenced-by'   => 'docName',
-            'inversed-by'     => 'entityName',
-            'target-field'    => 'referencedField',
-            'sync-type'       => 'from-reference',
-        );
-
-        $commonFieldMappings = array('entityName' => $commonField, 'uuid' => $referenceCommonField);
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
-                            ->will($this->returnValue($referenceMappings));
+                            ->will($this->returnValue($referenceMapping));
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->any())
+        $this->objectAdapterManager->expects($this->once())
                                    ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
                               ->method('persist')
@@ -195,59 +214,119 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->UoW->persist($object);
 
-        $this->assertEquals('test-uuid', $object->uuid);
-        $this->assertEquals('doc-value', $object->entityName);
+        $this->assertEquals('entity name on object', $testReferencedObject->docName);
     }
 
-    public function testPersistNewWithCommonFieldsToObject()
+    public function testUpdateInvertedReference()
     {
         // pre conditions
-        $object = new ReferenceMappingObject();
-        $object->entityName = 'entity-value';
-        $testDocument = new ReferencedObject();
-        $object->referencedField = $testDocument;
-        $testDocument->uuid = 'test-uuid';
+        $object = new InvertedReferenceMappingObject();
+        $object->objectId = 'i am still there';
+        $object->docName = 'name on document';
+        $testReferencedObject = new ProductObject();
+        $object->referencedField = $testReferencedObject;
+        $testReferencedObject->id = 'test-id';
 
-        $reference = array(
-            'inversed-by'     => 'uuid',
-            'referenced-by'   => 'uuid',
-            'fieldName'       => 'referencedField',
-            'target-object' => get_class($testDocument),
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'objectId',
+                'referenced-by' => 'id',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+            ),
         );
-        $referenceMappings = array(
-            'referencedField' => $reference,
+        $commonFieldMappings = array(
+            'objectId'      => array(
+                'referenced-by' => 'id',
+                'inversed-by'   => 'objectId',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+            'entityName' => array(
+                'referenced-by' => 'entityName',
+                'inversed-by'   => 'docName',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'to-reference',
+            ),
         );
-        // common fields for the pure referecne are from-reference by default for entiy -> document mapping
-        $referenceCommonField = array(
-            'referenced-by' => 'uuid',
-            'inversed-by'   => 'uuid',
-            'target-field'  => 'referencedField',
-            'sync-type'     => 'from-reference',
-        );
-        $commonField = array(
-            'referenced-by' => 'docName',
-            'inversed-by' => 'entityName',
-            'target-field' => 'referencedField',
-            'sync-type'       => 'to-reference',
-        );
-        $commonFieldMappings = array('entityName' => $commonField, 'uuid' => $referenceCommonField);
 
         $this->classMetadata->expects($this->any())
-                            ->method('getReferencedObjects')
-                            ->will($this->returnValue($referenceMappings));
+            ->method('getReferencedObjects')
+            ->will($this->returnValue($referenceMapping));
         $this->classMetadata->expects($this->any())
-                            ->method('getCommonFields')
-                            ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->any())
-                                   ->method('getManager')
-                                   ->will($this->returnValue($this->documentManager));
-        $this->documentManager->expects($this->once())
-                              ->method('persist')
-                              ->with($this->equalTo($testDocument));
+            ->method('getCommonFields')
+            ->will($this->returnValue($commonFieldMappings));
+        $this->objectAdapterManager->expects($this->once())
+            ->method('getManager')
+            ->with($this->equalTo($object), $this->equalTo('referencedField'))
+            ->will($this->returnValue($this->objectManager));
+        $this->objectManager->expects($this->once())
+            ->method('persist')
+            ->with($this->equalTo($testReferencedObject));
 
         $this->UoW->persist($object);
 
-        $this->assertEquals('test-uuid', $object->uuid);
-        $this->assertEquals('entity-value', $testDocument->docName);
+        $this->assertEquals('name on document', $testReferencedObject->entityName);
+    }
+
+    public function testRemoveReference()
+    {
+        // pre conditions
+        $object = new ReferenceMappingObject();
+        $testReferencedObject = new ProductDocument();
+        $object->referencedField = $testReferencedObject;
+
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+        );
+
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
+        $this->objectAdapterManager->expects($this->once())
+                                  ->method('getManager')
+                                  ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                  ->will($this->returnValue($this->documentManager));
+        $this->documentManager->expects($this->once())
+                              ->method('remove')
+                              ->with($this->equalTo($testReferencedObject));
+
+        $this->UoW->removeReferencedObject($object);
+    }
+
+    public function testRemoveInvertedReference()
+    {
+        // pre conditions
+        $object = new InvertedReferenceMappingObject();
+        $testReferencedObject = new ProductObject();
+        $object->referencedField = $testReferencedObject;
+
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'objectId',
+                'referenced-by' => 'id',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+            ),
+        );
+
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
+        $this->objectAdapterManager->expects($this->once())
+                                  ->method('getManager')
+                                  ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                  ->will($this->returnValue($this->objectManager));
+        $this->objectManager->expects($this->once())
+                              ->method('remove')
+                              ->with($this->equalTo($testReferencedObject));
+
+        $this->UoW->removeReferencedObject($object);
     }
 }

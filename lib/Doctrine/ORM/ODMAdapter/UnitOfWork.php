@@ -80,22 +80,19 @@ class UnitOfWork
                 break;
         }
     }
+
     /**
      * This method will get the object's document reference by its field
      * mapping, persist that one and store the document's uuid on the object.
      *
      * @param $object
-     * @throws UnitOfWorkException
+     * @param $classMetadata
      */
-    private function persistNew($object)
+    private function persistNew($object, $classMetadata)
     {
-
-        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
-
         $referencedObjects = $this->extractReferencedObjects($object, $classMetadata);
 
         foreach ($referencedObjects as $fieldName => $referencedObject) {
-
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
@@ -106,7 +103,7 @@ class UnitOfWork
                 );
             }
 
-            $this->objectAdapterManager->getManager($referencedObject, $fieldName)->persist($referencedObject);
+            $this->objectAdapterManager->getManager($object, $fieldName)->persist($referencedObject);
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
                 $this->eventListenersInvoker->invoke(
@@ -160,13 +157,62 @@ class UnitOfWork
         return $referencedObjects;
     }
 
+
     public function removeReferencedObject($object)
     {
+        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+        $references = $classMetadata->getReferencedObjects();
 
+        $objectReflection = new \ReflectionClass($object);
+        foreach ($references as $fieldName => $reference) {
+            $objectProperty = $objectReflection->getProperty($fieldName);
+            $objectProperty->setAccessible(true);
+            $referencedObject = $objectProperty->getValue($object);
+            if (!$referencedObject) {
+                continue;
+            }
+
+            // call the remove method on the right manager
+            $this->objectAdapterManager->getManager($object, $fieldName)->remove($referencedObject);
+        }
     }
 
-    private function updateReference($object, $classMetadata)
+    /**
+     * This method does the update of a reference.
+     *
+     * @todo do i really need a separate method? the only difference are the events.
+     * @param $object
+     * @param ClassMetadata $classMetadata
+     */
+    private function updateReference($object, ClassMetadata $classMetadata)
     {
+        $referencedObjects = $this->extractReferencedObjects($object, $classMetadata);
+
+        foreach ($referencedObjects as $fieldName => $referencedObject) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preUpdateDocument)) {
+                $this->eventListenersInvoker->invoke(
+                    $classMetadata,
+                    Event::preUpdateDocument,
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                    $invoke
+                );
+            }
+
+            $this->objectAdapterManager->getManager($object, $fieldName)->persist($referencedObject);
+
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postUpdateDocument)) {
+                $this->eventListenersInvoker->invoke(
+                    $classMetadata,
+                    Event::postUpdateDocument,
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                    $invoke
+                );
+            }
+
+            $this->syncCommonFields($object, $referencedObject, $classMetadata);
+        }
     }
 
     /**
