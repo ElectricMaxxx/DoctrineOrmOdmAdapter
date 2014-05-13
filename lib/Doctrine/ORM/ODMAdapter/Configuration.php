@@ -2,6 +2,7 @@
 
 
 namespace Doctrine\ORM\ODMAdapter;
+
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\ORM\ODMAdapter\Exception\ConfigurationException;

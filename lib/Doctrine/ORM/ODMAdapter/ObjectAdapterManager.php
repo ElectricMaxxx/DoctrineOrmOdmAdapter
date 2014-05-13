@@ -3,7 +3,6 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\EventManager;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
@@ -39,8 +38,14 @@ class ObjectAdapterManager
     protected $configuration;
 
     /**
+     * @var UnitOfWork
+     */
+    protected $unitOfWork;
+
+    /**
      * Both managers needs to be injected in service definition.
      *
+     * @todo inject the manager as an collection
      * @param DocumentManager $dm
      * @param ObjectManager $em
      * @param Configuration $config
@@ -55,6 +60,8 @@ class ObjectAdapterManager
 
         $classMetadataFactoryClass = $this->configuration->getClassMetadataFactoryName();
         $this->classMetdataFactory = new $classMetadataFactoryClass($this);
+
+        $this->unitOfWork = new UnitOfWork($this);
     }
 
     /**
@@ -129,22 +136,6 @@ class ObjectAdapterManager
     }
 
     /**
-     * @return DocumentManager
-     */
-    public function getDocumentManager()
-    {
-        return $this->dm;
-    }
-
-    /**
-     * @return ObjectManager
-     */
-    public function getObjectManager()
-    {
-        return $this->em;
-    }
-
-    /**
      * This method makes the decision for the right manager depending
      * on the type of mapping and the fieldName.
      *
@@ -176,5 +167,37 @@ class ObjectAdapterManager
         }
 
         return $manager;
+    }
+
+    /**
+     * First persist the referenced object with its own manager an doing
+     * the sync of the common fields.
+     *
+     * @param $object
+     */
+    public function bindReference($object)
+    {
+        $this->unitOfWork->persist($object);
+    }
+
+    /**
+     * To update a referenced object on a given one with syncing the
+     * common fields.
+     *
+     * @param $object
+     */
+    public function updateReference($object)
+    {
+        $this->unitOfWork->persist($object);
+    }
+
+    /**
+     * To remove a referenced object from a given object.
+     *
+     * @param object $object
+     */
+    public function removeReference($object)
+    {
+        $this->unitOfWork->removeReferencedObject($object);
     }
 }
