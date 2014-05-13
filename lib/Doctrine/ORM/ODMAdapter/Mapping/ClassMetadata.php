@@ -81,6 +81,15 @@ class ClassMetadata implements CommonClassMetadata
 
     protected $prototype;
 
+    /**
+     * The object's type can only be one of
+     * - reference-document
+     * - reference-object
+     *
+     * @var string
+     */
+    protected $referenceType;
+
     public function __construct($className)
     {
         $this->className = $className;
@@ -308,15 +317,36 @@ class ClassMetadata implements CommonClassMetadata
     }
 
     /**
+     * Method takes care on the values for the reference mapping.
+     * So the type needs to be set in the right way, and both pointer
+     * to the mapping properties referenced-by and inversed-by.
+     *
      * @param array $mapping
      * @param ClassMetadata $inherit
      * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
     public function mapReferencedObject(array $mapping, ClassMetadata $inherit = null)
     {
-        if (!isset($mapping['type']) || ($mapping['type'] !== 'reference-document' && $mapping['type'] !== 'reference-object')) {
+        if (!isset($mapping['type']) || empty($mapping['type'])) {
+            throw new MappingException('Type for reference mapping has to be set.');
+        }
+
+        if ($mapping['type'] !== 'reference-document' && $mapping['type'] !== 'reference-object') {
             throw new MappingException('Mapping type needs to be one of reference-document or reference-object');
         }
+
+        if ($mapping['type'] === $this->referenceType) {
+            throw new MappingException(
+                sprintf(
+                    'Type still set on %s, you tried to set %s. Just one type is allowed per object.',
+                    $this->referenceType,
+                    $mapping['type']
+                )
+            );
+        }
+
+        $this->referenceType = $mapping['type'];
+
         if (!isset($mapping['referenced-by'])) {
             throw new MappingException('Objects mapping for referenced-by is missing');
         }
@@ -643,10 +673,26 @@ class ClassMetadata implements CommonClassMetadata
         return $this->commonFieldMappings;
     }
 
-    public function getcommonField($property)
+    /**
+     * Return a specific common field mapping by its property/fieldName.
+     *
+     * @param $property
+     * @return mixed
+     */
+    public function getCommonField($property)
     {
         if (array_key_exists($property, $this->commonFieldMappings)) {
             return $this->commonFieldMappings[$property];
         }
+    }
+
+    /**
+     * Just a READ-Only property.
+     *
+     * @return string
+     */
+    public function getReferenceType()
+    {
+        return $this->referenceType;
     }
 }

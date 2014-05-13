@@ -155,18 +155,11 @@ class ObjectAdapterManager
     public function getManager($object)
     {
         $classMetdata = $this->getClassMetadata($object);
-        $referencedObjectMapping = $classMetdata->getReferencedObjects();
-        if (count($referencedObjectMapping) < 1) {
-            throw new MappingException('There must be one at least one referenced object.');
+        $type = $classMetdata->getReferenceType();
+        if (!$type) {
+            throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        $reference = array_shift($referencedObjectMapping);
-        if ('reference-document' !== $reference['type'] && 'reference-object' !== $reference['type']) {
-            throw new MappingException(
-                sprintf('Reference type %s not supported by adapter manager.', $reference['type'])
-            );
-        }
-
-        return 'reference-document' == $reference['type'] ? $this->getDocumentManager() : $this->getObjectManager();
+        return 'reference-document' == $type ? $this->getDocumentManager() : $this->getObjectManager();
     }
 }

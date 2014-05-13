@@ -48,7 +48,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testReferenceMapping
      */
-    public function testReferenceMappings(ClassMetadata $cm)
+    public function testCommonFieldMappings(ClassMetadata $cm)
     {
         $cm->mapCommonField(array(
             'inversed-by'   => 'entityName',
@@ -92,7 +92,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      * @depends testReferenceMapping
      * @param ClassMetadata $cm
      */
-    public function testMapReferenceOneDocument(ClassMetadata $cm)
+    public function testMapReferenceDocument(ClassMetadata $cm)
     {
         $cm->mapReferencedObject(array(
             'type'            => 'reference-document',
@@ -153,6 +153,22 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     public function testMapReferenceThrowsExceptionOnEmtpyType(ClassMetadata $cm)
     {
         $cm->mapCommonField(array());
+    }
+
+    /**
+     * @depends             testReferenceMapping
+     * @param ClassMetadata $cm
+     * @expectedException   Doctrine\ORM\ODMAdapter\Exception\MappingException
+     */
+    public function testMapReferenceThrowsExceptionOnDifferentTypes(ClassMetadata $cm)
+    {
+        $cm->mapReferencedObject(array(
+            'type'            => 'reference-document',
+        ));
+
+        $cm->mapReferencedObject(array(
+            'type'            => 'reference-object',
+        ));
     }
 
     /**
