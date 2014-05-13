@@ -6,7 +6,7 @@ namespace Doctrine\ORM\ODMAdapter;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
 use Doctrine\ORM\ODMAdapter\Event;
@@ -36,9 +36,9 @@ class UnitOfWork
     const STATE_NEW = 2;
 
     /**
-     * @var DocumentAdapterManager
+     * @var ObjectAdapterManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
 
     /**
      * @var DocumentManager
@@ -56,16 +56,16 @@ class UnitOfWork
     private $eventManager;
 
     /**
-     * @param DocumentAdapterManager $documentAdapterManager
+     * @param ObjectAdapterManager $objectAdapterManager
      */
-    public function __construct(DocumentAdapterManager $documentAdapterManager)
+    public function __construct(ObjectAdapterManager $objectAdapterManager)
     {
 
-        $this->documentAdapterManager = $documentAdapterManager;
-        $this->documentManager = $documentAdapterManager->getDocumentManager();
-        $this->objectManager = $documentAdapterManager->getObjectManager();
-        $this->eventManager = $documentAdapterManager->getEventManager();
-        $this->eventListenersInvoker = new ListenersInvoker($documentAdapterManager);
+        $this->objectAdapterManager = $objectAdapterManager;
+        $this->documentManager = $objectAdapterManager->getDocumentManager();
+        $this->objectManager = $objectAdapterManager->getObjectManager();
+        $this->eventManager = $objectAdapterManager->getEventManager();
+        $this->eventListenersInvoker = new ListenersInvoker($objectAdapterManager);
     }
 
     /**
@@ -80,7 +80,7 @@ class UnitOfWork
 
     private function doPersist($object)
     {
-        $classMetadata = $this->documentAdapterManager->getClassMetadata(get_class($object));
+        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
         $objectState = $this->getObjectState($object, $classMetadata);
 
         switch ($objectState) {
@@ -102,76 +102,77 @@ class UnitOfWork
     private function persistNew($object)
     {
 
-        $classMetadata = $this->documentAdapterManager->getClassMetadata(get_class($object));
+        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
 
-        $documents = $this->extractDocuments($object, $classMetadata);
+        $referencedObjects = $this->extractReferencedObjects($object, $classMetadata);
 
-        foreach ($documents as $document) {
+        foreach ($referencedObjects as $referencedObject) {
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
                     Event::preBindDocument,
-                    $document,
-                    new LifecycleEventArgs($this->documentAdapterManager, $document, $object),
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
                 );
             }
 
-            $this->documentManager->persist($document);
+            $this->documentManager->persist($referencedObject);
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
                     Event::postBindDocument,
-                    $document,
-                    new LifecycleEventArgs($this->documentAdapterManager, $document, $object),
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
                 );
             }
 
-            $this->syncCommonFields($object, $document, $classMetadata);
+            $this->syncCommonFields($object, $referencedObject, $classMetadata);
         }
     }
 
     /**
-     * Depending on the reference-document mapping there can be several mapped documents.
-     * This method tries to extract them based on the mapping from the object and return
+     * Depending on the reference-document/referenced-object mapping there can
+     * be several mapped documents. This method tries to extract them based on
+     * the mapping from the object and return
      * it as an array to persist or work on them.
      *
-     * @param $object
+     * @param object        $object
      * @param ClassMetadata $classMetadata
      * @return array
      * @throws Exception\UnitOfWorkException
      */
-    private function extractDocuments($object, ClassMetadata $classMetadata)
+    private function extractReferencedObjects($object, ClassMetadata $classMetadata)
     {
-        $referenceMappings = $classMetadata->getReferencedDocuments();
-        $documents = array();
+        $referencedObjetMappings = $classMetadata->getReferencedObjects();
+        $referencedObjects = array();
 
-        foreach ($referenceMappings as $fieldName => $reference) {
+        foreach ($referencedObjetMappings as $fieldName => $reference) {
             $objectReflection = new \ReflectionClass($object);
             $property = $objectReflection->getProperty($fieldName);
             $property->setAccessible(true);
-            $document = $property->getValue($object);
+            $referencedObject = $property->getValue($object);
 
-            if (!$document) {
+            if (!$referencedObject) {
                 throw new UnitOfWorkException(
                     sprintf(
-                        'No document found on %s with mapped document field %s',
+                        'No object found on %s with mapped reference object field %s',
                         get_class($object),
                         $fieldName
                     )
                 );
             }
 
-            $documents[$fieldName] = $document;
+            $referencedObjects[$fieldName] = $referencedObject;
         }
 
-        return $documents;
+        return $referencedObjects;
     }
 
-    public function removeDocument($object)
+    public function removeReferencedObject($object)
     {
 
     }
@@ -191,10 +192,10 @@ class UnitOfWork
      */
     private function getObjectState($object, ClassMetadata $classMetadata)
     {
-        $referenceMapping = $classMetadata->getReferencedDocuments();
+        $referencedObjectMapping = $classMetadata->getReferencedObjects();
 
         $matches = 0;
-        foreach ($referenceMapping as $reference) {
+        foreach ($referencedObjectMapping as $reference) {
             $objectReflection = new \ReflectionClass($object);
             $property = $objectReflection->getProperty($reference['inversed-by']);
             $property->setAccessible(true);
@@ -213,37 +214,26 @@ class UnitOfWork
      * document has got some mapped common fields and sync them by the mapped sync-type.
      *
      * @param $object
-     * @param $document
+     * @param $referencedObject
      * @param ClassMetadata $classMetadata
      * @throws Exception\MappingException
      */
-    private function syncCommonFields($object, $document, ClassMetadata $classMetadata)
+    private function syncCommonFields($object, $referencedObject, ClassMetadata $classMetadata)
     {
-        $referencedDocument = array_filter(
-            $classMetadata->getReferencedDocuments(),
-            function ($refDocument) use ($document) {
-                return $refDocument['target-document'] === get_class($document);
+        $referencedObjets = array_filter(
+            $classMetadata->getReferencedObjects(),
+            function ($refObject) use ($referencedObject) {
+                return $refObject['target-object'] === get_class($referencedObject);
             }
         );
 
-        if (!$referencedDocument || !is_array($referencedDocument)) {
+        if (!$referencedObjets || !is_array($referencedObjets)) {
             return;
         }
 
         $objectReflection = new \ReflectionClass($object);
-        foreach ($referencedDocument as $fieldName => $reference) {
-            // get the current document from object
-            $objectFieldProperty = $objectReflection->getProperty($fieldName);
-            $objectFieldProperty->setAccessible(true);
-            $document = $objectFieldProperty->getValue($object);
-
-            if (!$document) {
-                throw new MappingException(
-                    sprintf('Error when trying to get mapped %s from object %s.', $fieldName, get_class($object))
-                );
-            }
-
-            // get the common-field mappings for that document
+        foreach ($referencedObjets as $fieldName => $reference) {
+            // get the common-field mappings for that referenced object
             $commonFieldMappings = $classMetadata->getCommonFields();
             if (!$commonFieldMappings) {
                 continue;
@@ -253,20 +243,20 @@ class UnitOfWork
                  return $field['target-field'] === $fieldName;
             });
 
-            $documentReflection = new \ReflectionClass($document);
+            $referencedObjectReflection = new \ReflectionClass($referencedObject);
 
             foreach ($commonFieldMappings as $commonField) {
-                $documentProperty = $documentReflection->getProperty($commonField['referenced-by']);
-                $documentProperty->setAccessible(true);
+                $referencedObjectProperty = $referencedObjectReflection->getProperty($commonField['referenced-by']);
+                $referencedObjectProperty->setAccessible(true);
 
                 $objectProperty = $objectReflection->getProperty($commonField['inversed-by']);
                 $objectProperty->setAccessible(true);
 
-                if ($commonField['sync-type'] === 'to-document') {
+                if ($commonField['sync-type'] === 'to-reference') {
                     $value = $objectProperty->getValue($object);
-                    $documentProperty->setValue($document, $value);
-                } elseif ($commonField['sync-type'] === 'to-entity') {
-                    $value = $documentProperty->getValue($document);
+                    $referencedObjectProperty->setValue($referencedObject, $value);
+                } elseif ($commonField['sync-type'] === 'from-reference') {
+                    $value = $referencedObjectProperty->getValue($referencedObject);
                     $objectProperty->setValue($object, $value);
                 }
             }

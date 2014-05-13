@@ -5,7 +5,7 @@ namespace Doctrine\ORM\ODMAdapter\Event;
 
 
 use Doctrine\Common\EventArgs;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 
 class LoadClassMetadataEventArgs extends EventArgs
@@ -16,15 +16,15 @@ class LoadClassMetadataEventArgs extends EventArgs
      */
     private $classMetadata;
     /**
-     * @var DocumentAdapterManager
+     * @var ObjectAdapterManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
 
-    public function __construct(ClassMetadata $classMetadata, DocumentAdapterManager $documentAdapterManager)
+    public function __construct(ClassMetadata $classMetadata, ObjectAdapterManager $objectAdapterManager)
     {
 
         $this->classMetadata = $classMetadata;
-        $this->documentAdapterManager = $documentAdapterManager;
+        $this->objectAdapterManager = $objectAdapterManager;
     }
 
     /**
@@ -36,11 +36,11 @@ class LoadClassMetadataEventArgs extends EventArgs
     }
 
     /**
-     * @return DocumentAdapterManager
+     * @return ObjectAdapterManager
      */
-    public function getDocumentAdapterManager()
+    public function getObjectAdapterManager()
     {
-        return $this->documentAdapterManager;
+        return $this->objectAdapterManager;
     }
 
 

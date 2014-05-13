@@ -13,5 +13,5 @@ class DefaultMappingObject
 {
     public $uuid;
 
-    public $document;
+    public $referencedField;
 }

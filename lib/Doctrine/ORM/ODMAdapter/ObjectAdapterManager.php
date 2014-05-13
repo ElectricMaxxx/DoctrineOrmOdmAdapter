@@ -10,12 +10,12 @@ use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 
 /**
- * The DocumentAdapterManager will combine persistence operation
+ * The ObjectAdapterManager will combine persistence operation
  * on orm and odm and provide a doctrine common interface.
  *
  * @author Maximilian Berghoff <Maximilian.Berghoff@gmx.de>
  */
-class DocumentAdapterManager
+class ObjectAdapterManager
 {
     /**
      * @var DocumentManager
@@ -64,7 +64,7 @@ class DocumentAdapterManager
      * @param Configuration $configuration
      * @param EventManager $evm
      *
-     * @return DocumentAdapterManager
+     * @return ObjectAdapterManager
      */
     public static function create(DocumentManager $dm, ObjectManager $em, Configuration $configuration = null, EventManager $evm = null)
     {

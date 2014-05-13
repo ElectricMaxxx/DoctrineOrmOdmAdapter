@@ -54,7 +54,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $cm->mapCommonField(array(
             'inversed-by'   => 'entityName',
             'referenced-by' => 'docName',
-            'target-field'  => 'document',
+            'target-field'  => 'referencedField',
             'type'          => 'common-field',
         ));
 
@@ -67,8 +67,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'property'      => 'entityName',
                 'referenced-by' => 'docName',
                 'type'          => 'common-field',
-                'target-field'  => 'document',
-                'sync-type'     => 'to-entity',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
             ),
             $cm->mappings['entityName']
         );
@@ -80,8 +80,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'property'      => 'entityName',
                 'referenced-by' => 'docName',
                 'type'          => 'common-field',
-                'target-field'  => 'document',
-                'sync-type'     => 'to-entity',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
             ),
             $cm->commonFieldMappings['entityName']
         );
@@ -95,28 +95,28 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapReferenceOneDocument(ClassMetadata $cm)
     {
-        $cm->mapRefereceOneDocument(array(
+        $cm->mapReferencedObject(array(
             'type'            => 'reference-document',
             'inversed-by'     => 'uuid',
             'referenced-by'   => 'uuid',
-            'target-document' => 'document',
-            'fieldName'       => 'document',
+            'target-object' => 'document',
+            'fieldName'       => 'referencedField',
             'inversed-entity' => 'entity',
         ));
 
-        $this->assertTrue(isset($cm->mappings['document']));
+        $this->assertTrue(isset($cm->mappings['referencedField']));
 
         $this->assertEquals(
             array(
                 'type'            => 'reference-document',
-                'fieldName'       => 'document',
+                'fieldName'       => 'referencedField',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
-                'target-document' => 'document',
+                'target-object' => 'document',
                 'inversed-entity' => 'entity',
-                'property'        => 'document',
+                'property'        => 'referencedField',
             ),
-            $cm->mappings['document']
+            $cm->mappings['referencedField']
         );
 
         $this->assertEquals(
@@ -126,8 +126,8 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'type'          => 'common-field',
                 'inversed-by'   => 'uuid',
                 'referenced-by' => 'uuid',
-                'target-field'  => 'document',
-                'sync-type'     => 'to-entity',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
             ),
             $cm->mappings['uuid']
         );
@@ -135,14 +135,14 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             array(
                 'type'            => 'reference-document',
-                'fieldName'       => 'document',
+                'fieldName'       => 'referencedField',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
-                'target-document' => 'document',
+                'target-object' => 'document',
                 'inversed-entity' => 'entity',
-                'property'        => 'document',
+                'property'        => 'referencedField',
             ),
-            $cm->getReferencedDocument('document')
+            $cm->getReferencedObject('referencedField')
         );
     }
 
@@ -173,7 +173,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapFieldThrowsExceptionOnEmtpyType(ClassMetadata $cm)
     {
-        $cm->mapRefereceOneDocument(array());
+        $cm->mapReferencedObject(array());
     }
 
     /**
@@ -183,7 +183,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapReferenceThrowsExceptionOnWrongType(ClassMetadata $cm)
     {
-        $cm->mapRefereceOneDocument(array('type' => 'some_type'));
+        $cm->mapReferencedObject(array('type' => 'some_type'));
     }
 
     /**

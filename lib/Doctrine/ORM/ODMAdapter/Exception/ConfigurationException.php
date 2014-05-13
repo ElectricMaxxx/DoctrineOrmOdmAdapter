@@ -8,12 +8,12 @@ namespace Doctrine\ORM\ODMAdapter\Exception;
  */
 class ConfigurationException extends \Exception
 {
-    public static function unknownDocumentNamespace($documentNamespaceAlias)
+    public static function unknownObjectNamespace($documentNamespaceAlias)
     {
         return new self("Unknown Document namespace alias '$documentNamespaceAlias'.");
     }
 
-    public static function invalidDocumentRepository($className)
+    public static function invalidObjectRepository($className)
     {
         return new self("Invalid repository class '".$className."'. It must be a Doctrine\Common\Persistence\ObjectRepository.");
     }

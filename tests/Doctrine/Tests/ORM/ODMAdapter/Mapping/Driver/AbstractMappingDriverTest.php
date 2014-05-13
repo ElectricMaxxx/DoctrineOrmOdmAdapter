@@ -103,11 +103,11 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertCount(3, $class->mappings);
         $this->assertCount(2, $class->commonFieldMappings);
-        $this->assertCount(1, $class->getReferencedDocuments());
+        $this->assertCount(1, $class->getReferencedObjects());
         $this->assertTrue(isset($class->mappings['entityName']));
         $this->assertEquals('common-field', $class->mappings['entityName']['type']);
         $this->assertEquals('common-field', $class->mappings['uuid']['type']);
-        $this->assertEquals('reference-document', $class->mappings['document']['type']);
+        $this->assertEquals('reference-document', $class->mappings['referencedField']['type']);
         return $class;
     }
 
@@ -119,16 +119,16 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
     {
 
         $expectedMapping = array();
-        $expectedMapping['target-document'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document';
+        $expectedMapping['target-object'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document';
         $expectedMapping['referenced-by'] = 'uuid';
         $expectedMapping['inversed-by'] = 'uuid';
         $expectedMapping['inversed-entity'] = 'Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\CommonFieldMappingObject';
-        $expectedMapping['fieldName'] = 'document';
+        $expectedMapping['fieldName'] = 'referencedField';
         $expectedMapping['type'] = 'reference-document';
-        $expectedMapping['property'] = 'document';
-        $expectedMapping['name'] = 'document';
+        $expectedMapping['property'] = 'referencedField';
+        $expectedMapping['name'] = 'referencedField';
 
-        $this->assertEquals($expectedMapping, $class->mappings['document']);
+        $this->assertEquals($expectedMapping, $class->mappings['referencedField']);
     }
 
     /**
@@ -141,6 +141,6 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('entityName', $class->mappings['entityName']['property']);
         $this->assertEquals('entityName', $class->mappings['entityName']['inversed-by']);
         $this->assertEquals('docName', $class->mappings['entityName']['referenced-by']);
-        $this->assertEquals('document', $class->mappings['entityName']['target-field']);
+        $this->assertEquals('referencedField', $class->mappings['entityName']['target-field']);
     }
 }

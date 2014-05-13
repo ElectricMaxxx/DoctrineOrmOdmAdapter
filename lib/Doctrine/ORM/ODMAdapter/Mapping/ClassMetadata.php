@@ -41,10 +41,10 @@ class ClassMetadata implements CommonClassMetadata
      * The mapping definition array has the following values:
      *
      * - <b>fieldName</b> (string)
-     * The name of the field in the Document.
+     * The name of the field in the object.
      *
      * - <b>id</b> (boolean, optional)
-     * Marks the field as the primary key of the document.
+     * Marks the field as the primary key of the object.
      *
      * @var array
      */
@@ -66,18 +66,18 @@ class ClassMetadata implements CommonClassMetadata
     public $reflectionFields = array();
 
     /**
-     * READ-ONLY: The registered lifecycle callbacks for documents of this class.
+     * READ-ONLY: The registered lifecycle callbacks for objects of this class.
      *
      * @var array
      */
     public $lifecycleCallbacks = array();
 
     /**
-     * Contains all referenced documents with the inverse info on entity
+     * Contains all referenced objects with the inverse info on entity
      *
      * @var array
      */
-    public $referencedDocuments;
+    public $referencedObjects;
 
     protected $prototype;
 
@@ -172,7 +172,7 @@ class ClassMetadata implements CommonClassMetadata
     }
 
     /**
-     * Adds a lifecycle callback for documents of this class.
+     * Adds a lifecycle callback for objects of this class.
      *
      * Note: If the same callback is registered more than once, the old one
      * will be overridden.
@@ -190,7 +190,7 @@ class ClassMetadata implements CommonClassMetadata
     }
 
     /**
-     * Sets the lifecycle callbacks for documents of this class.
+     * Sets the lifecycle callbacks for objects of this class.
      * Any previously registered callbacks are overwritten.
      *
      * @param array $callbacks
@@ -245,7 +245,7 @@ class ClassMetadata implements CommonClassMetadata
 
     /**
      * @param array $mapping
-     * @param ClassMetadata $inherited same field of parent document, if any
+     * @param ClassMetadata $inherited same field of parent object, if any
      * @param bool $isField whether this is a field or an association
      * @param string $phpcrLabel the name for the phpcr thing. usually property,
      *                                  except for child where this is name. referrers
@@ -312,24 +312,26 @@ class ClassMetadata implements CommonClassMetadata
      * @param ClassMetadata $inherit
      * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
-    public function mapRefereceOneDocument(array $mapping, ClassMetadata $inherit = null)
+    public function mapReferencedObject(array $mapping, ClassMetadata $inherit = null)
     {
-        if (!isset($mapping['type']) || $mapping['type'] !== 'reference-document') {
-            throw new MappingException('Mapping type needs to be reference-document');
+        if (!isset($mapping['type']) || ($mapping['type'] !== 'reference-document' && $mapping['type'] !== 'reference-object')) {
+            throw new MappingException('Mapping type needs to be one of reference-document or reference-object');
         }
         if (!isset($mapping['referenced-by'])) {
-            throw new MappingException('Documents mapping for referenced-by is missing');
+            throw new MappingException('Objects mapping for referenced-by is missing');
         }
         if (!isset($mapping['inversed-by'])) {
             throw new MappingException('Entities mapping for inversed-by is missing');
         }
-        if (!isset($mapping['target-document'])) {
-            throw new MappingException('No target-document found while reference-one-document mapping.');
+        if (!isset($mapping['target-object'])) {
+            throw new MappingException(
+                sprintf('No target-object found while %s mapping.', $mapping['type'])
+            );
         }
 
         $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
 
-        $this->referencedDocuments[$mapping['property']] = $mapping;
+        $this->referencedObjects[$mapping['property']] = $mapping;
 
         // the mapping for both fields will be done by a sync of a common field
         $commonFieldMapping = array(
@@ -355,7 +357,7 @@ class ClassMetadata implements CommonClassMetadata
         }
 
         if (!isset($mapping['sync-type']) || empty($mapping['sync-type'])) {
-            $mapping['sync-type'] = 'to-entity';
+            $mapping['sync-type'] = 'from-reference';
         }
 
         if (!isset($mapping['referenced-by']) || empty($mapping['referenced-by'])) {
@@ -426,7 +428,7 @@ class ClassMetadata implements CommonClassMetadata
             return false;
         }
         return in_array($fieldName, $this->commonFieldMappings)
-            || in_array($fieldName, $this->referencedDocuments)
+            || in_array($fieldName, $this->referencedObjects)
             ;
     }
 
@@ -487,10 +489,10 @@ class ClassMetadata implements CommonClassMetadata
     public function getFieldNames()
     {
         $fields = $this->commonFieldMappings;
-        $referencedDocuments = $this->getReferencedDocuments();
-        if (count($referencedDocuments) !== 0) {
-            foreach ($referencedDocuments as $document) {
-                $fields[] = $document['fieldName'];
+        $referecnedObjects = $this->getReferencedObjects();
+        if (count($referecnedObjects) !== 0) {
+            foreach ($referecnedObjects as $object) {
+                $fields[] = $object['fieldName'];
             }
         }
 
@@ -618,21 +620,21 @@ class ClassMetadata implements CommonClassMetadata
     /**
      * @return array
      */
-    public function getReferencedDocuments()
+    public function getReferencedObjects()
     {
-        return $this->referencedDocuments;
+        return $this->referencedObjects;
     }
 
     /**
-     * Will return the reference-document mappings for the given property.
+     * Will return the the current reference mappings for the given property.
      *
      * @param $property
      * @return array
      */
-    public function getReferencedDocument($property)
+    public function getReferencedObject($property)
     {
-        if (array_key_exists($property, $this->referencedDocuments)) {
-            return $this->referencedDocuments[$property];
+        if (array_key_exists($property, $this->referencedObjects)) {
+            return $this->referencedObjects[$property];
         }
     }
 

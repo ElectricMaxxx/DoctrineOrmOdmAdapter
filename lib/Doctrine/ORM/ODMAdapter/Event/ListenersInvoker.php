@@ -6,7 +6,7 @@ namespace Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 
 /**
@@ -34,17 +34,17 @@ class ListenersInvoker
     /**
      * @var DocumentManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
 
     /**
      * Initializes a new ListenersInvoker instance.
      *
-     * @param DocumentAdapterManager $documentAdapterManager
+     * @param ObjectAdapterManager $objectAdapterManager
      */
-    public function __construct(DocumentAdapterManager $documentAdapterManager)
+    public function __construct(ObjectAdapterManager $objectAdapterManager)
     {
-        $this->eventManager = $documentAdapterManager->getEventManager();
-        $this->documentAdapterManager = $documentAdapterManager;
+        $this->eventManager = $objectAdapterManager->getEventManager();
+        $this->objectAdapterManager = $objectAdapterManager;
     }
 
     /**
@@ -79,19 +79,19 @@ class ListenersInvoker
     }
 
     /**
-     * Dispatches the lifecycle event of the given entity.
+     * Dispatches the lifecycle event of the given object.
      *
      * @param ClassMetadata $metadata The entity metadata.
      * @param string $eventName The entity lifecycle event.
-     * @param object $document The Entity on which the event occurred.
+     * @param object $object The Entity on which the event occurred.
      * @param EventArgs $event The Event args.
      * @param $invoke
      */
-    public function invoke(ClassMetadata $metadata, $eventName, $document, EventArgs $event, $invoke)
+    public function invoke(ClassMetadata $metadata, $eventName, $object, EventArgs $event, $invoke)
     {
         if ($invoke & self::INVOKE_CALLBACKS) {
             foreach ($metadata->lifecycleCallbacks[$eventName] as $callback) {
-                $document->$callback($event);
+                $object->$callback($event);
             }
         }
 

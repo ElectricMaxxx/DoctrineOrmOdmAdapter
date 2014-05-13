@@ -3,46 +3,45 @@
 
 namespace Doctrine\ORM\ODMAdapter\Event;
 
-
 use Doctrine\Common\EventArgs;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 
 class LifecycleEventArgs extends EventArgs
 {
     /**
-     * @var DocumentAdapterManager
+     * @var ObjectAdapterManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
     /**
      * @var null
      */
-    private $document;
+    private $referencedObject;
     /**
      * @var null
      */
     private $object;
 
-    public function __construct(DocumentAdapterManager $documentAdapterManager, $document = null, $object = null)
+    public function __construct(ObjectAdapterManager $objectAdapterManager, $document = null, $object = null)
     {
-        $this->documentAdapterManager = $documentAdapterManager;
-        $this->document = $document;
+        $this->objectAdapterManager = $objectAdapterManager;
+        $this->referencedObject = $document;
         $this->object = $object;
     }
 
     /**
      * @return null
      */
-    public function getDocument()
+    public function getReferencedObject()
     {
-        return $this->document;
+        return $this->referencedObject;
     }
 
     /**
-     * @return DocumentAdapterManager
+     * @return ObjectAdapterManager
      */
-    public function getDocumentAdapterManager()
+    public function getObjectAdapterManager()
     {
-        return $this->documentAdapterManager;
+        return $this->objectAdapterManager;
     }
 
     /**

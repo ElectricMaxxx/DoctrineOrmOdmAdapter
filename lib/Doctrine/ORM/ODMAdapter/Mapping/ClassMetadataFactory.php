@@ -9,7 +9,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Common\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\ORM\ODMAdapter\Configuration;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 
@@ -33,9 +33,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     protected $cacheSalt = '\$PHPCRODMCLASSMETADATA';
 
     /**
-     * @var DocumentAdapterManager
+     * @var ObjectAdapterManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
 
     /**
      *  The used metadata driver.
@@ -55,16 +55,16 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     private $configuration;
 
     /**
-     * @param DocumentAdapterManager $dma
+     * @param ObjectAdapterManager $oma
      */
-    public function __construct(DocumentAdapterManager $dma)
+    public function __construct(ObjectAdapterManager $oma)
     {
-        $this->documentAdapterManager = $dma;
+        $this->objectAdapterManager = $oma;
 
-        $this->configuration = $this->documentAdapterManager->getConfiguration();
+        $this->configuration = $this->objectAdapterManager->getConfiguration();
         $this->setCacheDriver($this->configuration->getMetadataCacheImpl());
         $this->driver = $this->configuration->getMetadataDriverImpl();
-        $this->evm = $this->documentAdapterManager->getEventManager();
+        $this->evm = $this->objectAdapterManager->getEventManager();
     }
 
     /**
@@ -112,7 +112,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      */
     protected function getFqcnFromAlias($namespaceAlias, $simpleClassName)
     {
-        return $this->configuration->getDocumentNamespace($namespaceAlias) . '\\' . $simpleClassName;
+        return $this->configuration->getObjectNamespace($namespaceAlias) . '\\' . $simpleClassName;
     }
 
     /**
@@ -125,7 +125,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         if ($this->evm->hasListeners(Event::loadClassMetadata)) {
-            $eventArgs = new Event\LoadClassMetadataEventArgs($class, $this->documentAdapterManager);
+            $eventArgs = new Event\LoadClassMetadataEventArgs($class, $this->objectAdapterManager);
             $this->evm->dispatchEvent(Event::loadClassMetadata, $eventArgs);
         }
 

@@ -32,7 +32,7 @@ class XmlDriver extends FileDriver{
         $xmlElement = simplexml_load_string(file_get_contents($file));
         libxml_disable_entity_loader($entity);
 
-        foreach (array('document-adapter') as $type) {
+        foreach (array('object-adapter') as $type) {
             if (isset($xmlElement->$type)) {
                 foreach ($xmlElement->$type as $documentElement) {
                     $className = (string) $documentElement['name'];
@@ -130,6 +130,6 @@ class XmlDriver extends FileDriver{
             $this->extractCommonFields($xmlRoot->{'reference-document'}, $class, $className, $mapping['fieldName']);
         }
 
-        $class->mapRefereceOneDocument($mapping);
+        $class->mapReferencedObject($mapping);
     }
 }

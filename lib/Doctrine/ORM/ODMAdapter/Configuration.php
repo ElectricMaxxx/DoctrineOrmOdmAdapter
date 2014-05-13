@@ -5,7 +5,7 @@ namespace Doctrine\ORM\ODMAdapter;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\ORM\ODMAdapter\Exception\ConfigurationException;
-use Doctrine\ORM\ODMAdapter\Mapping\Driver\BuiltinDocumentAdaptersDriver;
+use Doctrine\ORM\ODMAdapter\Mapping\Driver\BuiltinObjectAdaptersDriver;
 use PHPCR\Util\UUIDHelper;
 
 /**
@@ -26,17 +26,17 @@ class Configuration
      * @var array $attributes
      */
     private $attributes = array(
-        'writeDoctrineMetadata' => true,
+        'writeDoctrineMetadata'    => true,
         'validateDoctrineMetadata' => true,
-        'metadataDriverImpl' => null,
-        'metadataCacheImpl' => null,
-        'documentClassMapper' => null,
-        'proxyNamespace' => 'MyPHPCRProxyNS',
+        'metadataDriverImpl'       => null,
+        'metadataCacheImpl'        => null,
+        'objectClassMapper'        => null,
+        'proxyNamespace'           => 'MyPHPCRProxyNS',
         'autoGenerateProxyClasses' => true,
     );
 
     /**
-     * Sets if all document adapter metadata should be validated on read
+     * Sets if all object adapter metadata should be validated on read
      *
      * @param boolean $validateDoctrineMetadata
      */
@@ -46,7 +46,7 @@ class Configuration
     }
 
     /**
-     * Gets if all document adapter metadata should be validated on read
+     * Gets if all object adapter metadata should be validated on read
      *
      * @return boolean
      */
@@ -56,7 +56,7 @@ class Configuration
     }
 
     /**
-     * Sets if all document adapters should automatically get doctrine metadata added on write
+     * Sets if all object adapters should automatically get doctrine metadata added on write
      *
      * @param boolean $writeDoctrineMetadata
      */
@@ -66,7 +66,7 @@ class Configuration
     }
 
     /**
-     * Gets if all document adapters should automatically get doctrine metadata added on write
+     * Gets if all object adapters should automatically get doctrine metadata added on write
      *
      * @return boolean
      */
@@ -81,50 +81,50 @@ class Configuration
      * @param string $alias
      * @param string $namespace
      */
-    public function addDocumentNamespace($alias, $namespace)
+    public function addObjectNamespace($alias, $namespace)
     {
-        $this->attributes['documentNamespaces'][$alias] = $namespace;
+        $this->attributes['objectNamespaces'][$alias] = $namespace;
     }
 
     /**
      * Resolves a registered namespace alias to the full namespace.
      *
-     * @param string $documentNamespaceAlias
+     * @param string $objectNamespaceAlias
      *
      * @throws Exception\ConfigurationException
      * @return string the namespace URI
      */
-    public function getDocumentNamespace($documentNamespaceAlias)
+    public function getObjectNamespace($objectNamespaceAlias)
     {
-        if (!isset($this->attributes['documentNamespaces'][$documentNamespaceAlias])) {
-            throw ConfigurationException::unknownDocumentNamespace($documentNamespaceAlias);
+        if (!isset($this->attributes['objectNamespaces'][$objectNamespaceAlias])) {
+            throw ConfigurationException::unknownObjectNamespace($objectNamespaceAlias);
         }
 
-        return trim($this->attributes['documentNamespaces'][$documentNamespaceAlias], '\\');
+        return trim($this->attributes['objectNamespaces'][$objectNamespaceAlias], '\\');
     }
 
     /**
-     * Set the document alias map
+     * Set the object alias map
      *
-     * @param array $documentNamespaces
+     * @param array $objectNamespaces
      */
-    public function setDocumentNamespaces(array $documentNamespaces)
+    public function setObjectNamespaces(array $objectNamespaces)
     {
-        $this->attributes['documentNamespaces'] = $documentNamespaces;
+        $this->attributes['objectNamespaces'] = $objectNamespaces;
     }
 
     /**
      * Sets the driver implementation that is used to retrieve mapping metadata.
      *
      * @param MappingDriver $driverImpl
-     * @param bool $useBuildInDocumentsDriver
+     * @param bool $useBuildInObjectsDriver
      * @todo Force parameter to be a Closure to ensure lazy evaluation
      *       (as soon as a metadata cache is in effect, the driver never needs to initialize).
      */
-    public function setMetadataDriverImpl(MappingDriver $driverImpl, $useBuildInDocumentsDriver = true)
+    public function setMetadataDriverImpl(MappingDriver $driverImpl, $useBuildInObjectsDriver = true)
     {
-        if ($useBuildInDocumentsDriver) {
-            $driverImpl = new BuiltinDocumentAdaptersDriver($driverImpl);
+        if ($useBuildInObjectsDriver) {
+            $driverImpl = new BuiltinObjectAdaptersDriver($driverImpl);
         }
         $this->attributes['metadataDriverImpl'] = $driverImpl;
     }
@@ -268,7 +268,7 @@ class Configuration
         $reflectionClass = new \ReflectionClass($className);
 
         if ( ! $reflectionClass->implementsInterface('Doctrine\Common\Persistence\ObjectRepository')) {
-            throw ConfigurationException::invalidDocumentRepository($className);
+            throw ConfigurationException::invalidObjectRepository($className);
         }
 
         $this->attributes['defaultRepositoryClassName'] = $className;
@@ -285,7 +285,7 @@ class Configuration
     {
         return isset($this->attributes['defaultRepositoryClassName'])
             ? $this->attributes['defaultRepositoryClassName']
-            : 'Doctrine\ORM\ODMAdapter\DocumentAdapterRepository';
+            : 'Doctrine\ORM\ODMAdapter\ObjectAdapterRepository';
     }
 
     /**

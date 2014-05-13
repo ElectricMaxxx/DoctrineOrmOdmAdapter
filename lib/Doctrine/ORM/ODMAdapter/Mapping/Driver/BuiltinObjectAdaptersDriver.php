@@ -17,7 +17,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @author      Uwe Jäger <uwej711e@googlemail.com>
  * @author      Maximilian Berghoff <maximilian.berghoff@gmx.de>
  */
-class BuiltinDocumentAdaptersDriver implements MappingDriver
+class BuiltinObjectAdaptersDriver implements MappingDriver
 {
     /**
      * namespace of built-in documents

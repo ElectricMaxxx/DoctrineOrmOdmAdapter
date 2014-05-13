@@ -29,7 +29,7 @@ Current state:
  -----
 
  ... would be to create a bundle which is able to hook on entities lifecycle events
- and triggers the right method on the `DocumentAdapterManager`. That bundle would need
+ and triggers the right method on the `ObjectAdapterManager`. That bundle would need
  to inject the right managers (for document and entity).
  The application which uses both would just need to do the mapping and hook on this libraries
  events for further usage.
@@ -41,7 +41,7 @@ Current state:
  - map uuid/document field - means where to find them on the entity
  - persist the entity
  - OrmOdmAdapterBunle would hook on `postPersist`
- - call `$documentAdapterManager->bindDocument($entity);`
+ - call `$objectAdapterManager->bindDocument($entity);`
  - UoW would get the documents uuid and store it on the mapped field on the entity
  - UoW would trigger persist on `DocumentManager` (that one that handles the document)
  - a possible hook on `preBindDocument` could manage other work i.e. creating a route

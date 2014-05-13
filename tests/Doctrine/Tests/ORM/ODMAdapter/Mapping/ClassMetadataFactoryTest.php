@@ -9,7 +9,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs;
 use Doctrine\Common\Persistence\Mapping\Driver\PHPDriver;
-use Doctrine\ORM\ODMAdapter\DocumentAdapterManager;
+use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
@@ -22,9 +22,9 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
     private $objectManager;
 
     /**
-     * @var DocumentAdapterManager
+     * @var ObjectAdapterManager
      */
-    private $documentAdapterManager;
+    private $objectAdapterManager;
 
     /**
      * @param $fqn
@@ -37,9 +37,9 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $reader = new AnnotationReader($cache);
         $annotationDriver = new AnnotationDriver($reader);
         $annotationDriver->addPaths(array(__DIR__ . '/Model'));
-        $this->documentAdapterManager->getConfiguration()->setMetadataDriverImpl($annotationDriver);
+        $this->objectAdapterManager->getConfiguration()->setMetadataDriverImpl($annotationDriver);
 
-        $cmf = new ClassMetadataFactory($this->documentAdapterManager);
+        $cmf = new ClassMetadataFactory($this->objectAdapterManager);
         $meta = $cmf->getMetadataFor($fqn);
         return $meta;
     }
@@ -52,12 +52,12 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
-        $this->documentAdapterManager = DocumentAdapterManager::create($this->documentManager, $this->objectManager);
+        $this->objectAdapterManager = ObjectAdapterManager::create($this->documentManager, $this->objectManager);
     }
 
     public function testNotMappedThrowsException()
     {
-        $cmf = new ClassMetadataFactory($this->documentAdapterManager);
+        $cmf = new ClassMetadataFactory($this->objectAdapterManager);
 
         $this->setExpectedException('Doctrine\ORM\ODMAdapter\Exception\MappingException');
         $cmf->getMetadataFor('unknown');
@@ -65,7 +65,7 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMapping()
     {
-        $cmf = new ClassMetadataFactory($this->documentAdapterManager);
+        $cmf = new ClassMetadataFactory($this->objectAdapterManager);
 
         $cm = new \Doctrine\ODM\PHPCR\Mapping\ClassMetadata('stdClass');
 
@@ -78,9 +78,9 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
     public function testGetAllMetadata()
     {
         $driver = new PHPDriver(array(__DIR__ . '/Driver/Model/php'));
-        $this->documentAdapterManager->getConfiguration()->setMetadataDriverImpl($driver);
+        $this->objectAdapterManager->getConfiguration()->setMetadataDriverImpl($driver);
 
-        $cmf = new ClassMetadataFactory($this->documentAdapterManager);
+        $cmf = new ClassMetadataFactory($this->objectAdapterManager);
 
         $cm = new ClassMetadata('stdClass');
         $cmf->setMetadataFor('stdClass', $cm);
@@ -98,26 +98,26 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
     public function testLoadClassMetadataEvent()
     {
         $listener = new Listener;
-        $evm = $this->documentAdapterManager->getEventManager();
+        $evm = $this->objectAdapterManager->getEventManager();
         $evm->addEventListener(array(Event::loadClassMetadata), $listener);
 
         $meta = $this->getMetadataFor('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject');
         $this->assertTrue($listener->called);
-        $this->assertSame($this->documentAdapterManager, $listener->dma);
+        $this->assertSame($this->objectAdapterManager, $listener->oma);
         $this->assertSame($meta, $listener->meta);
     }
 }
 
 class Listener
 {
-    public $dma;
+    public $oma;
     public $meta;
     public $called = false;
 
     public function loadClassMetadata(Event\LoadClassMetadataEventArgs $args)
     {
         $this->called = true;
-        $this->dma = $args->getDocumentAdapterManager();
+        $this->oma = $args->getObjectAdapterManager();
         $this->meta = $args->getClassMetadata();
     }
 }
