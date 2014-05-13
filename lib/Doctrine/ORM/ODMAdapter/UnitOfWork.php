@@ -41,16 +41,6 @@ class UnitOfWork
     private $objectAdapterManager;
 
     /**
-     * @var DocumentManager
-     */
-    private $documentManager;
-
-    /**
-     * @var ObjectManager
-     */
-    private $objectManager;
-
-    /**
      * @var EventManager
      */
     private $eventManager;
@@ -62,8 +52,6 @@ class UnitOfWork
     {
 
         $this->objectAdapterManager = $objectAdapterManager;
-        $this->documentManager = $objectAdapterManager->getDocumentManager();
-        $this->objectManager = $objectAdapterManager->getObjectManager();
         $this->eventManager = $objectAdapterManager->getEventManager();
         $this->eventListenersInvoker = new ListenersInvoker($objectAdapterManager);
     }
@@ -106,7 +94,7 @@ class UnitOfWork
 
         $referencedObjects = $this->extractReferencedObjects($object, $classMetadata);
 
-        foreach ($referencedObjects as $referencedObject) {
+        foreach ($referencedObjects as $fieldName => $referencedObject) {
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
                 $this->eventListenersInvoker->invoke(
@@ -118,7 +106,7 @@ class UnitOfWork
                 );
             }
 
-            $this->documentManager->persist($referencedObject);
+            $this->objectAdapterManager->getManager($referencedObject)->persist($referencedObject);
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
                 $this->eventListenersInvoker->invoke(
@@ -233,7 +221,6 @@ class UnitOfWork
 
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjets as $fieldName => $reference) {
-            // get the common-field mappings for that referenced object
             $commonFieldMappings = $classMetadata->getCommonFields();
             if (!$commonFieldMappings) {
                 continue;

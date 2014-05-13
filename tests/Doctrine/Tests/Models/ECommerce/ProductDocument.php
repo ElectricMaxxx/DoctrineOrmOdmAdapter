@@ -2,7 +2,7 @@
 
 namespace Doctrine\Tests\Models\ECommerce;
 
-class Product
+class ProductDocument
 {
     public $uuid;
 }

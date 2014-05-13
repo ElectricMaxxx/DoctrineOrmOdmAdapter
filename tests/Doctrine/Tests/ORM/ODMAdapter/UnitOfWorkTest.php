@@ -2,7 +2,9 @@
 
 namespace Doctrine\Tests\ORM\ODMAdapter;
 use Doctrine\ORM\ODMAdapter\UnitOfWork;
-use Doctrine\Tests\Models\ECommerce\Product;
+use Doctrine\Tests\Models\ECommerce\ProductDocument;
+use Doctrine\Tests\Models\ECommerce\ProductObject;
+use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingDocument;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferencedObject;
@@ -46,12 +48,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         // expected getter on document adapter manager
         $this->objectAdapterManager->expects($this->any())
-                                     ->method('getDocumentManager')
-                                     ->will($this->returnValue($this->documentManager));
-        $this->objectAdapterManager->expects($this->any())
-                                     ->method('getObjectManager')
-                                     ->will($this->returnValue($this->objectManager));
-        $this->objectAdapterManager->expects($this->any())
                                      ->method('getEventManager')
                                      ->will($this->returnValue($this->eventManager));
         $this->objectAdapterManager->expects($this->any())
@@ -62,11 +58,11 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testPersistNew()
+    public function testPersistNewReference()
     {
         // pre conditions
         $object = new DefaultMappingObject();
-        $testReferencedObject = new Product();
+        $testReferencedObject = new ProductDocument();
         $object->referencedField = $testReferencedObject;
         $testReferencedObject->uuid = 'test-uuid';
 
@@ -95,6 +91,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
+        $this->objectAdapterManager->expects($this->any())
+                                   ->method('getManager')
+                                   ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
                               ->method('persist')
                               ->with($this->equalTo($testReferencedObject));
@@ -102,6 +101,50 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->persist($object);
 
         $this->assertEquals('test-uuid', $object->uuid);
+    }
+    public function testPersistNewInvertedReference()
+    {
+        // pre conditions
+        $object = new DefaultMappingDocument();
+        $testReferencedObject = new ProductObject();
+        $object->referencedField = $testReferencedObject;
+        $testReferencedObject->id = 'test-id';
+
+        $reference = array(
+            'inversed-by' => 'objectId',
+            'referenced-by' => 'id',
+            'target-object' => get_class($testReferencedObject),
+            'fieldName' => 'referencedField',
+            'sync-type'       => 'from-reference',
+        );
+        // common fields for the pure referecne are from-reference by default for entiy -> document mapping
+        $referenceCommonField = array(
+            'referenced-by' => 'id',
+            'inversed-by'   => 'objectId',
+            'target-field'  => 'referencedField',
+            'sync-type'     => 'from-reference',
+        );
+        $mapping = array(
+
+            'referencedField' => $reference,
+        );
+        $commonFieldMappings = array('uuid' => $referenceCommonField);
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($mapping));
+        $this->classMetadata->expects($this->any())
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
+        $this->objectAdapterManager->expects($this->any())
+                                   ->method('getManager')
+                                   ->will($this->returnValue($this->objectManager));
+        $this->objectManager->expects($this->once())
+                              ->method('persist')
+                              ->with($this->equalTo($testReferencedObject));
+
+        $this->UoW->persist($object);
+
+        $this->assertEquals('test-id', $object->objectId);
     }
 
     public function testPersistNewWithCommonFieldsToEntity()
@@ -143,7 +186,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-
+        $this->objectAdapterManager->expects($this->any())
+                                   ->method('getManager')
+                                   ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
                               ->method('persist')
                               ->with($this->equalTo($testReferencedObject));
@@ -193,7 +238,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-
+        $this->objectAdapterManager->expects($this->any())
+                                   ->method('getManager')
+                                   ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
                               ->method('persist')
                               ->with($this->equalTo($testDocument));

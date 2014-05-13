@@ -6,6 +6,7 @@ use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
+use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 
@@ -59,8 +60,8 @@ class ObjectAdapterManager
     /**
      * Factory method for a Document Manager.
      *
-     * @param \Doctrine\ODM\PHPCR\DocumentManager $dm
-     * @param \Doctrine\Common\Persistence\ObjectManager $em
+     * @param DocumentManager $dm
+     * @param ObjectManager $em
      * @param Configuration $configuration
      * @param EventManager $evm
      *
@@ -143,5 +144,29 @@ class ObjectAdapterManager
         return $this->em;
     }
 
+    /**
+     * This method makes the decision for the right manager depending
+     * on the type of mapping.
+     *
+     * @param object $object
+     * @return ObjectManager|DocumentManager
+     * @throws Exception\MappingException
+     */
+    public function getManager($object)
+    {
+        $classMetdata = $this->getClassMetadata($object);
+        $referencedObjectMapping = $classMetdata->getReferencedObjects();
+        if (count($referencedObjectMapping) < 1) {
+            throw new MappingException('There must be one at least one referenced object.');
+        }
 
+        $reference = array_shift($referencedObjectMapping);
+        if ('reference-document' !== $reference['type'] && 'reference-object' !== $reference['type']) {
+            throw new MappingException(
+                sprintf('Reference type %s not supported by adapter manager.', $reference['type'])
+            );
+        }
+
+        return 'reference-document' == $reference['type'] ? $this->getDocumentManager() : $this->getObjectManager();
+    }
 }
