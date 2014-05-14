@@ -14,6 +14,7 @@ use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\ODMAdapter\Reference;
 
 class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -52,7 +53,12 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
-        $this->objectAdapterManager = ObjectAdapterManager::create($this->documentManager, $this->objectManager);
+        $this->objectAdapterManager = ObjectAdapterManager::create(
+            array(
+                Reference::PHPCR    => $this->documentManager,
+                Reference::DBAL_ORM => $this->objectManager
+            )
+        );
     }
 
     public function testNotMappedThrowsException()
