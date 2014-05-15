@@ -118,7 +118,7 @@ class ClassMetadata implements CommonClassMetadata
         $this->reflectionClass = $reflectionService->getClass($this->className);
         $this->namespace = $reflectionService->getClassNamespace($this->className);
         $fieldNames = $this->getFieldNames();
-        foreach ($fieldNames as $fieldName) {
+        foreach ($fieldNames as $fieldName => $mapping) {
             $reflectionField = isset($this->mappings[$fieldName]['declared'])
                 ? new ReflectionProperty($this->mappings[$fieldName]['declared'], $fieldName)
                 : $this->reflectionClass->getProperty($fieldName)
@@ -516,7 +516,7 @@ class ClassMetadata implements CommonClassMetadata
         $referecnedObjects = $this->getReferencedObjects();
         if (count($referecnedObjects) !== 0) {
             foreach ($referecnedObjects as $object) {
-                $fields[] = $object['fieldName'];
+                $fields[$object['fieldName']] = $object;
             }
         }
 

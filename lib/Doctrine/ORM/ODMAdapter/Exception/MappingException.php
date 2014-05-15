@@ -60,4 +60,9 @@ class MappingException extends \Exception
     {
         return new self("Class '$className' is not mapped to a document");
     }
-} 
+
+    public static function classIsNotAValidDocument($className)
+    {
+        return new self("Class '$className' is not a valid object adapter.");
+    }
+}

@@ -23,8 +23,8 @@
  * Including this file is no longer needed, as each annotation is now in its
  * own file, supporting PSR-0 compatible autoloading.
  *
- * The file is kept for backwards compatibility and will be removed in a future
- * version of phpcr-odm.
  */
 
-require_once __DIR__ . '/DocumentAdapter.php';
+require_once __DIR__ . '/ObjectAdapter.php';
+require_once __DIR__ . '/ReferencePhpcr.php';
+require_once __DIR__ . '/CommonField.php';

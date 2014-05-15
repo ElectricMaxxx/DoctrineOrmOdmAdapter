@@ -26,4 +26,3 @@ class XmlDriverTest extends AbstractMappingDriverTest {
         return $this->loadDriver();
     }
 }
- 

@@ -1,14 +1,14 @@
 <?php
 
-
 namespace Doctrine\ORM\ODMAdapter\Mapping\Annotations;
 
 use Doctrine\Common\Annotations\Annotation;
 
 /**
  * @Annotation
- * @Target("CLASS")
+ * @Target("PROPERTY")
  */
-final class DocumentAdapter {
+final class ReferencePhpcr extends Reference
+{
 
-} 
+}

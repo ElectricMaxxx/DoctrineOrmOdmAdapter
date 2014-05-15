@@ -8,7 +8,6 @@ use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\Common\Persistence\Mapping\MappingException as DoctrineMappingException;
 use Doctrine\ORM\ODMAdapter\Reference;
-use DOMElement;
 use SimpleXMLElement;
 
 class XmlDriver extends FileDriver{
@@ -82,7 +81,7 @@ class XmlDriver extends FileDriver{
 
         // not supported types won't be parsed
         if ($rootElement instanceof \SimpleXMLElement) {
-            $this->extractReferencedDocuments($rootElement, $class, $className, $mapping);
+            $this->extractReferencedObjects($rootElement, $class, $className, $mapping);
         }
     }
 
@@ -90,9 +89,9 @@ class XmlDriver extends FileDriver{
      * @param SimpleXMLElement $xmlRoot
      * @param \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata|ClassMetadata $class
      * @param $className
-     * @param $targetDocumentField
+     * @param $targetReferencedObjectField
      */
-    protected function extractCommonFields(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className, $targetDocumentField)
+    protected function extractCommonFields(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className, $targetReferencedObjectField)
     {
         if (!isset($xmlRoot->{'common-field'})) {
             return;
@@ -105,7 +104,7 @@ class XmlDriver extends FileDriver{
                 $mapping[$key] = (string)$value;
             }
 
-            $mapping['target-field'] = $targetDocumentField;
+            $mapping['target-field'] = $targetReferencedObjectField;
 
             $class->mapCommonField($mapping);
         }
@@ -118,7 +117,7 @@ class XmlDriver extends FileDriver{
      * @param array  $mapping
      * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      */
-    protected function extractReferencedDocuments(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className, $mapping)
+    protected function extractReferencedObjects(SimpleXMLElement $xmlRoot, ClassMetadata $class, $className, $mapping)
     {
         $referenceAttributes = $xmlRoot->attributes();
         foreach ($referenceAttributes as $key => $value) {

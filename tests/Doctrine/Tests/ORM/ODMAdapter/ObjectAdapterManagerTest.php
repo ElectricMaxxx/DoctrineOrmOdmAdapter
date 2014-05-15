@@ -9,7 +9,8 @@ use Doctrine\ORM\ODMAdapter\Reference;
 use Doctrine\Tests\ODM\PHPCR\Mapping\Model\DefaultMappingObject;
 use Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject;
 
-class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase {
+class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
+{
 
     private $documentManager;
     private $objectManager;

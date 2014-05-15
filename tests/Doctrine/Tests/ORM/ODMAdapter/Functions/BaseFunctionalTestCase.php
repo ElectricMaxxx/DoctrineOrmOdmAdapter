@@ -92,5 +92,4 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
         }
         $this->sessions = array();
     }
-
 }

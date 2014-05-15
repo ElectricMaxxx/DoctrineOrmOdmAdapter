@@ -3,18 +3,14 @@
 
 namespace Doctrine\Tests\ORM\ODMAdapter\Mapping;
 
-
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\Common\EventArgs;
-use Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs;
 use Doctrine\Common\Persistence\Mapping\Driver\PHPDriver;
 use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
-use Doctrine\ORM\ODMAdapter\Reference;
 
 class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -117,7 +113,7 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $evm = $this->objectAdapterManager->getEventManager();
         $evm->addEventListener(array(Event::loadClassMetadata), $listener);
 
-        $meta = $this->getMetadataFor('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\DefaultMappingObject');
+        $meta = $this->getMetadataFor('Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject');
         $this->assertTrue($listener->called);
         $this->assertSame($this->objectAdapterManager, $listener->oma);
         $this->assertSame($meta, $listener->meta);
