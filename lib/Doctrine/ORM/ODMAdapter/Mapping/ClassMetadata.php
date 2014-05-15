@@ -78,7 +78,7 @@ class ClassMetadata implements CommonClassMetadata
      *
      * @var array
      */
-    public $referencedObjects;
+    public $referencedObjects = array();
 
     protected $prototype;
 
