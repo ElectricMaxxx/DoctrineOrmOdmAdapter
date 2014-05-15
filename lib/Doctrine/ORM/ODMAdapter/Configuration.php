@@ -34,6 +34,10 @@ class Configuration
         'objectClassMapper'        => null,
         'proxyNamespace'           => 'MyPHPCRProxyNS',
         'autoGenerateProxyClasses' => true,
+        'defaultObjectManagerServices' => array(
+            Reference::DBAL_ORM => 'doctrine.orm.entity_manager',
+            Reference::PHPCR    => 'doctrine_phpcr.odm.default_document_manager',
+        )
     );
 
     /**
@@ -315,4 +319,26 @@ class Configuration
             }
             ;
     }
-} 
+
+    public function getDefaultManagerServices()
+    {
+        return $this->attributes['defaultObjectManagerServices'];
+    }
+
+    public function setDefaultManagerServices($services)
+    {
+        $this->attributes['defaultObjectManagerServices'] = array();
+        $possibleReferenceTypes = array(Reference::PHPCR, Reference::DBAL_ORM);
+
+        foreach ($services as $referenceType => $serviceId) {
+            if (!in_array($referenceType, $possibleReferenceTypes)) {
+                throw new ConfigurationException(
+                    sprintf('Not allowed to set a manager service with reference type %s', $referenceType)
+                );
+            }
+
+            $this->attributes['defaultObjectManagerServices'][$referenceType] = $serviceId;
+
+        }
+    }
+}

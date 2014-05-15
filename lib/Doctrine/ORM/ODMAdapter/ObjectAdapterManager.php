@@ -9,6 +9,7 @@ use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Exception\ObjectAdapterMangerException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * The ObjectAdapterManager will combine persistence operation
@@ -39,28 +40,33 @@ class ObjectAdapterManager
      * @var UnitOfWork
      */
     protected $unitOfWork;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * Both managers needs to be injected in service definition.
      *
      * @todo inject the manager as an collection
-     * @param array $manager
+     * @param ContainerInterface $container
      * @param Configuration $config
      * @param EventManager $evm
+     * @internal param array $manager
      * @internal param \Doctrine\ODM\PHPCR\DocumentManager $dm
      * @internal param \Doctrine\Common\Persistence\ObjectManager $em
      */
-    public function __construct(array $manager, Configuration $config = null, EventManager $evm = null)
+    public function __construct(ContainerInterface $container, Configuration $config = null, EventManager $evm = null)
     {
         $this->configuration = $config?: new Configuration();
         $this->eventManager = $evm ?: new EventManager();
-
+        $this->container = $container;
         $classMetadataFactoryClass = $this->configuration->getClassMetadataFactoryName();
         $this->classMetdataFactory = new $classMetadataFactoryClass($this);
 
         $this->unitOfWork = new UnitOfWork($this);
 
-        $this->insertManager($manager);
+        $this->setupMangerList();
     }
 
     /**
@@ -68,31 +74,35 @@ class ObjectAdapterManager
      *
      * Mangers with right type will be stored in an array to use them.
      *
-     * @param array $managers
      */
-    private function insertManager(array $managers)
+    private function setupMangerList()
     {
         $referenceTypes = array(Reference::DBAL_ORM, Reference::PHPCR);
-        foreach ($managers as $referenceType => $manager) {
+        $managers = $this->configuration->getDefaultManagerServices();
+        foreach ($managers as $referenceType => $managerServiceId) {
             if (!in_array($referenceType, $referenceTypes)) {
                 continue;
             }
 
-            $this->manager[$referenceType] = $manager;
+            if (!$this->container->has($managerServiceId)) {
+                continue;
+            }
+
+            $this->manager[$referenceType] = $this->container->get($managerServiceId);
         }
     }
 
     /**
      * Factory method for a Document Manager.
      *
-     * @param array $managers
+     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      * @param Configuration $configuration
      * @param EventManager $evm
      * @return ObjectAdapterManager
      */
-    public static function create(array $managers, Configuration $configuration = null, EventManager $evm = null)
+    public static function create(ContainerInterface $container, Configuration $configuration = null, EventManager $evm = null)
     {
-        return new self($managers, $configuration, $evm);
+        return new self($container, $configuration, $evm);
     }
 
     public function bindDocument($object)

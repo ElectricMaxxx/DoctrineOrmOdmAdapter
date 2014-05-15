@@ -22,6 +22,7 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase {
     private $objectAdapterManager;
 
     private $classMetadataFactory;
+    private $container;
 
     public function setUp()
     {
@@ -50,11 +51,29 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase {
         $configuration->expects($this->once())
                       ->method('getClassMetadataFactoryName')
                       ->will($this->returnValue(get_class($this->classMetadataFactory)));
-
-        $this->objectAdapterManager = new ObjectAdapterManager(
-            array(Reference::PHPCR => $this->documentManager, Reference::DBAL_ORM => $this->objectManager),
-            $configuration
-        );
+        $configuration->expects($this->any())
+                      ->method('getDefaultManagerServices')
+                      ->will($this->returnValue(
+                          array(
+                                Reference::DBAL_ORM => 'doctrine.orm.entity_manager',
+                                Reference::PHPCR    => 'doctrine_phpcr.odm.default_document_manager',
+                          )
+                      ));
+        $this->container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerInterface')
+                                ->disableOriginalConstructor()
+                                ->getMock();
+        $this->container->expects($this->any())->method('has')->will($this->returnValue(true));
+        $this->container->expects($this->any())
+                        ->method('get')
+                        ->with($this->logicalOr(
+                            $this->equalTo('doctrine.orm.entity_manager'),
+                            $this->equalTo('doctrine_phpcr.odm.default_document_manager')
+                        ))
+                        ->will($this->returnCallback(function ($value) {
+                            return 'doctrine.orm.entity_manager' == $value
+                                ? $this->objectManager : $this->documentManager;
+                        }));
+        $this->objectAdapterManager = new ObjectAdapterManager($this->container, $configuration);
     }
 
     public function testGetManagerByType()
