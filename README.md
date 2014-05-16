@@ -1,6 +1,8 @@
 What the hell is he doing here?
 -------------------------------
 
+[![Build Status](https://secure.travis-ci.org/ElectricMaxxx/DoctrineOrmOdmAdapter.png)](http://travis-ci.org/ElectricMaxxx/DoctrineOrmOdmAdapter)
+
 I realized in a client project that there are use cases to reference documents
 (i.e. from phpcr-odm) on an entity (ORM). The reference is done by the document's
 uuid. So i started with implementing an listener, that handles the loading, persisting
