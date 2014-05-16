@@ -20,12 +20,12 @@ Current state:
  * [x] ClassMetadata + Test
  * [x] ClassMetadataFactory + Test
  * [x] XmlDriver + Test
- * [ ] AnnotationDriver + Test
+ * [x] AnnotationDriver + Test
  * [ ] YmDriver + Test
- * [ ] DocumentAdapter + Test
- * [ ] Kind of UnitOfWork for handling hard work
+ * [x] DocumentAdapter + Test
+ * [x] Kind of UnitOfWork for handling hard work
  * [ ] implement the lifecycle events
- * [ ] Bundle to use that library
+ * [x] Bundle to use that library
 
  Usage
  -----
