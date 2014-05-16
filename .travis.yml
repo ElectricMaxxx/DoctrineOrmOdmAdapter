@@ -8,7 +8,7 @@ php:
 
 before_script:
   - composer self-update
-  - ./tests/travis_${TRANSPORT}.sh
+  - ./tests/travis_doctrine_dbal.sh
 
 script: phpunit -c tests/phpunit_doctrine_dbal.xml.dist
 
