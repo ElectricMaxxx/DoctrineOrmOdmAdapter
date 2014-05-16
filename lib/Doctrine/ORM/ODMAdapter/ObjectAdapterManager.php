@@ -105,17 +105,17 @@ class ObjectAdapterManager
         return new self($container, $configuration, $evm);
     }
 
-    public function bindDocument($object)
+    public function persistReference($object)
     {
-        // todo implement that
+        $this->unitOfWork->persist($object);
     }
 
-    public function updateBoundDocument($object)
+    public function removeReferencce($object)
     {
-        // todo implement that
+        $this->unitOfWork->removeReferencedObject($object);
     }
 
-    public function removeDocument($object)
+    public function findReference($object)
     {
 
     }
@@ -130,27 +130,11 @@ class ObjectAdapterManager
     }
 
     /**
-     * @param Configuration $config
-     */
-    public function setConfiguration($config)
-    {
-        $this->configuration = $config;
-    }
-
-    /**
      * @return Configuration
      */
     public function getConfiguration()
     {
         return $this->configuration;
-    }
-
-    /**
-     * @param EventManager $eventManager
-     */
-    public function setEventManager($eventManager)
-    {
-        $this->eventManager = $eventManager;
     }
 
     /**
