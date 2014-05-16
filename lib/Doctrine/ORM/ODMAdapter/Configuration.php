@@ -37,7 +37,8 @@ class Configuration
         'defaultObjectManagerServices' => array(
             Reference::DBAL_ORM => 'doctrine.orm.entity_manager',
             Reference::PHPCR    => 'doctrine_phpcr.odm.default_document_manager',
-        )
+        ),
+        'objectNamespaces' => array(),
     );
 
     /**
