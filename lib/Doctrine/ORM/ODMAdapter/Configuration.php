@@ -109,13 +109,22 @@ class Configuration
     }
 
     /**
-     * Set the object alias map
+     * Set the object alias map.
      *
      * @param array $objectNamespaces
      */
     public function setObjectNamespaces(array $objectNamespaces)
     {
         $this->attributes['objectNamespaces'] = $objectNamespaces;
+    }
+
+    /**
+     * Return the object alias map.
+     * @return array
+     */
+    public function getObjectNamespaces()
+    {
+        return $this->attributes['objectNamespaces'];
     }
 
     /**

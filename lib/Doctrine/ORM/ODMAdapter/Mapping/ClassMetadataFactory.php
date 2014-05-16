@@ -25,7 +25,7 @@ use Doctrine\ORM\ODMAdapter\Exception\MappingException;
  * @author      Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author      Maximilian Berghoff <maximilian.berghoff@gmx.de>
  */
-class ClassMetadataFactory extends AbstractClassMetadataFactory
+    class ClassMetadataFactory extends AbstractClassMetadataFactory
 {
     /**
      * {@inheritdoc}
