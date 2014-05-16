@@ -156,7 +156,7 @@ class ObjectAdapterManager
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        $manager = in_array($type, $this->manager) ? $this->manager[$type] : null;
+        $manager = array_key_exists($type, $this->manager) ? $this->manager[$type] : null;
 
         if (null === $manager) {
             throw new MappingException(sprintf('No manager found for mapped reference type %s', $type));
