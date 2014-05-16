@@ -50,21 +50,9 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
-        $this->container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerInterface')
-                                ->disableOriginalConstructor()
-                                ->getMock();
-        $this->container->expects($this->any())->method('has')->will($this->returnValue(true));
-        $this->container->expects($this->any())
-                        ->method('get')
-                        ->with($this->logicalOr(
-                            $this->equalTo('doctrine.orm.entity_manager'),
-                            $this->equalTo('doctrine_phpcr.odm.default_document_manager')
-                        ))
-                        ->will($this->returnCallback(function ($value) {
-                            return 'doctrine.orm.entity_manager' == $value ? $this->objectManager : $this->documentManager;
-                        }));
 
-        $this->objectAdapterManager = ObjectAdapterManager::create($this->container);
+
+        $this->objectAdapterManager = ObjectAdapterManager::create();
     }
 
     public function testNotMappedThrowsException()

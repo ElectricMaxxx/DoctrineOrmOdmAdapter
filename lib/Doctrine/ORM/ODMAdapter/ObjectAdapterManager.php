@@ -56,11 +56,10 @@ class ObjectAdapterManager
      * @internal param \Doctrine\ODM\PHPCR\DocumentManager $dm
      * @internal param \Doctrine\Common\Persistence\ObjectManager $em
      */
-    public function __construct(ContainerInterface $container, Configuration $config = null, EventManager $evm = null)
+    public function __construct(Configuration $config = null, EventManager $evm = null)
     {
         $this->configuration = $config?: new Configuration();
         $this->eventManager = $evm ?: new EventManager();
-        $this->container = $container;
         $classMetadataFactoryClass = $this->configuration->getClassMetadataFactoryName();
         $this->classMetdataFactory = new $classMetadataFactoryClass($this);
 
@@ -79,30 +78,25 @@ class ObjectAdapterManager
     {
         $referenceTypes = array(Reference::DBAL_ORM, Reference::PHPCR);
         $managers = $this->configuration->getDefaultManagerServices();
-        foreach ($managers as $referenceType => $managerServiceId) {
+        foreach ($managers as $referenceType => $manager) {
             if (!in_array($referenceType, $referenceTypes)) {
                 continue;
             }
 
-            if (!$this->container->has($managerServiceId)) {
-                continue;
-            }
-
-            $this->manager[$referenceType] = $this->container->get($managerServiceId);
+            $this->manager[$referenceType] = $manager;
         }
     }
 
     /**
      * Factory method for a Document Manager.
      *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      * @param Configuration $configuration
      * @param EventManager $evm
      * @return ObjectAdapterManager
      */
-    public static function create(ContainerInterface $container, Configuration $configuration = null, EventManager $evm = null)
+    public static function create(Configuration $configuration = null, EventManager $evm = null)
     {
-        return new self($container, $configuration, $evm);
+        return new self($configuration, $evm);
     }
 
     public function persistReference($object)

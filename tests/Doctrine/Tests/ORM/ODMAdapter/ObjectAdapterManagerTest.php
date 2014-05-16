@@ -56,25 +56,12 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
                       ->method('getDefaultManagerServices')
                       ->will($this->returnValue(
                           array(
-                                Reference::DBAL_ORM => 'doctrine.orm.entity_manager',
-                                Reference::PHPCR    => 'doctrine_phpcr.odm.default_document_manager',
+                                Reference::DBAL_ORM => $this->objectManager,
+                                Reference::PHPCR    => $this->documentManager,
                           )
                       ));
-        $this->container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerInterface')
-                                ->disableOriginalConstructor()
-                                ->getMock();
-        $this->container->expects($this->any())->method('has')->will($this->returnValue(true));
-        $this->container->expects($this->any())
-                        ->method('get')
-                        ->with($this->logicalOr(
-                            $this->equalTo('doctrine.orm.entity_manager'),
-                            $this->equalTo('doctrine_phpcr.odm.default_document_manager')
-                        ))
-                        ->will($this->returnCallback(function ($value) {
-                            return 'doctrine.orm.entity_manager' == $value
-                                ? $this->objectManager : $this->documentManager;
-                        }));
-        $this->objectAdapterManager = new ObjectAdapterManager($this->container, $configuration);
+
+        $this->objectAdapterManager = new ObjectAdapterManager($configuration);
     }
 
     public function testGetManagerByType()
