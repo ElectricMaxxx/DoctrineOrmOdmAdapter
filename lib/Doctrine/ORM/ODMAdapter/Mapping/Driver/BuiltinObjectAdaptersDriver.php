@@ -44,7 +44,7 @@ class BuiltinObjectAdaptersDriver implements MappingDriver
         $this->wrappedDriver = $wrappedDriver;
 
         $reader = new AnnotationReader();
-        $this->builtinDriver = new AnnotationDriver($reader, array(realpath(__DIR__.'/../../Document')));
+        $this->builtinDriver = new AnnotationDriver($reader, array(realpath(__DIR__.'/../../Object')));
     }
 
     /**
