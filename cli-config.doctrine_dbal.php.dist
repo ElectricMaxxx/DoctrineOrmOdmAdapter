@@ -11,7 +11,10 @@ $extraCommands = array();
 $extraCommands[] = new \Jackalope\Tools\Console\Command\InitDoctrineDbalCommand();
 
 $params = array(
-    'driver'    => 'pdo_sqlite',
+    'driver'    => 'pdo_mysql',
+    'host'      => 'localhost',
+    'user'      => 'root',
+    'password'  => '',
     'dbname'    => 'phpcr_odm_tests',
 );
 
