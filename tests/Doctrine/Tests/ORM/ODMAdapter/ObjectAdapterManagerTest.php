@@ -4,6 +4,7 @@
 namespace Doctrine\Tests\ORM\ODMAdapter;
 
 
+use Doctrine\ORM\ODMAdapter\Configuration;
 use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Reference;
 use Doctrine\Tests\ODM\PHPCR\Mapping\Model\DefaultMappingObject;
@@ -43,24 +44,15 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
         $configuration = $this->getMockBuilder('Doctrine\ORM\ODMAdapter\Configuration')
                               ->disableOriginalConstructor()
                               ->getMock();
-        $this->classMetadataFactory = $this->getMockBuilder('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory')
-                                           ->disableOriginalConstructor()
-                                           ->getMock();
-        $this->classMetadataFactory->expects($this->any())
-                                   ->method('getMetadataFor')
-                                   ->will($this->returnValue($this->classMetadata));
-        $configuration->expects($this->once())
-                      ->method('getClassMetadataFactoryName')
-                      ->will($this->returnValue(get_class($this->classMetadataFactory)));
-        $configuration->expects($this->any())
-                      ->method('getDefaultManagerServices')
-                      ->will($this->returnValue(
-                          array(
-                                Reference::DBAL_ORM => $this->objectManager,
-                                Reference::PHPCR    => $this->documentManager,
-                          )
-                      ));
 
+        $configuration = new Configuration();
+        $configuration->setDefaultManagerServices(
+            array(
+                Reference::DBAL_ORM => $this->objectManager,
+                Reference::PHPCR    => $this->documentManager,
+            )
+        );
+        $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
         $this->objectAdapterManager = new ObjectAdapterManager($configuration);
     }
 
@@ -72,9 +64,19 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Doctrine\ORM\ODMAdapter\Exception\ObjectAdapterMangerException
+     * @expectedExceptionMessage Can not find a manager for reference type some-type
      */
     public function testGetMangerByTypeThrowsException()
     {
         $this->objectAdapterManager->getManagerByType('some-type');
+    }
+
+    /**
+     * @expectedException \Doctrine\ORM\ODMAdapter\Exception\MappingException
+     * @expectedExceptionMessage No reference mapping on stdClass
+     */
+    public function testGetManagerObjectWithoutTypeThrowsException()
+    {
+        $this->objectAdapterManager->getManager(new \stdClass(), 'test-field');
     }
 }

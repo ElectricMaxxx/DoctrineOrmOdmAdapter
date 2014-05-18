@@ -83,13 +83,10 @@ class ClassMetadata implements CommonClassMetadata
     protected $prototype;
 
     /**
-     * The object's type can only be one of
-     * - reference-phpcr
-     * - reference-dbal-orm
-     *
+     * List of referenced types sorted by its field names they are referenced for.
      * @var string
      */
-    protected $referenceType;
+    protected $referencedTypes = array();
 
     public function __construct($className)
     {
@@ -364,7 +361,7 @@ class ClassMetadata implements CommonClassMetadata
         $this->mapCommonField($commonFieldMapping);
 
         // create the type by fieldName mapping
-        $this->referenceType[$mapping['fieldName']]  = $mapping['type'];
+        $this->referencedTypes[$mapping['fieldName']]  = $mapping['type'];
     }
 
     /**
@@ -686,10 +683,10 @@ class ClassMetadata implements CommonClassMetadata
      * @param $fieldName
      * @return string
      */
-    public function getReferenceType($fieldName)
+    public function getReferencedType($fieldName)
     {
-        if (array_key_exists($fieldName, $this->referenceType)) {
-            return $this->referenceType[$fieldName];
+        if (array_key_exists($fieldName, $this->referencedTypes)) {
+            return $this->referencedTypes[$fieldName];
         }
     }
 }

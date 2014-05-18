@@ -151,7 +151,7 @@ class ObjectAdapterManager
     public function getManager($object, $fieldName)
     {
         $classMetdata = $this->getClassMetadata(get_class($object));
-        $type = $classMetdata->getReferenceType($fieldName);
+        $type = $classMetdata->getReferencedType($fieldName);
         if (!$type) {
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }

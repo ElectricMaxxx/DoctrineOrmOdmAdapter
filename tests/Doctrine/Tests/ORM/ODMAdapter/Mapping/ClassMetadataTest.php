@@ -164,7 +164,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
      */
     public function testMapedReferenceType(ClassMetadata $cm)
     {
-        $this->assertEquals(Reference::PHPCR, $cm->getReferenceType('referencedField'));
+        $this->assertEquals(Reference::PHPCR, $cm->getReferencedType('referencedField'));
     }
 
     /**
