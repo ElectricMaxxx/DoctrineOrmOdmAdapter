@@ -6,11 +6,13 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\PHPDriver;
+use Doctrine\ORM\ODMAdapter\Configuration;
 use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\ODMAdapter\Reference;
 
 class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,7 +24,8 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
      * @var ObjectAdapterManager
      */
     private $objectAdapterManager;
-    private $container;
+
+    private $configuration;
 
     /**
      * @param $fqn
@@ -50,9 +53,13 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
         $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
+        $this->configuration = new Configuration();
+        $this->configuration->setDefaultManagerServices(array(
+            Reference::PHPCR => $this->documentManager,
+            Reference::DBAL_ORM => $this->objectManager,
+        ));
 
-
-        $this->objectAdapterManager = ObjectAdapterManager::create();
+        $this->objectAdapterManager = ObjectAdapterManager::create($this->configuration);
     }
 
     public function testNotMappedThrowsException()
