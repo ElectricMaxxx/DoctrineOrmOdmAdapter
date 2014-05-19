@@ -316,7 +316,7 @@ class UnitOfWork
 
             $referencedObject = $this->objectAdapterManager
                                      ->getManager($object, $fieldName)
-                                     ->find($reference['target-object'], $objectValue);
+                                     ->getReference($reference['target-object'], $objectValue);
 
             $objectProperty = $objectReflection->getProperty($fieldName);
             $objectProperty->setAccessible(true);

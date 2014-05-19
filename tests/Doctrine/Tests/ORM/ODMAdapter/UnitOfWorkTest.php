@@ -38,7 +38,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->documentManager = $this->getMockBuilder('Doctrine\ODM\PHPCR\DocumentManager')
                                       ->disableOriginalConstructor()
                                       ->getMock();
-        $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
+        $this->objectManager = $this->getMockBuilder('Doctrine\ORM\EntityManager')
                                     ->disableOriginalConstructor()
                                     ->getMock();
         $this->eventManager = $this->getMockBuilder('Doctrine\Common\EventManager')
@@ -359,7 +359,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
         $this->documentManager->expects($this->once())
-                              ->method('find')
+                              ->method('getReference')
                               ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('test-uuid'))
                               ->will($this->returnValue($testReferencedObject));
 
@@ -397,7 +397,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->objectManager));
         $this->objectManager->expects($this->once())
-                              ->method('find')
+                              ->method('getReference')
                               ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('test-id'))
                               ->will($this->returnValue($testReferencedObject));
 

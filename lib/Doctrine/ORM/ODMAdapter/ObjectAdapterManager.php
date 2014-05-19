@@ -24,7 +24,7 @@ class ObjectAdapterManager
     /**
      * @var ClassMetadataFactory
      */
-    protected $classMetdataFactory;
+    protected $classMetadataFactory;
 
     /**
      * @var Configuration
@@ -45,7 +45,7 @@ class ObjectAdapterManager
         $this->configuration = $config?: new Configuration();
         $this->eventManager = $evm ?: new EventManager();
         $classMetadataFactoryClass = $this->configuration->getClassMetadataFactoryName();
-        $this->classMetdataFactory = new $classMetadataFactoryClass($this);
+        $this->classMetadataFactory = new $classMetadataFactoryClass($this);
 
         $this->unitOfWork = new UnitOfWork($this);
     }
@@ -83,7 +83,7 @@ class ObjectAdapterManager
      */
     public function getClassMetadata($className)
     {
-        return $this->classMetdataFactory->getMetadataFor($className);
+        return $this->classMetadataFactory->getMetadataFor($className);
     }
 
     /**
@@ -182,7 +182,7 @@ class ObjectAdapterManager
      */
     public function getMetadataFactory()
     {
-        return $this->classMetdataFactory;
+        return $this->classMetadataFactory;
     }
 
     /**
