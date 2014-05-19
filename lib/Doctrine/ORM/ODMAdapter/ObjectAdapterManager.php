@@ -62,19 +62,35 @@ class ObjectAdapterManager
         return new self($configuration, $evm);
     }
 
+    /**
+     * Will trigger the persist call for the referenced objects on its managers.
+     *
+     * @param $object
+     */
     public function persistReference($object)
     {
         $this->unitOfWork->persist($object);
     }
 
-    public function removeReferencce($object)
+    /**
+     * Will trigger a remove() call for all referenced objects on its managers.
+     *
+     * @param $object
+     */
+    public function removeReference($object)
     {
         $this->unitOfWork->removeReferencedObject($object);
     }
 
+    /**
+     * The referenced objects won't be loaded directly by find() (on the referenced managers),
+     * getReference() will be called to avoid performance issues.
+     *
+     * @param $object
+     */
     public function findReference($object)
     {
-            $this->unitOfWork->loadReferences($object);
+        $this->unitOfWork->loadReferences($object);
     }
 
     /**
@@ -144,37 +160,6 @@ class ObjectAdapterManager
     public function getManagerByType($type)
     {
         return $this->configuration->getRegistryByReferenceType($type);
-    }
-    /**
-     * First persist the referenced object with its own manager an doing
-     * the sync of the common fields.
-     *
-     * @param $object
-     */
-    public function bindReference($object)
-    {
-        $this->unitOfWork->persist($object);
-    }
-
-    /**
-     * To update a referenced object on a given one with syncing the
-     * common fields.
-     *
-     * @param $object
-     */
-    public function updateReference($object)
-    {
-        $this->unitOfWork->persist($object);
-    }
-
-    /**
-     * To remove a referenced object from a given object.
-     *
-     * @param object $object
-     */
-    public function removeReference($object)
-    {
-        $this->unitOfWork->removeReferencedObject($object);
     }
 
     /**
