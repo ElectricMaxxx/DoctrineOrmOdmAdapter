@@ -10,6 +10,7 @@ use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Exception\ObjectAdapterMangerException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\ODMAdapter\Proxy\ProxyFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -73,7 +74,7 @@ class ObjectAdapterManager
 
     public function findReference($object)
     {
-
+            $this->unitOfWork->loadReferences($object);
     }
 
     /**
@@ -174,5 +175,21 @@ class ObjectAdapterManager
     public function removeReference($object)
     {
         $this->unitOfWork->removeReferencedObject($object);
+    }
+
+    /**
+     * @return ClassMetadataFactory
+     */
+    public function getMetadataFactory()
+    {
+        return $this->classMetdataFactory;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUnitOfWork()
+    {
+        return $this->getUnitOfWork();
     }
 }
