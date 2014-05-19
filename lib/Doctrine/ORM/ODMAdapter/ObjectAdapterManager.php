@@ -3,6 +3,7 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
@@ -20,13 +21,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ObjectAdapterManager
 {
     /**
-     * List of all available managers with the reference type as key.
-     *
-     * @var array
-     */
-    protected $manager;
-
-    /**
      * @var ClassMetadataFactory
      */
     protected $classMetdataFactory;
@@ -40,21 +34,10 @@ class ObjectAdapterManager
      * @var UnitOfWork
      */
     protected $unitOfWork;
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
 
     /**
-     * Both managers needs to be injected in service definition.
-     *
-     * @todo inject the manager as an collection
-     * @param ContainerInterface $container
      * @param Configuration $config
      * @param EventManager $evm
-     * @internal param array $manager
-     * @internal param \Doctrine\ODM\PHPCR\DocumentManager $dm
-     * @internal param \Doctrine\Common\Persistence\ObjectManager $em
      */
     public function __construct(Configuration $config = null, EventManager $evm = null)
     {
@@ -64,27 +47,6 @@ class ObjectAdapterManager
         $this->classMetdataFactory = new $classMetadataFactoryClass($this);
 
         $this->unitOfWork = new UnitOfWork($this);
-
-        $this->setupMangerList();
-    }
-
-    /**
-     * Method checks the managers that are injected in constructor.
-     *
-     * Mangers with right type will be stored in an array to use them.
-     *
-     */
-    private function setupMangerList()
-    {
-        $referenceTypes = array(Reference::DBAL_ORM, Reference::PHPCR);
-        $managers = $this->configuration->getDefaultManagerServices();
-        foreach ($managers as $referenceType => $manager) {
-            if (!in_array($referenceType, $referenceTypes)) {
-                continue;
-            }
-
-            $this->manager[$referenceType] = $manager;
-        }
     }
 
     /**
@@ -156,13 +118,21 @@ class ObjectAdapterManager
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        $manager = array_key_exists($type, $this->manager) ? $this->manager[$type] : null;
-
-        if (null === $manager) {
-            throw new MappingException(sprintf('No manager found for mapped reference type %s', $type));
+        /** @var ManagerRegistry $registry */
+        $registry = $this->configuration->getRegistryByReferenceType($type);
+        if (!$registry) {
+            throw new MappingException(sprintf('No registry found for mapped reference type %s', $type));
         }
 
-        return $manager;
+        // try to get the manager of a persisted object
+        if ($manager = $registry->getManagerForClass(get_class($object))) {
+            print("Class: ".get_class($manager)."\n");
+            return $manager;
+        }
+
+        // return default instead
+        // todo implement a manager mapping
+        return $registry->getManager('default');
     }
 
     /**
@@ -172,11 +142,7 @@ class ObjectAdapterManager
      */
     public function getManagerByType($type)
     {
-        if (!array_key_exists($type, $this->manager)) {
-            throw new ObjectAdapterMangerException('Can not find a manager for reference type '.$type);
-        }
-
-        return $this->manager[$type];
+        return $this->configuration->getRegistryByReferenceType($type);
     }
     /**
      * First persist the referenced object with its own manager an doing

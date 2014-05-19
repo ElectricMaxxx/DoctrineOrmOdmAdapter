@@ -4,6 +4,7 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\ORM\ODMAdapter\Exception\ConfigurationException;
 use Doctrine\ORM\ODMAdapter\Mapping\Driver\BuiltinObjectAdaptersDriver;
@@ -32,14 +33,15 @@ class Configuration
         'metadataDriverImpl'       => null,
         'metadataCacheImpl'        => null,
         'objectClassMapper'        => null,
-        'proxyNamespace'           => 'MyPHPCRProxyNS',
+        'proxyNamespace'           => 'DoctrineORMODMAdapter',
         'autoGenerateProxyClasses' => true,
-        'defaultObjectManagerServices' => array(
-            Reference::DBAL_ORM => 'doctrine.orm.entity_manager',
-            Reference::PHPCR    => 'doctrine_phpcr.odm.default_document_manager',
-        ),
         'objectNamespaces' => array(),
     );
+
+    /**
+     * @var array|ManagerRegistry
+     */
+    private $registries = array();
 
     /**
      * Sets if all object adapter metadata should be validated on read
@@ -261,7 +263,7 @@ class Configuration
      */
     public function getClassMetadataFactoryName()
     {
-        if ( ! isset($this->attributes['classMetadataFactoryName'])) {
+        if (!isset($this->attributes['classMetadataFactoryName'])) {
             $this->attributes['classMetadataFactoryName'] = 'Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory';
         }
 
@@ -282,7 +284,7 @@ class Configuration
     {
         $reflectionClass = new \ReflectionClass($className);
 
-        if ( ! $reflectionClass->implementsInterface('Doctrine\Common\Persistence\ObjectRepository')) {
+        if (!$reflectionClass->implementsInterface('Doctrine\Common\Persistence\ObjectRepository')) {
             throw ConfigurationException::invalidObjectRepository($className);
         }
 
@@ -330,25 +332,45 @@ class Configuration
             ;
     }
 
-    public function getDefaultManagerServices()
+    public function getRegistries()
     {
-        return $this->attributes['defaultObjectManagerServices'];
+        return $this->registries;
     }
 
-    public function setDefaultManagerServices($services)
+    public function setRegistries($registries)
     {
-        $this->attributes['defaultObjectManagerServices'] = array();
+        $this->registries = array();
         $possibleReferenceTypes = array(Reference::PHPCR, Reference::DBAL_ORM);
 
-        foreach ($services as $referenceType => $serviceId) {
+        foreach ($registries as $referenceType => $registry) {
             if (!in_array($referenceType, $possibleReferenceTypes)) {
                 throw new ConfigurationException(
-                    sprintf('Not allowed to set a manager service with reference type %s', $referenceType)
+                    sprintf(
+                        'Not allowed to set a registry %s with reference type %s. Allowed reference types are: %s',
+                        get_class($registry),
+                        $referenceType,
+                        implode(', ', $possibleReferenceTypes)
+                    )
                 );
             }
 
-            $this->attributes['defaultObjectManagerServices'][$referenceType] = $serviceId;
-
+            $this->registries[$referenceType] = $registry;
         }
+    }
+
+    /**
+     * Return the registry for a specific reference type.
+     *
+     * @param $type
+     * @throws Exception\ConfigurationException
+     * @return ManagerRegistry
+     */
+    public function getRegistryByReferenceType($type)
+    {
+        if (array_key_exists($type, $this->registries)) {
+            return $this->registries[$type];
+        }
+
+        throw new ConfigurationException(sprintf('No registry found for type %s.', $type));
     }
 }
