@@ -392,9 +392,26 @@ class UnitOfWork
 
     /**
      * Will commit all scheduled stuff.
+     *
+     * @todo add the events for that
      */
     public function commit()
     {
+        // todo put a preFlushReferences event in here
+
+        if ($this->referenceInserts) {
+            $this->executeInsert();
+        }
+
+        if ($this->referenceUpdates) {
+            $this->executeUpdates();
+        }
+
+        if ($this->referenceDeletions) {
+            $this->executeDeletion();
+        }
+
+        // todo put a postFlushReferences event in here
     }
 
     /**
@@ -482,5 +499,26 @@ class UnitOfWork
     public function getScheduledReferenceRemoves()
     {
         return $this->referenceDeletions;
+    }
+
+    /**
+     * Executes all referenced object deletions, which are referenced by mapped objects.
+     */
+    private function executeDeletion()
+    {
+    }
+
+    /**
+     * Executes all referenced object updates, which are referenced by mapped objects.
+     */
+    private function executeUpdates()
+    {
+    }
+
+    /**
+     * Executes all referenced object inserts, which are referenced by mapped objects.
+     */
+    private function executeInsert()
+    {
     }
 }
