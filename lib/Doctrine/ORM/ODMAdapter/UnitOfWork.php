@@ -34,7 +34,12 @@ class UnitOfWork
     /**
      * An object state, when one or more references arn't set.
      */
-    const STATE_NEW = 2;
+    const OBJECT_STATE_NEW = 2;
+
+    /**
+     * An object state, when it is managed.
+     */
+    const OBJECT_STATE_MANAGED = 4;
 
     /**
      * @var ObjectAdapterManager
@@ -45,6 +50,42 @@ class UnitOfWork
      * @var EventManager
      */
     private $eventManager;
+
+    /**
+     * List of managed or new states for the objects.
+     *
+     * @var array
+     */
+    private $objectState = array();
+
+    /**
+     * List of all referenced objects.
+     *
+     * @var array
+     */
+    private $referencedObjectState = array();
+
+    /**
+     * List of all managed objects with referenced objects to insert.
+     *
+     * @var array
+     */
+    private $referenceInserts = array();
+
+    /**
+     * List of all managed objects with referenced objects to update.
+     *
+     * @var array
+     */
+    private $referenceUpdates = array();
+
+    /**
+     * List of all managed objects which will be remove, so the referenced
+     * objects too.
+     *
+     * @var array
+     */
+    private $referenceDeletions = array();
 
     /**
      * @param ObjectAdapterManager $objectAdapterManager
@@ -76,7 +117,7 @@ class UnitOfWork
             case self::STATE_REFERENCED:    // this object is still managed and got its reference
                 $this->updateReference($object, $classMetadata);
                 break;
-            case self::STATE_NEW:           // complete new reference
+            case self::OBJECT_STATE_NEW:           // complete new reference
                 $this->persistNew($object, $classMetadata);
                 break;
         }
@@ -91,6 +132,8 @@ class UnitOfWork
      */
     private function persistNew($object, $classMetadata)
     {
+        $oid = spl_object_hash($object);
+
         $referencedObjects = $this->extractReferencedObjects($object, $classMetadata);
 
         foreach ($referencedObjects as $fieldName => $referencedObject) {
@@ -117,7 +160,12 @@ class UnitOfWork
             }
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
+
+            $this->objectState[$oid] = self::OBJECT_STATE_MANAGED;
+            $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
         }
+
+        $this->scheduleForInsert($object);
     }
 
     /**
@@ -164,6 +212,8 @@ class UnitOfWork
         $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
         $references = $classMetadata->getReferencedObjects();
 
+        $this->objectState[spl_object_hash($object)] = self::OBJECT_STATE_MANAGED;
+
         $objectReflection = new \ReflectionClass($object);
         foreach ($references as $fieldName => $reference) {
             $objectProperty = $objectReflection->getProperty($fieldName);
@@ -175,7 +225,11 @@ class UnitOfWork
 
             // call the remove method on the right manager
             $this->objectAdapterManager->getManager($object, $fieldName)->remove($referencedObject);
+
+            $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
         }
+
+        $this->scheduleForRemove($object);
     }
 
     /**
@@ -214,6 +268,8 @@ class UnitOfWork
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
         }
+
+        $this->scheduleForUpdate($object);
     }
 
     /**
@@ -241,7 +297,7 @@ class UnitOfWork
             }
         }
 
-        return $matches === 0 ? self::STATE_NEW : self::STATE_REFERENCED;
+        return $matches === 0 ? self::OBJECT_STATE_NEW : self::STATE_REFERENCED;
     }
 
     /**
@@ -332,5 +388,99 @@ class UnitOfWork
                 );
             }
         }
+    }
+
+    /**
+     * Will commit all scheduled stuff.
+     */
+    public function commit()
+    {
+    }
+
+    /**
+     * Checks if the object is still scheduled and will insert it to the list.
+     *
+     * @param $object
+     * @throws Exception\UnitOfWorkException
+     */
+    private function scheduleForInsert($object)
+    {
+        $oid = spl_object_hash($object);
+
+        $this->referencedObjectState[$oid] = self::STATE_REFERENCED;
+
+        if (isset($this->referenceInserts[$oid])) {
+            throw new UnitOfWorkException(
+                sprintf('%s can not be scheduled twice for insert.', get_class($object))
+            );
+        }
+
+        $this->referenceInserts[$oid] = $object;
+    }
+
+    /**
+     * @param $object
+     * @throws Exception\UnitOfWorkException
+     */
+    private function scheduleForUpdate($object)
+    {
+        $oid = spl_object_hash($object);
+
+        if (isset($this->referenceUpdates[$oid])) {
+            throw new UnitOfWorkException(
+                sprintf('%s can not be scheduled twice for updates.', get_class($object))
+            );
+        }
+
+        $this->referenceUpdates[$oid] = $object;
+    }
+
+    /**
+     * Checks whether the object is still on the list and set it onto it.
+     *
+     * @param $object
+     * @throws Exception\UnitOfWorkException
+     */
+    private function scheduleForRemove($object)
+    {
+        $oid = spl_object_hash($object);
+
+        if (isset($this->referenceDeletions[$oid])) {
+            throw new UnitOfWorkException(
+                sprintf('%s can not be scheduled twice for removes.', get_class($object))
+            );
+        }
+
+        $this->referenceDeletions[$oid] = $object;
+    }
+
+    /**
+     * Gets the currently scheduled objects inserts in the UnitOfWork.
+     *
+     * @return array
+     */
+    public function getScheduledReferenceInsertions()
+    {
+        return $this->referenceInserts;
+    }
+
+    /**
+     * Gets the currently scheduled object updates in the UnitOfWork.
+     *
+     * @return array
+     */
+    public function getScheduledReferenceUpdates()
+    {
+        return $this->referenceUpdates;
+    }
+
+    /**
+     * Gets the currently scheduled object deletions in the UnitOfWork.
+     *
+     * @return array
+     */
+    public function getScheduledReferenceRemoves()
+    {
+        return $this->referenceDeletions;
     }
 }

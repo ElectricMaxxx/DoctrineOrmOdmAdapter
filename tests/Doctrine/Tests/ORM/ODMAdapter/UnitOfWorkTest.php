@@ -110,6 +110,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test-uuid', $object->uuid);
         $this->assertEquals('entity name on object', $testReferencedObject->docName);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceRemoves());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceUpdates());
+        $inserts = $this->UoW->getScheduledReferenceInsertions();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testPersistNewInvertedReference()
@@ -162,6 +168,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test-id', $object->objectId);
         $this->assertEquals('name on document', $testReferencedObject->entityName);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceRemoves());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceUpdates());
+        $inserts = $this->UoW->getScheduledReferenceInsertions();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testUpdateReference()
@@ -215,6 +227,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->persist($object);
 
         $this->assertEquals('entity name on object', $testReferencedObject->docName);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceRemoves());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceInsertions());
+        $inserts = $this->UoW->getScheduledReferenceUpdates();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testUpdateInvertedReference()
@@ -267,6 +285,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->persist($object);
 
         $this->assertEquals('name on document', $testReferencedObject->entityName);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceRemoves());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceInsertions());
+        $inserts = $this->UoW->getScheduledReferenceUpdates();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testRemoveReference()
@@ -298,6 +322,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                               ->with($this->equalTo($testReferencedObject));
 
         $this->UoW->removeReferencedObject($object);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceUpdates());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceInsertions());
+        $inserts = $this->UoW->getScheduledReferenceRemoves();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testRemoveInvertedReference()
@@ -328,6 +358,12 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                               ->with($this->equalTo($testReferencedObject));
 
         $this->UoW->removeReferencedObject($object);
+
+        // check setting on scheduled lists
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceUpdates());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferenceInsertions());
+        $inserts = $this->UoW->getScheduledReferenceRemoves();
+        $this->assertEquals($object, $inserts[spl_object_hash($object)]);
     }
 
     public function testLoadReference()

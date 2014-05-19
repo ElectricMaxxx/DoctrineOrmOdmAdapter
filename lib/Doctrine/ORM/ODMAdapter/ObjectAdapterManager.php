@@ -93,6 +93,11 @@ class ObjectAdapterManager
         $this->unitOfWork->loadReferences($object);
     }
 
+    public function flushReference()
+    {
+        $this->unitOfWork->commit();
+    }
+
     /**
      * @param  string        $className
      * @return ClassMetadata
