@@ -6,6 +6,7 @@ namespace Doctrine\ORM\ODMAdapter;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
@@ -294,6 +295,42 @@ class UnitOfWork
                 }
             }
 
+        }
+    }
+
+    /**
+     * Loads a referenced object by its value on inversed-by property of the object holding the reference.
+     *
+     * @param $object
+     */
+    public function loadReferences($object)
+    {
+        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+        $referencedObjects = $classMetadata->getReferencedObjects();
+
+        $objectReflection = new \ReflectionClass($object);
+        foreach ($referencedObjects as $fieldName => $reference) {
+            $objectProperty = $objectReflection->getProperty($reference['inversed-by']);
+            $objectProperty->setAccessible(true);
+            $objectValue = $objectProperty->getValue($object);
+
+            $referencedObject = $this->objectAdapterManager
+                                     ->getManager($object, $fieldName)
+                                     ->find($reference['target-object'], $objectValue);
+
+            $objectProperty = $objectReflection->getProperty($fieldName);
+            $objectProperty->setAccessible(true);
+            $objectProperty->setValue($object, $referencedObject);
+
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postLoadDocument)) {
+                $this->eventListenersInvoker->invoke(
+                    $classMetadata,
+                    Event::postLoadDocument,
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                    $invoke
+                );
+            }
         }
     }
 }

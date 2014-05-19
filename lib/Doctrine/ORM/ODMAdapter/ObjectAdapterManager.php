@@ -74,7 +74,7 @@ class ObjectAdapterManager
 
     public function findReference($object)
     {
-
+            $this->unitOfWork->loadReferences($object);
     }
 
     /**

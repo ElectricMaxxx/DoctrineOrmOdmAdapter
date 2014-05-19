@@ -329,4 +329,80 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->UoW->removeReferencedObject($object);
     }
+
+    public function testLoadReference()
+    {
+        // pre conditions
+        $object = new ReferenceMappingObject();
+        $object->entityName = 'Name on document';
+        $object->uuid = 'test-uuid';
+        $testReferencedObject = new ProductDocument();
+        $object->referencedField = $testReferencedObject;
+        $testReferencedObject->uuid = 'test-uuid';
+        $testReferencedObject->docName = 'Name on document';
+
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+        );
+
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
+        $this->objectAdapterManager->expects($this->once())
+                                   ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                   ->will($this->returnValue($this->documentManager));
+        $this->documentManager->expects($this->once())
+                              ->method('find')
+                              ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('test-uuid'))
+                              ->will($this->returnValue($testReferencedObject));
+
+        $this->UoW->loadReferences($object);
+
+        $this->assertEquals($testReferencedObject, $object->referencedField);
+    }
+
+    public function testLoadInvertedReference()
+    {
+        // pre conditions
+        $object = new InvertedReferenceMappingObject();
+        $object->docName = 'Name on document';
+        $object->objectId = 'test-id';
+        $testReferencedObject = new ProductObject();
+        $object->referencedField = $testReferencedObject;
+        $testReferencedObject->id = 'test-id';
+        $testReferencedObject->entityName = 'Name on document';
+
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'objectId',
+                'referenced-by' => 'id',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+        );
+
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
+        $this->objectAdapterManager->expects($this->once())
+                                   ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                   ->will($this->returnValue($this->objectManager));
+        $this->objectManager->expects($this->once())
+                              ->method('find')
+                              ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('test-id'))
+                              ->will($this->returnValue($testReferencedObject));
+
+        $this->UoW->loadReferences($object);
+
+        $this->assertEquals($testReferencedObject, $object->referencedField);
+    }
 }
