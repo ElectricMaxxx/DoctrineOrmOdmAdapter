@@ -23,6 +23,7 @@ class UnitOfWork
     /**
      * An object state for referenced objects, means when fields for inversed-by
      * mappings are set.
+     *
      */
     const STATE_REFERENCED = 1;
 
@@ -65,7 +66,14 @@ class UnitOfWork
      *
      * @var array
      */
-    private $objects;
+    private $objects = array();
+
+    /**
+     * List of all referenced objects that are handled by this UnitOfWork
+     *
+     * @var array
+     */
+    private $referencedObjects = array();
 
     /**
      * The list of referenced objects contains all of them sorted by the oid
@@ -127,7 +135,7 @@ class UnitOfWork
      */
     private function doPersist($object, ClassMetadata $classMetadata)
     {
-        $objectState = $this->getObjectState($object, $classMetadata);
+        $objectState = $this->getObjectState($object);
 
         switch ($objectState) {
             case self::OBJECT_STATE_MANAGED:    // this object is still managed and got its reference
@@ -297,29 +305,7 @@ class UnitOfWork
     {
         $oid = spl_object_hash($object);
 
-        if (isset($this->objectState[$oid])) {
-            return $this->objectState[$oid];
-        }
-
-        /*
-         * No object state means we need to check if the object got a kind of an identifier
-         * in that case we gonna check if one or more inversed fields are still set.
-         */
-        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
-        $referencedObjectMapping = $classMetadata->getReferencedObjects();
-
-        $matches = 0;
-        foreach ($referencedObjectMapping as $reference) {
-            $objectReflection = new \ReflectionClass($object);
-            $property = $objectReflection->getProperty($reference['inversed-by']);
-            $property->setAccessible(true);
-            $inversedField = $property->getValue($object);
-
-            if (null !== $inversedField) {
-                $matches++;
-            }
-        }
-        return $matches === 0 ? self::OBJECT_STATE_NEW : self::OBJECT_STATE_MANAGED;
+        return isset($this->objectState[$oid]) ? $this->objectState[$oid] : self::OBJECT_STATE_NEW;
     }
 
     /**
@@ -386,6 +372,11 @@ class UnitOfWork
         $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
         $referencedObjects = $classMetadata->getReferencedObjects();
 
+        // add this object to the object map
+        $oid = spl_object_hash($object);
+        $this->objects[$oid] = $object;
+        $this->objectState[$oid] = self::OBJECT_STATE_MANAGED;
+
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjects as $fieldName => $reference) {
             $objectProperty = $objectReflection->getProperty($reference['inversed-by']);
@@ -399,6 +390,11 @@ class UnitOfWork
             $objectProperty = $objectReflection->getProperty($fieldName);
             $objectProperty->setAccessible(true);
             $objectProperty->setValue($object, $referencedObject);
+
+            // add this referenced Object to the map of referenced objects
+            $roid = spl_object_hash($referencedObject);
+            $this->referencedObjects[$roid] = $referencedObject;
+            $this->referencedObjectState[$roid] = self::STATE_REFERENCED;
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
                 $classMetadata,

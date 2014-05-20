@@ -219,7 +219,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 'referenced-by' => 'docName',
                 'inversed-by'   => 'entityName',
                 'target-field'  => 'referencedField',
-                'sync-type'     => 'to-reference',
+                'sync-type'     => 'from-reference',
             ),
         );
         $this->classMetadata->expects($this->any())
@@ -228,29 +228,33 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
-        $this->documentManager->expects($this->once())
+        $this->documentManager->expects($this->any())
                               ->method('persist')
                               ->with($this->equalTo($testReferencedObject));
+        $this->documentManager->expects($this->any())
+                              ->method('getReference')
+                              ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('i am there'))
+                              ->will($this->returnValue($testReferencedObject));
+        $this->UoW->persist($object);
+        $this->UoW->loadReferences($object);
+
+        $updatedReferencedObject = $object->referencedField;
+        $updatedReferencedObject->docName = 'name to update';
 
         $this->UoW->persist($object);
 
-        $this->assertEquals('entity name on object', $testReferencedObject->docName);
+        $this->assertEquals('name to update', $object->entityName);
 
         // check setting on scheduled lists
         $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForUpdate($object, 'referencedField'));
 
-        $expectedReferences = array(
-            spl_object_hash($object) => array(
-                'referencedField' => $testReferencedObject,
-            ),
-        );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForUpdate());
-        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
-        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
+        $this->assertCount(1, $this->UoW->getScheduledReferencesForInsert());
+        $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
+        $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
     }
 
     public function testUpdateInvertedReference()
@@ -282,7 +286,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 'referenced-by' => 'entityName',
                 'inversed-by'   => 'docName',
                 'target-field'  => 'referencedField',
-                'sync-type'     => 'to-reference',
+                'sync-type'     => 'from-reference',
             ),
         );
 
@@ -292,29 +296,33 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->objectManager));
-        $this->objectManager->expects($this->once())
-                            ->method('persist')
-                            ->with($this->equalTo($testReferencedObject));
+        $this->objectManager->expects($this->any())
+                              ->method('persist')
+                              ->with($this->equalTo($testReferencedObject));
+        $this->objectManager->expects($this->any())
+                              ->method('getReference')
+                              ->with($this->equalTo(get_class($testReferencedObject)), $this->equalTo('test-id'))
+                              ->will($this->returnValue($testReferencedObject));
+        $this->UoW->persist($object);
+        $this->UoW->loadReferences($object);
+
+        $updatedReferencedObject = $object->referencedField;
+        $updatedReferencedObject->entityName = 'name to update';
 
         $this->UoW->persist($object);
 
-        $this->assertEquals('name on document', $testReferencedObject->entityName);
+        $this->assertEquals('name to update', $object->docName);
 
         // check setting on scheduled lists
         $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForUpdate($object, 'referencedField'));
 
-        $expectedReferences = array(
-            spl_object_hash($object) => array(
-                'referencedField' => $testReferencedObject,
-            ),
-        );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForUpdate());
-        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
-        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
+        $this->assertCount(1, $this->UoW->getScheduledReferencesForInsert());
+        $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
+        $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
     }
 
     public function testRemoveReference()
