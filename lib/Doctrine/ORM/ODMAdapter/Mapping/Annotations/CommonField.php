@@ -19,4 +19,9 @@ final class CommonField
      * @var string
      */
     public $inversedBy;
+
+    /**
+     * @var string
+     */
+    public $type;
 }
