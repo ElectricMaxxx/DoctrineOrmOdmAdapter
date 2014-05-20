@@ -118,12 +118,15 @@ class UnitOfWork
      */
     public function persist($object)
     {
-        $this->doPersist($object);
+        $this->doPersist($object, $this->objectAdapterManager->getClassMetadata(get_class($object)));
     }
 
-    private function doPersist($object)
+    /**
+     * @param $object
+     * @param Mapping\ClassMetadata $classMetadata
+     */
+    private function doPersist($object, ClassMetadata $classMetadata)
     {
-        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
         $objectState = $this->getObjectState($object, $classMetadata);
 
         switch ($objectState) {
@@ -158,16 +161,6 @@ class UnitOfWork
 
             $manager = $this->objectAdapterManager->getManager($object, $fieldName);
             $manager->persist($referencedObject);
-
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindReference)) {
-                $this->eventListenersInvoker->invoke(
-                    $classMetadata,
-                    Event::postBindReference,
-                    $object,
-                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
-                    $invoke
-                );
-            }
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
 
@@ -267,7 +260,10 @@ class UnitOfWork
     private function updateReference($object, ClassMetadata $classMetadata)
     {
         foreach ($this->extractReferencedObjects($object, $classMetadata) as $fieldName => $referencedObject) {
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preUpdateReference)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                $classMetadata,
+                Event::preUpdateReference
+            )) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
                     Event::preUpdateReference,
@@ -278,16 +274,6 @@ class UnitOfWork
             }
 
             $this->objectAdapterManager->getManager($object, $fieldName)->persist($referencedObject);
-
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postUpdateReference)) {
-                $this->eventListenersInvoker->invoke(
-                    $classMetadata,
-                    Event::postUpdateReference,
-                    $object,
-                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
-                    $invoke
-                );
-            }
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
 
@@ -414,7 +400,10 @@ class UnitOfWork
             $objectProperty->setAccessible(true);
             $objectProperty->setValue($object, $referencedObject);
 
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postLoadReference)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                $classMetadata,
+                Event::postLoadReference
+            )) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
                     Event::postLoadReference,
@@ -431,8 +420,6 @@ class UnitOfWork
      *
      * That means all managers needs to be flushed. So we need to get all
      * referenced objects with its managers
-     *
-     * @todo add the events for that
      */
     public function commit()
     {
@@ -461,6 +448,16 @@ class UnitOfWork
                 Event::postFlushReference,
                 new Event\FlushEventArguments($this->objectAdapterManager)
             );
+        }
+
+        if ($this->insertReferences) {
+            $this->dispatchPostPersist();
+        }
+        if ($this->updateReferences) {
+            $this->dispatchPostUpdate();
+        }
+        if ($this->removeReferences) {
+            $this->dispatchPostRemove();
         }
     }
 
@@ -666,5 +663,98 @@ class UnitOfWork
 
 
         return $managedList;
+    }
+
+    /**
+     * One event will be fired for each referenced object in the list of scheduled objects for inserts.
+     */
+    private function dispatchPostPersist()
+    {
+        foreach ($this->insertReferences as $oid => $fields) {
+            if (!isset($this->objects[$oid])) {
+                continue;
+            }
+
+            $object = $this->objects[$oid];
+            $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+
+            foreach ($fields as $referencedObject) {
+
+                if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                    $classMetadata,
+                    Event::postBindReference
+                )) {
+                    $this->eventListenersInvoker->invoke(
+                        $classMetadata,
+                        Event::postBindReference,
+                        $object,
+                        new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                        $invoke
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * One event will be fired for each referenced object in the list of scheduled objects for updates.
+     */
+    private function dispatchPostUpdate()
+    {
+        foreach ($this->updateReferences as $oid => $fields) {
+            if (!isset($this->objects[$oid])) {
+                continue;
+            }
+
+            $object = $this->objects[$oid];
+            $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+
+            foreach ($fields as $referencedObject) {
+
+                if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                    $classMetadata,
+                    Event::postUpdateReference
+                )) {
+                    $this->eventListenersInvoker->invoke(
+                        $classMetadata,
+                        Event::postUpdateReference,
+                        $object,
+                        new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                        $invoke
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * One event will be fired for each referenced object in the list of scheduled objects for removes.
+     */
+    private function dispatchPostRemove()
+    {
+        foreach ($this->removeReferences as $oid => $fields) {
+            if (!isset($this->objects[$oid])) {
+                continue;
+            }
+
+            $object = $this->objects[$oid];
+            $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+
+            foreach ($fields as $referencedObject) {
+
+                if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                    $classMetadata,
+                    Event::postRemoveReference
+                )) {
+                    $this->eventListenersInvoker->invoke(
+                        $classMetadata,
+                        Event::postRemoveReference,
+                        $object,
+                        new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                        $invoke
+                    );
+                }
+            }
+        }
     }
 }
