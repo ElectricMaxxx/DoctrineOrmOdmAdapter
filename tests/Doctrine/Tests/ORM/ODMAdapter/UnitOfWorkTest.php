@@ -112,15 +112,17 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('entity name on object', $testReferencedObject->docName);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForInsert($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
     }
 
     public function testPersistNewInvertedReference()
@@ -175,15 +177,15 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('name on document', $testReferencedObject->entityName);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForInsert($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
     }
 
     public function testUpdateReference()
@@ -211,7 +213,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 'referenced-by' => 'uuid',
                 'inversed-by'   => 'uuid',
                 'target-field'  => 'referencedField',
-                'sync-type'     => 'from-reference',
+                'sync-type'     => 'to-reference',
             ),
             'entityName' => array(
                 'referenced-by' => 'docName',
@@ -239,15 +241,16 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('entity name on object', $testReferencedObject->docName);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForUpdate($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForUpdate());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
     }
 
     public function testUpdateInvertedReference()
@@ -284,33 +287,34 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->classMetadata->expects($this->any())
-            ->method('getReferencedObjects')
-            ->will($this->returnValue($referenceMapping));
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
         $this->classMetadata->expects($this->any())
-            ->method('getCommonFields')
-            ->will($this->returnValue($commonFieldMappings));
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
         $this->objectAdapterManager->expects($this->once())
-            ->method('getManager')
-            ->with($this->equalTo($object), $this->equalTo('referencedField'))
-            ->will($this->returnValue($this->objectManager));
+                                   ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                   ->will($this->returnValue($this->objectManager));
         $this->objectManager->expects($this->once())
-            ->method('persist')
-            ->with($this->equalTo($testReferencedObject));
+                            ->method('persist')
+                            ->with($this->equalTo($testReferencedObject));
 
         $this->UoW->persist($object);
 
         $this->assertEquals('name on document', $testReferencedObject->entityName);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForUpdate($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForUpdate());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
     }
 
     public function testRemoveReference()
@@ -344,15 +348,17 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->removeReferencedObject($object);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForRemove($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForRemove());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
     }
 
     public function testRemoveInvertedReference()
@@ -385,15 +391,17 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->removeReferencedObject($object);
 
         // check setting on scheduled lists
-        $this->UoW->getScheduledReference($object, 'referencedField');
-        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledReference($object, 'referencedField'));
+        $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForRemove($object, 'referencedField'));
 
         $expectedReferences = array(
             spl_object_hash($object) => array(
                 'referencedField' => $testReferencedObject,
             ),
         );
-        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferences());
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForRemove());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
+        $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
     }
 
     public function testLoadReference()
@@ -470,5 +478,72 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->loadReferences($object);
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
+    }
+
+    public function testCommitReference()
+    {
+        // pre conditions
+        $object = new ReferenceMappingObject();
+        $object->entityName = 'entity name on object';
+        $testReferencedObject = new ProductDocument();
+        $object->referencedField = $testReferencedObject;
+        $testReferencedObject->uuid = 'test-uuid';
+        $testReferencedObject->docName = 'Name on document';
+
+        $referenceMapping = array(
+            'referencedField'   => array(
+                'inversed-by'   => 'uuid',
+                'referenced-by' => 'uuid',
+                'target-object' => get_class($testReferencedObject),
+                'fieldName'     => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+        );
+        $commonFieldMappings = array(
+            'uuid'      => array(
+                'referenced-by' => 'uuid',
+                'inversed-by'   => 'uuid',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'from-reference',
+            ),
+            'entityName' => array(
+                'referenced-by' => 'docName',
+                'inversed-by'   => 'entityName',
+                'target-field'  => 'referencedField',
+                'sync-type'     => 'to-reference',
+            ),
+        );
+        $this->classMetadata->expects($this->any())
+                            ->method('getReferencedObjects')
+                            ->will($this->returnValue($referenceMapping));
+        $this->classMetadata->expects($this->any())
+                            ->method('getCommonFields')
+                            ->will($this->returnValue($commonFieldMappings));
+        $this->objectAdapterManager->expects($this->any())
+                                   ->method('getManager')
+                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
+                                   ->will($this->returnValue($this->documentManager));
+        $this->documentManager->expects($this->once())
+                              ->method('persist')
+                              ->with($this->equalTo($testReferencedObject));
+
+        $this->UoW->persist($object);
+
+        // check setting on scheduled lists
+        $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
+        $this->assertEquals($testReferencedObject, $this->UoW->getScheduledObjectForInsert($object, 'referencedField'));
+
+        $expectedReferences = array(
+            spl_object_hash($object) => array(
+                'referencedField' => $testReferencedObject,
+            ),
+        );
+        $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
+
+        $this->documentManager->expects($this->once())
+                              ->method('flush');
+
+        $this->UoW->commit();
+
     }
 }

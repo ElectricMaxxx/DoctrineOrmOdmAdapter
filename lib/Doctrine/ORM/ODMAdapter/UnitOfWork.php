@@ -61,20 +61,44 @@ class UnitOfWork
     private $referencedObjectState = array();
 
     /**
-     * The list of referenced objects contains all of them sorted by the oid
-     * of its containing object and fieldName. So we will be able to commit
-     * them all depending on their managers.
-     *
-     * @var array
-     */
-    private $referencedObjects = array();
-
-    /**
      * The list of all objects that are handled by this UnitOfWork.
      *
      * @var array
      */
     private $objects;
+
+    /**
+     * The list of referenced objects contains all of them sorted by the oid
+     * of its containing object and fieldName.
+     *
+     * All referenced objects for inserts will
+     * be stored in here.
+     *
+     * @var array
+     */
+    private $insertReferences = array();
+
+    /**
+     * The list of referenced objects contains all of them sorted by the oid
+     * of its containing object and fieldName.
+     *
+     * All referenced objects for updates will
+     * be stored in here.
+     *
+     * @var array
+     */
+    private $updateReferences = array();
+
+    /**
+     * The list of referenced objects contains all of them sorted by the oid
+     * of its containing object and fieldName.
+     *
+     * All referenced objects for removes will
+     * be stored in here.
+     *
+     * @var array
+     */
+    private $removeReferences = array();
 
     /**
      * @param ObjectAdapterManager $objectAdapterManager
@@ -103,7 +127,7 @@ class UnitOfWork
         $objectState = $this->getObjectState($object, $classMetadata);
 
         switch ($objectState) {
-            case self::STATE_REFERENCED:    // this object is still managed and got its reference
+            case self::OBJECT_STATE_MANAGED:    // this object is still managed and got its reference
                 $this->updateReference($object, $classMetadata);
                 break;
             case self::OBJECT_STATE_NEW:           // complete new reference
@@ -121,14 +145,11 @@ class UnitOfWork
      */
     private function persistNew($object, $classMetadata)
     {
-        $oid = spl_object_hash($object);
-        $this->objects[$oid] = $object;
-
         foreach ($this->extractReferencedObjects($object, $classMetadata) as $fieldName => $referencedObject) {
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindDocument)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindReference)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
-                    Event::preBindDocument,
+                    Event::preBindReference,
                     $object,
                     new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
@@ -138,10 +159,10 @@ class UnitOfWork
             $manager = $this->objectAdapterManager->getManager($object, $fieldName);
             $manager->persist($referencedObject);
 
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindDocument)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postBindReference)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
-                    Event::postBindDocument,
+                    Event::postBindReference,
                     $object,
                     new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
@@ -151,10 +172,11 @@ class UnitOfWork
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
 
             $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
-
-            $this->scheduleForReference($object, $referencedObject, $fieldName);
+            $this->scheduleReferenceForInsert($object, $referencedObject, $fieldName);
         }
 
+        $oid = spl_object_hash($object);
+        $this->objects[$oid] = $object;
         $this->objectState[$oid] = self::OBJECT_STATE_MANAGED;
     }
 
@@ -196,11 +218,11 @@ class UnitOfWork
         return $referencedObjects;
     }
 
-
+    /**
+     * @param $object
+     */
     public function removeReferencedObject($object)
     {
-        $oid = spl_object_hash($object);
-        $this->objects[$oid] = $object;
         $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
         $references = $classMetadata->getReferencedObjects();
 
@@ -219,10 +241,12 @@ class UnitOfWork
             $this->objectAdapterManager->getManager($object, $fieldName)->remove($referencedObject);
 
             $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
-
-            $this->scheduleForReference($object, $referencedObject, $fieldName);
+            $this->scheduleReferenceForRemove($object, $referencedObject, $fieldName);
         }
 
+        // schedule the object itself and mark it as managed
+        $oid = spl_object_hash($object);
+        $this->objects[$oid] = $object;
         $this->objectState[spl_object_hash($object)] = self::OBJECT_STATE_MANAGED;
     }
 
@@ -235,14 +259,11 @@ class UnitOfWork
      */
     private function updateReference($object, ClassMetadata $classMetadata)
     {
-        $oid = spl_object_hash($object);
-        $this->objects[$oid] = $object;
-
         foreach ($this->extractReferencedObjects($object, $classMetadata) as $fieldName => $referencedObject) {
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preUpdateDocument)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preUpdateReference)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
-                    Event::preUpdateDocument,
+                    Event::preUpdateReference,
                     $object,
                     new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
@@ -251,10 +272,10 @@ class UnitOfWork
 
             $this->objectAdapterManager->getManager($object, $fieldName)->persist($referencedObject);
 
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postUpdateDocument)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postUpdateReference)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
-                    Event::postUpdateDocument,
+                    Event::postUpdateReference,
                     $object,
                     new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
@@ -263,9 +284,13 @@ class UnitOfWork
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
 
-            $this->scheduleForReference($object, $referencedObject, $fieldName);
+            $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
+            $this->scheduleReferenceForUpdate($object, $referencedObject, $fieldName);
         }
 
+        // schedule the objet itself and mark it as managed
+        $oid = spl_object_hash($object);
+        $this->objects[$oid] = $object;
         $this->objectState[$oid] = self::OBJECT_STATE_MANAGED;
     }
 
@@ -279,11 +304,29 @@ class UnitOfWork
     {
         $oid = spl_object_hash($object);
 
-        if (!isset($this->objectState[$oid])) {
-            return self::OBJECT_STATE_NEW;
+        if (isset($this->objectState[$oid])) {
+            return $this->objectState[$oid];
         }
 
-        return $this->objectState[$oid];
+        /*
+         * No object state means we need to check if the object got a kind of an identifier
+         * in that case we gonna check if one or more inversed fields are still set.
+         */
+        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+        $referencedObjectMapping = $classMetadata->getReferencedObjects();
+
+        $matches = 0;
+        foreach ($referencedObjectMapping as $reference) {
+            $objectReflection = new \ReflectionClass($object);
+            $property = $objectReflection->getProperty($reference['inversed-by']);
+            $property->setAccessible(true);
+            $inversedField = $property->getValue($object);
+
+            if (null !== $inversedField) {
+                $matches++;
+            }
+        }
+        return $matches === 0 ? self::OBJECT_STATE_NEW : self::OBJECT_STATE_MANAGED;
     }
 
     /**
@@ -364,10 +407,10 @@ class UnitOfWork
             $objectProperty->setAccessible(true);
             $objectProperty->setValue($object, $referencedObject);
 
-            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postLoadDocument)) {
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::postLoadReference)) {
                 $this->eventListenersInvoker->invoke(
                     $classMetadata,
-                    Event::postLoadDocument,
+                    Event::postLoadReference,
                     $object,
                     new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
                     $invoke
@@ -388,72 +431,214 @@ class UnitOfWork
     {
         $managedList = $this->getScheduledReferencesByManager();
 
-        foreach ($managedList as $value) {
-            foreach ($value['referenced-objects'] as $referencedObject) {
-                // todo fire preFlush event here
+        if ($this->eventManager->hasListeners(Event::preFlushReference)) {
+            $this->eventManager->dispatchEvent(
+                Event::preFlushReference,
+                new Event\FlushEventArguments($this->objectAdapterManager)
+            );
+        }
 
+        foreach ($managedList as $value) {
+            if ($this->eventManager->hasListeners(Event::onFlushReference)) {
+                $this->eventManager->dispatchEvent(
+                    Event::onFlushReference,
+                    new Event\FlushEventArguments($this->objectAdapterManager)
+                );
             }
 
             $value['manager']->flush();
         }
+
+        if ($this->eventManager->hasListeners(Event::postFlushReference)) {
+            $this->eventManager->dispatchEvent(
+                Event::postFlushReference,
+                new Event\FlushEventArguments($this->objectAdapterManager)
+            );
+        }
     }
 
     /**
-     * Checks if the object is still scheduled and will insert it to the list.
+     * Schedule all referenced objects, which needs to be inserted.
      *
      * @param $object
      * @param $referencedObject
      * @param $fieldName
      * @throws Exception\UnitOfWorkException
      */
-    private function scheduleForReference($object, $referencedObject, $fieldName)
+    private function scheduleReferenceForInsert($object, $referencedObject, $fieldName)
     {
         $oid = spl_object_hash($object);
 
-        if (isset($this->referencedObjects[$oid][$fieldName])) {
+        if (isset($this->removeReferences[$oid][$fieldName])) {
             throw new UnitOfWorkException(
-                sprintf('%s can not be scheduled twice for reference.', get_class($object))
+                sprintf(
+                    '%s can not be scheduled for remove and insert on %s.',
+                    get_class($referencedObject),
+                    get_class($object)
+                )
             );
         }
 
-        $this->referencedObjects[$oid][$fieldName] = $referencedObject;
+        if (isset($this->insertReferences[$oid][$fieldName])) {
+            throw new UnitOfWorkException(
+                sprintf(
+                    '%s can not be scheduled twice for reference on %s.',
+                    get_class($referencedObject),
+                    get_class($object)
+                )
+            );
+        }
+
+        $this->insertReferences[$oid][$fieldName] = $referencedObject;
     }
 
     /**
-     * Gets the currently scheduled object references in the UnitOfWork.
+     * Schedule all referenced objects, which needs to be updated.
+     *
+     * @param $object
+     * @param $referencedObject
+     * @param $fieldName
+     * @throws Exception\UnitOfWorkException
+     */
+    private function scheduleReferenceForUpdate($object, $referencedObject, $fieldName)
+    {
+        $oid = spl_object_hash($object);
+
+        if (isset($this->removeReferences[$oid][$fieldName])) {
+            throw new UnitOfWorkException(
+                sprintf('%s can not be scheduled for remove and update on %s.', get_class($object), get_class($object))
+            );
+        }
+
+        if (isset($this->updateReferences[$oid][$fieldName])) {
+            throw new UnitOfWorkException(
+                sprintf(
+                    '%s can not be scheduled twice for reference on %s.',
+                    get_class($referencedObject),
+                    get_class($object)
+                )
+            );
+        }
+
+        $this->updateReferences[$oid][$fieldName] = $referencedObject;
+    }
+
+    /**
+     * Schedule all referenced objects, which needs to be removed.
+     *
+     * @param $object
+     * @param $referencedObject
+     * @param $fieldName
+     * @throws Exception\UnitOfWorkException
+     */
+    private function scheduleReferenceForRemove($object, $referencedObject, $fieldName)
+    {
+        $oid = spl_object_hash($object);
+
+        if (isset($this->removeReferences[$oid][$fieldName])) {
+            throw new UnitOfWorkException(
+                sprintf(
+                    '%s can not be scheduled twice for reference on %s.',
+                    get_class($referencedObject),
+                    get_class($object)
+                )
+            );
+        }
+
+        $this->removeReferences[$oid][$fieldName] = $referencedObject;
+    }
+
+    /**
+     * Gets the currently scheduled object references for insert in the UnitOfWork.
      *
      * @return array
      */
-    public function getScheduledReferences()
+    public function getScheduledReferencesForInsert()
     {
-        return $this->referencedObjects;
+        return $this->insertReferences;
     }
 
     /**
-     * Gets an specific referenced object that is scheduled on an object by its
-     * fieldName.
+     * Gets the currently scheduled object references for update in the UnitOfWork.
+     *
+     * @return array
+     */
+    public function getScheduledReferencesForUpdate()
+    {
+        return $this->updateReferences;
+    }
+
+    /**
+     * Gets the currently scheduled object references for remove in the UnitOfWork.
+     *
+     * @return array
+     */
+    public function getScheduledReferencesForRemove()
+    {
+        return $this->removeReferences;
+    }
+
+    /**
+     * Gets an specific referenced object which is scheduled for insert by its objects, that conains
+     * the reference and the field name.
      *
      * @param $object
      * @param $fieldName
      */
-    public function getScheduledReference($object, $fieldName)
+    public function getScheduledObjectForInsert($object, $fieldName)
     {
         $oid = spl_object_hash($object);
-        if (isset($this->referencedObjects[$oid][$fieldName])) {
-            return $this->referencedObjects[$oid][$fieldName];
+        if (isset($this->insertReferences[$oid][$fieldName])) {
+            return $this->insertReferences[$oid][$fieldName];
         }
     }
 
+    /**
+     * Gets an specific referenced object which is scheduled for update by its objects, that conains
+     * the reference and the field name.
+     *
+     * @param $object
+     * @param $fieldName
+     */
+    public function getScheduledObjectForUpdate($object, $fieldName)
+    {
+        $oid = spl_object_hash($object);
+        if (isset($this->updateReferences[$oid][$fieldName])) {
+            return $this->updateReferences[$oid][$fieldName];
+        }
+    }
+
+    /**
+     * Gets an specific referenced object which is scheduled for update by its objects, that conains
+     * the reference and the field name.
+     *
+     * @param $object
+     * @param $fieldName
+     */
+    public function getScheduledObjectForRemove($object, $fieldName)
+    {
+        $oid = spl_object_hash($object);
+        if (isset($this->removeReferences[$oid][$fieldName])) {
+            return $this->removeReferences[$oid][$fieldName];
+        }
+    }
+
+    /**
+     * To commit all referenced Objects by its managers we need to sort them.
+     *
+     * @return array
+     * @throws Exception\UnitOfWorkException
+     */
     public function getScheduledReferencesByManager()
     {
         $managedList = array();
 
-        foreach ($this->getScheduledReferences() as $oid => $fields) {
+        foreach ($this->getScheduledReferencesForInsert() as $oid => $fields) {
             if (!isset($this->objects[$oid])) {
                 throw new UnitOfWorkException('Can not find the object for oid %s', $oid);
             }
 
-            foreach($fields as $fieldName => $referencedObject) {
+            foreach ($fields as $fieldName => $referencedObject) {
                 $object = $this->objects[$oid];
                 $manager = $this->objectAdapterManager->getManager($object, $fieldName);
                 $managerClass = get_class($manager);
