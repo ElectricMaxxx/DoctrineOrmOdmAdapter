@@ -79,7 +79,7 @@ class ObjectAdapterManager
      */
     public function removeReference($object)
     {
-        $this->unitOfWork->removeReferencedObject($object);
+        $this->unitOfWork->remove($object);
     }
 
     /**

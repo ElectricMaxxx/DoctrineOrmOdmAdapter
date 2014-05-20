@@ -345,7 +345,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                               ->method('remove')
                               ->with($this->equalTo($testReferencedObject));
 
-        $this->UoW->removeReferencedObject($object);
+        $this->UoW->remove($object);
 
         // check setting on scheduled lists
         $this->UoW->getScheduledObjectForInsert($object, 'referencedField');
@@ -388,7 +388,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                               ->method('remove')
                               ->with($this->equalTo($testReferencedObject));
 
-        $this->UoW->removeReferencedObject($object);
+        $this->UoW->remove($object);
 
         // check setting on scheduled lists
         $this->UoW->getScheduledObjectForInsert($object, 'referencedField');

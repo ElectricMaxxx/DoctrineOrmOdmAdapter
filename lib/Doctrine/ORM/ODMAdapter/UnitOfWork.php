@@ -221,9 +221,17 @@ class UnitOfWork
     /**
      * @param $object
      */
-    public function removeReferencedObject($object)
+    public function remove($object)
     {
-        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
+        $this->doRemove($object, $this->objectAdapterManager->getClassMetadata(get_class($object)));
+    }
+
+    /**
+     * @param $object
+     * @param ClassMetadata $classMetadata
+     */
+    private function doRemove($object, ClassMetadata $classMetadata)
+    {
         $references = $classMetadata->getReferencedObjects();
 
         $this->objectState[spl_object_hash($object)] = self::OBJECT_STATE_MANAGED;
@@ -253,7 +261,6 @@ class UnitOfWork
     /**
      * This method does the update of a reference.
      *
-     * @todo do i really need a separate method? the only difference are the events.
      * @param $object
      * @param ClassMetadata $classMetadata
      */
@@ -632,23 +639,31 @@ class UnitOfWork
     public function getScheduledReferencesByManager()
     {
         $managedList = array();
+        $scheduledLists = array(
+            $this->insertReferences,
+            $this->updateReferences,
+            $this->removeReferences,
+        );
 
-        foreach ($this->getScheduledReferencesForInsert() as $oid => $fields) {
-            if (!isset($this->objects[$oid])) {
-                throw new UnitOfWorkException('Can not find the object for oid %s', $oid);
-            }
-
-            foreach ($fields as $fieldName => $referencedObject) {
-                $object = $this->objects[$oid];
-                $manager = $this->objectAdapterManager->getManager($object, $fieldName);
-                $managerClass = get_class($manager);
-                if (!isset($managedList[$managerClass])) {
-                    $managedList[$managerClass]['manager'] = $manager;
-                    $managedList[$managerClass]['referenced-objects'] = array();
+        foreach ($scheduledLists as $scheduleList) {
+            foreach ($scheduleList as $oid => $fields) {
+                if (!isset($this->objects[$oid])) {
+                    throw new UnitOfWorkException('Can not find the object for oid %s', $oid);
                 }
-                $managedList[$managerClass]['referenced-objects'][] = $referencedObject;
+
+                foreach ($fields as $fieldName => $referencedObject) {
+                    $object = $this->objects[$oid];
+                    $manager = $this->objectAdapterManager->getManager($object, $fieldName);
+                    $managerClass = get_class($manager);
+                    if (!isset($managedList[$managerClass])) {
+                        $managedList[$managerClass]['manager'] = $manager;
+                        $managedList[$managerClass]['referenced-objects'] = array();
+                    }
+                    $managedList[$managerClass]['referenced-objects'][] = $referencedObject;
+                }
             }
         }
+
 
         return $managedList;
     }
