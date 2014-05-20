@@ -4,6 +4,7 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
 use Doctrine\ORM\ODMAdapter\Event;
@@ -456,6 +457,25 @@ class UnitOfWork
             $this->dispatchPostRemove();
         }
     }
+
+    /**
+     * Will remove all scheduled stuff.
+     */
+    public function clear()
+    {
+        $this->objects =
+        $this->objectState =
+        $this->referencedObjects =
+        $this->referencedObjectState =
+        $this->removeReferences =
+        $this->insertReferences =
+        $this->updateReferences = array();
+
+        if ($this->eventManager->hasListeners(Event::onClear)) {
+            $this->eventManager->dispatchEvent(Event::onClear, new ManagerEventArgs($this->objectAdapterManager));
+        }
+    }
+
 
     /**
      * Schedule all referenced objects, which needs to be inserted.

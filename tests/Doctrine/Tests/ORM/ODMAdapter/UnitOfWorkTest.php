@@ -123,6 +123,10 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
+
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testPersistNewInvertedReference()
@@ -186,6 +190,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
             ),
         );
         $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testUpdateReference()
@@ -255,6 +262,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $this->UoW->getScheduledReferencesForInsert());
         $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
         $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testUpdateInvertedReference()
@@ -323,6 +333,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $this->UoW->getScheduledReferencesForInsert());
         $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
         $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testRemoveReference()
@@ -367,6 +380,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForRemove());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testRemoveInvertedReference()
@@ -410,6 +426,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForRemove());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testLoadReference()
@@ -448,6 +467,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->loadReferences($object);
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testLoadInvertedReference()
@@ -486,6 +508,9 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->loadReferences($object);
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
+
+        $this->UoW->clear();
+        $this->assertThatItsClear();
     }
 
     public function testCommitReference()
@@ -553,5 +578,15 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->UoW->commit();
 
+        $this->UoW->clear();
+        $this->assertThatItsClear();
+    }
+
+    private function assertThatItsClear()
+    {
+        $this->assertCount(0, $this->UoW->getScheduledReferencesForUpdate());
+        $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
+        $this->assertCount(0, $this->UoW->getScheduledReferencesForInsert());
+        $this->assertCount(0, $this->UoW->getScheduledReferencesByManager());
     }
 }

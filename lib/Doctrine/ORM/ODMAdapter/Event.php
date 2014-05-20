@@ -20,6 +20,7 @@ final class Event {
     const preFlushReference = 'preFlush';
     const onFlushReference = 'onFlush';
     const postFlushReference = 'postFlush';
+    const onClear = 'onClear';
 
     public static $lifecycleCallbacks = array();
 }

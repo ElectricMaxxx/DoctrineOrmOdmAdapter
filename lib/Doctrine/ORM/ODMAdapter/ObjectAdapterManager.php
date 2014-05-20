@@ -98,6 +98,11 @@ class ObjectAdapterManager
         $this->unitOfWork->commit();
     }
 
+    public function clear()
+    {
+        $this->unitOfWork->clear();
+    }
+
     /**
      * @param  string        $className
      * @return ClassMetadata
