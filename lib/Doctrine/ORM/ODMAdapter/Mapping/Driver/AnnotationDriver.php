@@ -111,7 +111,7 @@ class AnnotationDriver extends AbstractAnnotationDriver implements MappingDriver
             if (isset($annotation->inversedBy)) {
                 $mapping['inversed-by'] = $annotation->inversedBy;
             }
-            if (isset($annotation->type)) {
+            if (isset($annotation->syncType)) {
                 $mapping['sync-type'] = $annotation->inversedBy;
             }
             $mapping['target-field'] = $targetReferencedObjectField;

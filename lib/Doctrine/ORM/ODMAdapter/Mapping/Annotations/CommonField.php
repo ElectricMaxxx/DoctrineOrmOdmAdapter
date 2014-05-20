@@ -23,5 +23,5 @@ final class CommonField
     /**
      * @var string
      */
-    public $type;
+    public $syncType;
 }
