@@ -39,9 +39,11 @@ class Configuration
     );
 
     /**
-     * @var array|ManagerRegistry
+     * List of all available managers.
+     *
+     * @var array
      */
-    private $registries = array();
+    private $managers;
 
     /**
      * Sets if all object adapter metadata should be validated on read
@@ -332,45 +334,48 @@ class Configuration
             ;
     }
 
-    public function getRegistries()
+    public function getManagers()
     {
-        return $this->registries;
+        return $this->managers;
     }
 
-    public function setRegistries($registries)
+    public function setManagers($managers)
     {
-        $this->registries = array();
+        $this->managers = array();
         $possibleReferenceTypes = array(Reference::PHPCR, Reference::DBAL_ORM);
 
-        foreach ($registries as $referenceType => $registry) {
+        foreach ($managers as $referenceType => $managersByName) {
             if (!in_array($referenceType, $possibleReferenceTypes)) {
                 throw new ConfigurationException(
                     sprintf(
                         'Not allowed to set a registry %s with reference type %s. Allowed reference types are: %s',
-                        get_class($registry),
+                        get_class($managersByName),
                         $referenceType,
                         implode(', ', $possibleReferenceTypes)
                     )
                 );
             }
 
-            $this->registries[$referenceType] = $registry;
+            foreach ($managersByName as $name => $manager) {
+                $this->managers[$referenceType][$name] = $manager;
+            }
         }
     }
 
     /**
-     * Return the registry for a specific reference type.
+     * Return the manager for a specific reference type and its name.
      *
      * @param $type
+     * @param string $managerName
      * @throws Exception\ConfigurationException
      * @return ManagerRegistry
      */
-    public function getRegistryByReferenceType($type)
+    public function getManagerByReferenceType($type, $managerName = 'default')
     {
-        if (array_key_exists($type, $this->registries)) {
-            return $this->registries[$type];
+        if (isset($this->managers[$type][$managerName])) {
+                return $this->managers[$type][$managerName];
         }
 
-        throw new ConfigurationException(sprintf('No registry found for type %s.', $type));
+        throw new ConfigurationException(sprintf('No manager found for type %s and manager name %s.', $type, $managerName));
     }
 }

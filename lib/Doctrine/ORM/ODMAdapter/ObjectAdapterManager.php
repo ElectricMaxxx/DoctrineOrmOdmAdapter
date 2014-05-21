@@ -7,11 +7,8 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
-use Doctrine\ORM\ODMAdapter\Exception\ObjectAdapterMangerException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
-use Doctrine\ORM\ODMAdapter\Proxy\ProxyFactory;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * The ObjectAdapterManager will combine persistence operation
@@ -145,31 +142,25 @@ class ObjectAdapterManager
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        /** @var ManagerRegistry $registry */
-        $registry = $this->configuration->getRegistryByReferenceType($type);
-        if (!$registry) {
-            throw new MappingException(sprintf('No registry found for mapped reference type %s', $type));
-        }
-
-        // try to get the manager of a persisted object
-        if ($manager = $registry->getManagerForClass(get_class($object))) {
-            print("Class: ".get_class($manager)."\n");
-            return $manager;
-        }
-
-        // return default instead
         // todo implement a manager mapping
-        return $registry->getManager('default');
+        /** @var ManagerRegistry $manager */
+        $manager = $this->configuration->getManagerByReferenceType($type);
+        if (!$manager) {
+            throw new MappingException(
+                sprintf('No manager found for mapped reference type %s and manager name %s.', $type, 'default'));
+        }
+
+        return $manager;
     }
 
     /**
      * @param  string $type
+     * @param string $managerName
      * @return object
-     * @throws Exception\ObjectAdapterMangerException
      */
-    public function getManagerByType($type)
+    public function getManagerByType($type, $managerName = 'default')
     {
-        return $this->configuration->getRegistryByReferenceType($type);
+        return $this->configuration->getManagerByReferenceType($type, $managerName );
     }
 
     /**

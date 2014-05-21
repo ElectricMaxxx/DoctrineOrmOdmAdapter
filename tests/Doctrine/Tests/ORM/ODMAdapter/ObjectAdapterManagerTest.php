@@ -40,24 +40,12 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata = $this->getMockBuilder('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata')
                                     ->disableOriginalConstructor()
                                     ->getMock();
-        $this->ormRegistry = $this->getMock('Doctrine\Common\Persistence\ManagerRegistry');
-        $this->phpcrRegistry = $this->getMock('Doctrine\Common\Persistence\ManagerRegistry');
-        $this->ormRegistry->expects($this->any())
-                          ->method('getManagerForClass')
-                          ->will($this->returnValue($this->objectManager));
-        $this->phpcrRegistry->expects($this->any())
-                            ->method('getManagerForClass')
-                            ->will($this->returnValue($this->documentManager));
-
-        $configuration = $this->getMockBuilder('Doctrine\ORM\ODMAdapter\Configuration')
-                              ->disableOriginalConstructor()
-                              ->getMock();
 
         $configuration = new Configuration();
-        $configuration->setRegistries(
+        $configuration->setManagers(
             array(
-                Reference::DBAL_ORM => $this->ormRegistry,
-                Reference::PHPCR    => $this->phpcrRegistry,
+                Reference::DBAL_ORM => array('default' => $this->objectManager),
+                Reference::PHPCR    => array('default' => $this->documentManager),
             )
         );
         $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
@@ -66,13 +54,13 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetManagerByType()
     {
-        $this->assertEquals($this->ormRegistry, $this->objectAdapterManager->getManagerByType('reference-dbal-orm'));
-        $this->assertEquals($this->phpcrRegistry, $this->objectAdapterManager->getManagerByType('reference-phpcr'));
+        $this->assertEquals($this->objectManager, $this->objectAdapterManager->getManagerByType('reference-dbal-orm'));
+        $this->assertEquals($this->documentManager, $this->objectAdapterManager->getManagerByType('reference-phpcr'));
     }
 
     /**
      * @expectedException \Doctrine\ORM\ODMAdapter\Exception\ConfigurationException
-     * @expectedExceptionMessage No registry found for type some-type.
+     * @expectedExceptionMessage No manager found for type some-type and manager name default.
      */
     public function testGetMangerByTypeThrowsException()
     {

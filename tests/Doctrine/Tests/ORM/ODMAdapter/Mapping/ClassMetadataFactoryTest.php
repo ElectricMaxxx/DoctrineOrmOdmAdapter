@@ -54,7 +54,7 @@ class ClassMetadataFactoryTest extends \PHPUnit_Framework_TestCase
                                     ->disableOriginalConstructor()
                                     ->getMock();
         $this->configuration = new Configuration();
-        $this->configuration->setRegistries(array(
+        $this->configuration->setManagers(array(
             Reference::PHPCR => $this->documentManager,
             Reference::DBAL_ORM => $this->objectManager,
         ));
