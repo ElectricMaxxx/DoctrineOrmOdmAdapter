@@ -463,6 +463,13 @@ class UnitOfWork
      */
     public function clear()
     {
+        // trigger clear on all managers of the referenced objects
+        $managedObjects = $this->getScheduledReferencesByManager();
+        foreach ($managedObjects as $value) {
+            $value['manager']->clear();
+        }
+
+        // clear all object stores
         $this->objects =
         $this->objectState =
         $this->referencedObjects =

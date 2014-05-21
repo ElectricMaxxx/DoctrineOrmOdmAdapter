@@ -98,7 +98,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
@@ -124,8 +124,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForRemove());
 
-
-        $this->UoW->clear();
         $this->assertThatItsClear();
     }
 
@@ -167,7 +165,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getCommonFields')
                             ->will($this->returnValue($commonFieldMappings));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->objectManager));
@@ -191,8 +189,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($expectedReferences, $this->UoW->getScheduledReferencesForInsert());
 
-        $this->UoW->clear();
-        $this->assertThatItsClear();
+        $this->assertThatItsClear('dbal-orm');
     }
 
     public function testUpdateReference()
@@ -263,7 +260,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
         $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
 
-        $this->UoW->clear();
         $this->assertThatItsClear();
     }
 
@@ -334,8 +330,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
         $this->assertCount(1, $this->UoW->getScheduledReferencesForUpdate());
 
-        $this->UoW->clear();
-        $this->assertThatItsClear();
+        $this->assertThatItsClear('dbal-orm');
     }
 
     public function testRemoveReference()
@@ -358,7 +353,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
                             ->will($this->returnValue($referenceMapping));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                   ->method('getManager')
                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                   ->will($this->returnValue($this->documentManager));
@@ -381,7 +376,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
 
-        $this->UoW->clear();
         $this->assertThatItsClear();
     }
 
@@ -404,7 +398,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
                             ->will($this->returnValue($referenceMapping));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                   ->method('getManager')
                                   ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                   ->will($this->returnValue($this->objectManager));
@@ -427,8 +421,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForInsert());
         $this->assertEquals(array(), $this->UoW->getScheduledReferencesForUpdate());
 
-        $this->UoW->clear();
-        $this->assertThatItsClear();
+        $this->assertThatItsClear('dbal-orm');
     }
 
     public function testLoadReference()
@@ -455,7 +448,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
                             ->will($this->returnValue($referenceMapping));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->documentManager));
@@ -467,9 +460,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->loadReferences($object);
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
-
-        $this->UoW->clear();
-        $this->assertThatItsClear();
     }
 
     public function testLoadInvertedReference()
@@ -496,7 +486,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->classMetadata->expects($this->any())
                             ->method('getReferencedObjects')
                             ->will($this->returnValue($referenceMapping));
-        $this->objectAdapterManager->expects($this->once())
+        $this->objectAdapterManager->expects($this->any())
                                    ->method('getManager')
                                    ->with($this->equalTo($object), $this->equalTo('referencedField'))
                                    ->will($this->returnValue($this->objectManager));
@@ -509,8 +499,6 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
 
-        $this->UoW->clear();
-        $this->assertThatItsClear();
     }
 
     public function testCommitReference()
@@ -575,15 +563,24 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
 
         $this->documentManager->expects($this->once())
                               ->method('flush');
-
         $this->UoW->commit();
-
-        $this->UoW->clear();
         $this->assertThatItsClear();
     }
 
-    private function assertThatItsClear()
+    private function assertThatItsClear($reference = 'phpcr')
     {
+        if ('phpcr' === $reference) {
+            $this->documentManager
+                ->expects($this->once())
+                ->method('clear');
+        } elseif ('dbal-orm' === $reference) {
+            $this->objectManager
+                ->expects($this->once())
+                ->method('clear');
+        }
+
+        $this->UoW->clear();
+
         $this->assertCount(0, $this->UoW->getScheduledReferencesForUpdate());
         $this->assertCount(0, $this->UoW->getScheduledReferencesForRemove());
         $this->assertCount(0, $this->UoW->getScheduledReferencesForInsert());
