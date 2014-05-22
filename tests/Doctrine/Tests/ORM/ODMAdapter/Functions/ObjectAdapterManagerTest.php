@@ -7,6 +7,9 @@ use Doctrine\Tests\Models\ReferenceMappingObject;
 
 class ObjectAdapterManagerTest extends BaseFunctionalTestCase
 {
+    protected $object;
+    protected $referencedObject;
+
     public function testGetMangerByType()
     {
         $object = new ReferenceMappingObject();
@@ -20,54 +23,64 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->assertInstanceOf(get_class($this->em), $actual);
     }
 
-    public function testPersistObject()
+    protected function persistObject()
     {
-        $object = new ReferenceMappingObject();
-        $object->id = 'some-id';
-        $object->entityName = 'test-name';
-        $referencedObject = new InvertedReferenceMappingObject();
-        $referencedObject->docName = 'test-name-on-reference';
-        $referencedObject->name = 'test-doc';
-        $referencedObject->parentDocument = $this->base;
-        $object->referencedField = $referencedObject;
+        $this->object = new ReferenceMappingObject();
+        $this->object->id = 'some-id';
+        $this->object->entityName = 'test-name';
+        $this->referencedObject = new InvertedReferenceMappingObject();
+        $this->referencedObject->docName = 'test-name-on-reference';
+        $this->referencedObject->name = 'test-doc';
+        $this->referencedObject->parentDocument = $this->base;
+        $this->object->referencedField = $this->referencedObject;
 
-        $this->em->persist($object);
-        $this->objectAdapterManager->persistReference($object);
+        $this->em->persist($this->object);
+        $this->objectAdapterManager->persistReference($this->object);
         $this->em->flush();
         $this->objectAdapterManager->flushReference();
         $this->objectAdapterManager->clear();
         $this->em->clear();
+    }
 
-        $object = $this->em->find(get_class($object), $object->id);
-        $referencedObject = $this->dm->find(get_class($referencedObject), $referencedObject->id);
+    protected function persistInvertedObject()
+    {
+        $this->object = new InvertedReferenceMappingObject();
+        $this->object->docName = 'test-document';
+        $this->object->name = 'test-doc';
+        $this->object->parentDocument = $this->base;
+        $this->referencedObject = new ReferenceMappingObject();
+        $this->referencedObject->entityName = 'test name on orm';
+        $this->referencedObject->id = '1';
+        $this->object->referencedField = $this->referencedObject;
+
+        $this->dm->persist($this->object);
+        $this->objectAdapterManager->persistReference($this->object);
+        $this->dm->flush();
+        $this->objectAdapterManager->flushReference();
+        $this->dm->clear();
+        $this->objectAdapterManager->clear();
+    }
+
+    public function testPersistObject()
+    {
+        $this->persistObject();
+
+        $object = $this->em->find(get_class($this->object), $this->object->id);
+        $referencedObject = $this->dm->find(get_class($this->referencedObject), $this->referencedObject->id);
 
         $this->assertNotNull($object);
         $this->assertNotNull($referencedObject);
-        $this->assertEquals($object->id, $referencedObject->objectId);
+        $this->assertEquals($this->object->uuid, $referencedObject->uuid);
         $this->assertEquals('test-name-on-reference', $referencedObject->docName);
         $this->assertEquals('test-name-on-reference', $object->entityName);
     }
 
     public function testPersistInvertedObject()
     {
-        $object = new InvertedReferenceMappingObject();
-        $object->docName = 'test-document';
-        $object->name = 'test-doc';
-        $object->parentDocument = $this->base;
-        $referencedObject = new ReferenceMappingObject();
-        $referencedObject->entityName = 'test name on orm';
-        $referencedObject->id = '1';
-        $object->referencedField = $referencedObject;
+        $this->persistInvertedObject();
 
-        $this->dm->persist($object);
-        $this->objectAdapterManager->persistReference($object);
-        $this->dm->flush();
-        $this->objectAdapterManager->flushReference();
-        $this->dm->clear();
-        $this->objectAdapterManager->clear();
-
-        $referencedObject = $this->em->find(get_class($referencedObject), $referencedObject->id);
-        $object = $this->dm->find(null, $object->id);
+        $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
+        $object = $this->dm->find(null, $this->object->id);
 
         $this->assertNotNull($object);
         $this->assertNotNull($referencedObject);
