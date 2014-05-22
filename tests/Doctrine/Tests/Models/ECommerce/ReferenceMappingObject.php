@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * A class with no explicitly set properties for testing default values.
  *
  * @ODMAdapter\ObjectAdapter
- * @ORM\Entity(table="orm_odm_tests")
+ * @ORM\Entity(table="orm_odm_test_objects")
  */
 class ReferenceMappingObject
 {
