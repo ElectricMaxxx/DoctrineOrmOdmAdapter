@@ -148,4 +148,25 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->assertEquals('updated entity name', $object->docName);
         $this->assertEquals('updated entity name', $referencedObject->entityName);
     }
+
+    public function testRemoveObject()
+    {
+        $this->persistObject();
+
+        $object = $this->em->find(get_class($this->object), $this->object->id);
+        $this->objectAdapterManager->findReference($object);
+
+        $this->em->remove($object);
+        $this->objectAdapterManager->removeReference($object);
+        $this->em->flush();
+        $this->objectAdapterManager->flushReference();
+        $this->em->clear();
+        $this->objectAdapterManager->clear();
+
+        $object = $this->em->find(get_class($this->object), $this->object->id);
+        $referencedObject = $this->dm->find(get_class($this->referencedObject), $this->referencedObject->id);
+
+        $this->assertNull($object);
+        $this->assertNull($referencedObject);
+    }
 }
