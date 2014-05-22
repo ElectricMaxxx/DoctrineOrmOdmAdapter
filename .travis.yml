@@ -10,8 +10,8 @@ env:
   - DB=mysql
 
 before_script:
-  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS orm_odm_tests;create database IF NOT EXISTS doctrine_tests;'; fi"
-  - composer install --prefer-source --dev
+  - composer self-update
+  - ./tests/travis_doctrine_dbal.sh
 
 script: phpunit -c tests/phpunit_doctrine_dbal.xml.dist
 

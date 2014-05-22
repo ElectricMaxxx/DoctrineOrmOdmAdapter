@@ -147,7 +147,8 @@ class ObjectAdapterManager
         $manager = $this->configuration->getManagerByReferenceType($type);
         if (!$manager) {
             throw new MappingException(
-                sprintf('No manager found for mapped reference type %s and manager name %s.', $type, 'default'));
+                sprintf('No manager found for mapped reference type %s and manager name %s.', $type, 'default')
+            );
         }
 
         return $manager;
