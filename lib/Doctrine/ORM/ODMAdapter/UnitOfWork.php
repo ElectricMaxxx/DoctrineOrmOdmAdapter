@@ -323,7 +323,8 @@ class UnitOfWork
         $referencedObjets = array_filter(
             $classMetadata->getReferencedObjects(),
             function ($refObject) use ($referencedObject) {
-                return $refObject['target-object'] === get_class($referencedObject);
+                $refl = new \ReflectionClass($refObject['target-object']);
+                return $refl->isInstance($referencedObject);
             }
         );
 
@@ -358,12 +359,8 @@ class UnitOfWork
                 } elseif ($commonField['sync-type'] === 'from-reference') {
                     $value = $referencedObjectProperty->getValue($referencedObject);
                     $objectProperty->setValue($object, $value);
-                    if ('Doctrine\Tests\Models\InvertedReferenceMappingObject' === get_class($object)) {
-                        print("SET: $value to ".$commonField['inversed-by']."\n");
-                    }
                 }
             }
-
         }
     }
 
