@@ -1,7 +1,6 @@
 <?php
 
-
-namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model;
+namespace Doctrine\Tests\Models;
 
 use Doctrine\ORM\ODMAdapter\Mapping\Annotations as ODMAdapter;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,8 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * A class with no explicitly set properties for testing default values.
  *
+ * @ORM\Entity
+ * @ORM\Table(name="objects")
  * @ODMAdapter\ObjectAdapter
- * @ORM\Entity(table="orm_odm_test_objects")
  */
 class ReferenceMappingObject
 {
@@ -18,7 +18,7 @@ class ReferenceMappingObject
      * @ORM\Id()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    public $id;
 
     /**
      * @ORM\Column(type="string")
@@ -29,7 +29,7 @@ class ReferenceMappingObject
      * @ODMAdapter\ReferencePhpcr(
      *  referencedBy="uuid",
      *  inversedBy="uuid",
-     *  targetObject="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document",
+     *  targetObject="Doctrine\Tests\Models\InvertedReferenceMappingObject",
      *  name="referencedField",
      *  commonField={
      *      @ODMAdapter\CommonField(referencedBy="docName", inversedBy="entityName")

@@ -1,7 +1,6 @@
 <?php
 
-
-namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model;
+namespace Doctrine\Tests\Models;
 
 use Doctrine\ORM\ODMAdapter\Mapping\Annotations as ODMAdapter;
 use Doctrine\ODM\PHPCR\Mapping\Annotations as PHPCRODM;
@@ -9,7 +8,7 @@ use Doctrine\ODM\PHPCR\Mapping\Annotations as PHPCRODM;
 /**
  * A class with no explicitly set properties for testing default values.
  * @ODMAdapter\ObjectAdapter
- * @PHPCRODM\Document
+ * @PHPCRODM\Document(referenceable=true)
  */
 class InvertedReferenceMappingObject
 {
@@ -17,25 +16,30 @@ class InvertedReferenceMappingObject
     /**
      * @PHPCRODM\Id
      */
-    protected $id;
+    public $id;
+
+    /**
+     * @PHPCRODM\Uuid()
+     */
+    public $uuid;
 
     /**
      * @PHPCRODM\Node
      */
-    protected $node;
+    public $node;
 
     /**
      *  @PHPCRODM\ParentDocument
      */
-    protected $parentDocument;
+    public $parentDocument;
 
     /**
      * @PHPCRODM\Nodename
      */
-    protected $name;
+    public $name;
 
     /**
-     * @PHPCRODM\String
+     * @PHPCRODM\String(nullable=true)
      */
     public $objectId;
 
@@ -43,7 +47,7 @@ class InvertedReferenceMappingObject
      * @ODMAdapter\ReferenceDbalOrm(
      *  referencedBy="id",
      *  inversedBy="objectId",
-     *  targetObject="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object",
+     *  targetObject="Doctrine\Tests\Models\ReferenceMappingObject",
      *  name="referencedField",
      *  commonField={
      *      @ODMAdapter\CommonField(referencedBy="entityName", inversedBy="docName")

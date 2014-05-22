@@ -334,6 +334,7 @@ class UnitOfWork
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjets as $fieldName => $reference) {
             $commonFieldMappings = $classMetadata->getCommonFields();
+
             if (!$commonFieldMappings) {
                 continue;
             }
@@ -357,6 +358,9 @@ class UnitOfWork
                 } elseif ($commonField['sync-type'] === 'from-reference') {
                     $value = $referencedObjectProperty->getValue($referencedObject);
                     $objectProperty->setValue($object, $value);
+                    if ('Doctrine\Tests\Models\InvertedReferenceMappingObject' === get_class($object)) {
+                        print("SET: $value to ".$commonField['inversed-by']."\n");
+                    }
                 }
             }
 

@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "373c0d08bf1f326ff40bc237046aa10638bf28f6"
+                "reference": "3f58ce08b67f04b228f9fe93242757e0376f719c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/373c0d08bf1f326ff40bc237046aa10638bf28f6",
-                "reference": "373c0d08bf1f326ff40bc237046aa10638bf28f6",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/3f58ce08b67f04b228f9fe93242757e0376f719c",
+                "reference": "3f58ce08b67f04b228f9fe93242757e0376f719c",
                 "shasum": ""
             },
             "require": {
@@ -76,7 +76,7 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2014-04-24 04:07:43"
+            "time": "2014-05-20 13:29:32"
         },
         {
             "name": "doctrine/cache",
@@ -226,12 +226,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/common.git",
-                "reference": "b1a31ae3df2c18c24bec42e2cc32e3e4bedc07c7"
+                "reference": "ae92d076442e27b6910dd86a1292a8867cf5cfe4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/common/zipball/b1a31ae3df2c18c24bec42e2cc32e3e4bedc07c7",
-                "reference": "b1a31ae3df2c18c24bec42e2cc32e3e4bedc07c7",
+                "url": "https://api.github.com/repos/doctrine/common/zipball/ae92d076442e27b6910dd86a1292a8867cf5cfe4",
+                "reference": "ae92d076442e27b6910dd86a1292a8867cf5cfe4",
                 "shasum": ""
             },
             "require": {
@@ -241,6 +241,9 @@
                 "doctrine/inflector": "1.*",
                 "doctrine/lexer": "1.*",
                 "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~3.7"
             },
             "type": "library",
             "extra": {
@@ -293,7 +296,7 @@
                 "persistence",
                 "spl"
             ],
-            "time": "2014-04-21 05:00:49"
+            "time": "2014-05-21 19:29:23"
         },
         {
             "name": "doctrine/dbal",
@@ -549,12 +552,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackalope/jackalope-doctrine-dbal.git",
-                "reference": "0bdd1d1d836bca468849c1155583024f61365f80"
+                "reference": "853e29dfa9dc720e9f1c2a33a430dc9892e7c409"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackalope/jackalope-doctrine-dbal/zipball/0bdd1d1d836bca468849c1155583024f61365f80",
-                "reference": "0bdd1d1d836bca468849c1155583024f61365f80",
+                "url": "https://api.github.com/repos/jackalope/jackalope-doctrine-dbal/zipball/853e29dfa9dc720e9f1c2a33a430dc9892e7c409",
+                "reference": "853e29dfa9dc720e9f1c2a33a430dc9892e7c409",
                 "shasum": ""
             },
             "require": {
@@ -604,7 +607,7 @@
                 "phpcr",
                 "transport implementation"
             ],
-            "time": "2014-05-08 20:19:01"
+            "time": "2014-05-19 09:16:26"
         },
         {
             "name": "phpcr/phpcr",
@@ -667,12 +670,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcr/phpcr-utils.git",
-                "reference": "7847990a26ce9ce9b23cb18642252596ef25c0cd"
+                "reference": "60dc21b77b4d57bce86c505db2961d85eec30e57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcr/phpcr-utils/zipball/7847990a26ce9ce9b23cb18642252596ef25c0cd",
-                "reference": "7847990a26ce9ce9b23cb18642252596ef25c0cd",
+                "url": "https://api.github.com/repos/phpcr/phpcr-utils/zipball/60dc21b77b4d57bce86c505db2961d85eec30e57",
+                "reference": "60dc21b77b4d57bce86c505db2961d85eec30e57",
                 "shasum": ""
             },
             "require": {
@@ -722,7 +725,7 @@
                 "contentrepository",
                 "phpcr"
             ],
-            "time": "2014-05-16 22:15:22"
+            "time": "2014-05-21 06:32:41"
         },
         {
             "name": "psr/log",
@@ -821,12 +824,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "492f7a38c7a70b8006e2e1cedb3100792ab20276"
+                "reference": "85e08278ca7d15f70790446bd88dd07c1b172864"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/492f7a38c7a70b8006e2e1cedb3100792ab20276",
-                "reference": "492f7a38c7a70b8006e2e1cedb3100792ab20276",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/85e08278ca7d15f70790446bd88dd07c1b172864",
+                "reference": "85e08278ca7d15f70790446bd88dd07c1b172864",
                 "shasum": ""
             },
             "require": {
@@ -929,7 +932,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2014-05-17 20:50:45"
+            "time": "2014-05-21 16:04:07"
         },
         {
             "name": "twig/twig",
@@ -937,12 +940,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "55253c3f37b1b47ad797eb95f27b0a33e3a76d2f"
+                "reference": "c2ae310203e65987a26d57b87a173b15747a3412"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/55253c3f37b1b47ad797eb95f27b0a33e3a76d2f",
-                "reference": "55253c3f37b1b47ad797eb95f27b0a33e3a76d2f",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/c2ae310203e65987a26d57b87a173b15747a3412",
+                "reference": "c2ae310203e65987a26d57b87a173b15747a3412",
                 "shasum": ""
             },
             "require": {
@@ -986,7 +989,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2014-05-15 19:43:48"
+            "time": "2014-05-21 01:15:25"
         }
     ],
     "packages-dev": [
@@ -1145,12 +1148,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrinePHPCRBundle.git",
-                "reference": "4aaedb4e063604a16cbb1b5b70601dacc4204441"
+                "reference": "8e79a1742a3f77b7e9ce2446b7adbf6916da173c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrinePHPCRBundle/zipball/4aaedb4e063604a16cbb1b5b70601dacc4204441",
-                "reference": "4aaedb4e063604a16cbb1b5b70601dacc4204441",
+                "url": "https://api.github.com/repos/doctrine/DoctrinePHPCRBundle/zipball/8e79a1742a3f77b7e9ce2446b7adbf6916da173c",
+                "reference": "8e79a1742a3f77b7e9ce2446b7adbf6916da173c",
                 "shasum": ""
             },
             "require": {
@@ -1208,7 +1211,7 @@
                 "persistence",
                 "phpcr"
             ],
-            "time": "2014-05-08 15:20:35"
+            "time": "2014-05-21 06:33:46"
         },
         {
             "name": "doctrine/phpcr-odm",
