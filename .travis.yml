@@ -4,11 +4,14 @@ php:
   - 5.3
   - 5.4
   - 5.5
+  - 5.6
 
+env:
+  - DB=mysql
 
 before_script:
-  - composer self-update
-  - ./tests/travis_doctrine_dbal.sh
+  - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS doctrine_tests_tmp;create database IF NOT EXISTS doctrine_tests;'; fi"
+  - composer install --prefer-source --dev
 
 script: phpunit -c tests/phpunit_doctrine_dbal.xml.dist
 
