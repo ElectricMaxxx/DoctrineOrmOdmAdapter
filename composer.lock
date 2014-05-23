@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "56b6fddc01a1b7a6db4354de44ab3637",
+    "hash": "80462cd7e4de9c12d8029c346de6d9ab",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -824,12 +824,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "85e08278ca7d15f70790446bd88dd07c1b172864"
+                "reference": "e7971e5af57856b69d4507fc12c36dbf58023434"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/85e08278ca7d15f70790446bd88dd07c1b172864",
-                "reference": "85e08278ca7d15f70790446bd88dd07c1b172864",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/e7971e5af57856b69d4507fc12c36dbf58023434",
+                "reference": "e7971e5af57856b69d4507fc12c36dbf58023434",
                 "shasum": ""
             },
             "require": {
@@ -932,7 +932,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2014-05-21 16:04:07"
+            "time": "2014-05-22 20:57:44"
         },
         {
             "name": "twig/twig",
@@ -1215,16 +1215,16 @@
         },
         {
             "name": "doctrine/phpcr-odm",
-            "version": "dev-master",
+            "version": "dev-uuid-on-references",
             "source": {
                 "type": "git",
-                "url": "https://github.com/doctrine/phpcr-odm.git",
-                "reference": "cae814ef2f958ae828f70391dbb32c6ec43a0060"
+                "url": "https://github.com/ElectricMaxxx/phpcr-odm.git",
+                "reference": "7597dfc814436dd3ea262817ca1ad112faf10244"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/phpcr-odm/zipball/cae814ef2f958ae828f70391dbb32c6ec43a0060",
-                "reference": "cae814ef2f958ae828f70391dbb32c6ec43a0060",
+                "url": "https://api.github.com/repos/ElectricMaxxx/phpcr-odm/zipball/7597dfc814436dd3ea262817ca1ad112faf10244",
+                "reference": "7597dfc814436dd3ea262817ca1ad112faf10244",
                 "shasum": ""
             },
             "require": {
@@ -1258,24 +1258,21 @@
                     "Doctrine\\ODM\\PHPCR": "lib/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "authors": [
                 {
                     "name": "Jordi Boggiano",
-                    "email": "j.boggiano@seld.be",
-                    "homepage": "http://seld.be",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Lukas Kahwe Smith",
-                    "email": "smith@pooteeweet.org"
+                    "email": "j.boggiano@seld.be"
                 },
                 {
                     "name": "David Buchmann",
                     "email": "david@liip.ch"
+                },
+                {
+                    "name": "Lukas Kahwe Smith",
+                    "email": "smith@pooteeweet.org"
                 }
             ],
             "description": "Object-Document-Mapper for PHPCR",
@@ -1285,7 +1282,10 @@
                 "odm",
                 "phpcr"
             ],
-            "time": "2014-05-10 07:13:36"
+            "support": {
+                "source": "https://github.com/ElectricMaxxx/phpcr-odm/tree/uuid-on-references"
+            },
+            "time": "2014-05-23 06:54:15"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -2047,6 +2047,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "liip/rmt": 20,
+        "doctrine/phpcr-odm": 20,
         "doctrine/orm": 20
     },
     "platform": {
