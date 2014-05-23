@@ -323,7 +323,8 @@ class UnitOfWork
         $referencedObjets = array_filter(
             $classMetadata->getReferencedObjects(),
             function ($refObject) use ($referencedObject) {
-                return $refObject['target-object'] === get_class($referencedObject);
+                $refl = new \ReflectionClass($refObject['target-object']);
+                return $refl->isInstance($referencedObject);
             }
         );
 
@@ -334,6 +335,7 @@ class UnitOfWork
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjets as $fieldName => $reference) {
             $commonFieldMappings = $classMetadata->getCommonFields();
+
             if (!$commonFieldMappings) {
                 continue;
             }
@@ -359,7 +361,6 @@ class UnitOfWork
                     $objectProperty->setValue($object, $value);
                 }
             }
-
         }
     }
 

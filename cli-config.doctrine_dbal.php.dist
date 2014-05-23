@@ -15,7 +15,7 @@ $params = array(
     'host'      => 'localhost',
     'user'      => 'root',
     'password'  => '',
-    'dbname'    => 'phpcr_odm_tests',
+    'dbname'    => 'orm_odm_tests',
 );
 
 $dbConn = \Doctrine\DBAL\DriverManager::getConnection($params);

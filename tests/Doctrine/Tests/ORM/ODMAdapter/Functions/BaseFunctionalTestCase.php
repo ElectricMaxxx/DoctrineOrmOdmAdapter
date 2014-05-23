@@ -2,18 +2,21 @@
 
 namespace Doctrine\Tests\ORM\ODMAdapter\Functions;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ODMAdapter\Configuration;
 use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
+use Doctrine\ODM\PHPCR\Mapping\Driver\AnnotationDriver as PhpcrAnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver as OrmAnnotationDriver;
 use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
 use Doctrine\ORM\Tools\Setup;
 use PHPCR\RepositoryFactoryInterface;
 use PHPCR\SessionInterface;
+use PHPCR\Util\NodeHelper;
 
 class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -32,6 +35,8 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
      */
     protected $objectAdapterManager;
 
+    protected $base;
+
     /**
      * Connection parameters.
      *
@@ -47,7 +52,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
     /**
      * @var DocumentManager
      */
-    private $dm;
+    protected $dm;
 
     public function setUp()
     {
@@ -57,6 +62,9 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
         $this->createDocumentManager();
         $this->resetFunctionalNode($this->dm);
         $this->createObjectAdapterManager();
+        NodeHelper::createPath($this->dm->getPhpcrSession(), '/functional');
+        $this->base = $this->dm->find(null, '/functional');
+        $this->createBaseTables();
     }
 
     public function createDocumentManager(array $paths = null)
@@ -68,7 +76,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
             $paths = array(__DIR__ . "/../../../Models");
         }
 
-        $metaDriver = new AnnotationDriver($reader, $paths);
+        $metaDriver = new PhpcrAnnotationDriver($reader, $paths);
 
         $factoryclass = isset($GLOBALS['DOCTRINE_PHPCR_FACTORY'])
             ? $GLOBALS['DOCTRINE_PHPCR_FACTORY'] : '\Jackalope\RepositoryFactoryJackrabbit';
@@ -114,10 +122,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 
         $node = $root->addNode('functional');
         $session->save();
-
         $dm->clear();
-
-        return $node;
     }
 
     public function tearDown()
@@ -126,6 +131,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
             $session->logout();
         }
         $this->sessions = array();
+        $this->dropTables();
     }
 
     public function createEntityManager()
@@ -137,8 +143,17 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
                 $params[substr($key, strlen('jackalope.doctrine.dbal.'))] = $value;
             }
         }
-        $isDevMode = true;
-        $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/../../../Models"), $isDevMode);
+
+        $config = Setup::createConfiguration(true);
+        $reader = new AnnotationReader();
+        $reader->addGlobalIgnoredName('group');
+
+        if (empty($paths)) {
+            $paths = array(__DIR__ . "/../../../Models");
+        }
+
+        $metaDriver = new OrmAnnotationDriver($reader, $paths);
+        $config->setMetadataDriverImpl($metaDriver);
 
         // obtaining the entity manager
         $this->connection = DriverManager::getConnection($params);
@@ -158,11 +173,6 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
         }
     }
 
-    private function createEntityRegistry()
-    {
-        $this->entityRegistry = new Registry(null, array($this->connection), array($this->em), 'default', 'default');
-    }
-
     private function createObjectAdapterManager()
     {
         $configuration = new Configuration();
@@ -174,7 +184,28 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
                 'default'  => $this->em,
             ),
         ));
-
+        $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
+        $cache = new ArrayCache();
+        $reader = new AnnotationReader($cache);
+        $annotationDriver = new AnnotationDriver($reader);
+        $annotationDriver->addPaths(array(__DIR__ . "/../../../Models"));
+        $configuration->setMetadataDriverImpl($annotationDriver);
         $this->objectAdapterManager = new ObjectAdapterManager($configuration);
+    }
+
+    private function createBaseTables()
+    {
+        $this->connection->executeUpdate(
+          'CREATE TABLE IF NOT EXISTS `objects` (
+              `id` varchar(255),
+              `entityName` varchar(255),
+              `uuid` varchar(255)
+          )'
+        );
+    }
+
+    protected function dropTables()
+    {
+        $this->connection->executeUpdate("DROP TABLE objects");
     }
 }

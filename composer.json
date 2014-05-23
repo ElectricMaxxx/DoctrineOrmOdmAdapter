@@ -1,14 +1,16 @@
 {
-    "name": "doctrine/orm-odm-adapter",
+    "name": "electricmaxxx/doctrine-orm-odm-adapter",
     "type": "library",
     "description": "Mapping for using ODM on ORM",
     "keywords": ["odm", "orm", "database"],
-    "homepage": "http://www.doctrine-project.org",
     "license": "MIT",
     "authors":[
         {"name":"Maximilian Berghoff", "email":"maximilian.berghoff@gmx.de"}
     ],
     "minimum-stability": "dev",
+    "repositories": [
+        {"type":"vcs", "url":"https://github.com/ElectricMaxxx/phpcr-odm.git"}
+    ],
     "require": {
         "php": ">=5.3.3",
         "doctrine/common": "~2.4.0",
@@ -19,7 +21,7 @@
         "symfony/yaml": "~2.0",
         "liip/rmt": "dev-master",
         "doctrine/phpcr-bundle": "1.1.*",
-        "doctrine/phpcr-odm": "1.1.*",
+        "doctrine/phpcr-odm": "dev-uuid-on-references as 1.1.0",
         "doctrine/doctrine-bundle": "v1.2.0",
         "doctrine/orm": "2.4.*@dev",
         "phpcr/phpcr": "2.1.1",

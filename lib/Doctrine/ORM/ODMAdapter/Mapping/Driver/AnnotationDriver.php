@@ -118,7 +118,6 @@ class AnnotationDriver extends AbstractAnnotationDriver implements MappingDriver
 
             $class->mapCommonField($mapping);
         }
-
     }
 
     /**
