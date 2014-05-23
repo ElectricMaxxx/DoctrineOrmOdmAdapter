@@ -1,9 +1,8 @@
 {
-    "name": "doctrine/orm-odm-adapter",
+    "name": "electricmaxxx/doctrine-orm-odm-adapter",
     "type": "library",
     "description": "Mapping for using ODM on ORM",
     "keywords": ["odm", "orm", "database"],
-    "homepage": "http://www.doctrine-project.org",
     "license": "MIT",
     "authors":[
         {"name":"Maximilian Berghoff", "email":"maximilian.berghoff@gmx.de"}
