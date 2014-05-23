@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "80462cd7e4de9c12d8029c346de6d9ab",
+    "hash": "096e8abb741d5ddfbc1f171fb3a41f5c",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2042,7 +2042,12 @@
         }
     ],
     "aliases": [
-
+        {
+            "alias": "1.1.0",
+            "alias_normalized": "1.1.0.0",
+            "version": "dev-uuid-on-references",
+            "package": "doctrine/phpcr-odm"
+        }
     ],
     "minimum-stability": "dev",
     "stability-flags": {

@@ -22,7 +22,7 @@
         "symfony/yaml": "~2.0",
         "liip/rmt": "dev-master",
         "doctrine/phpcr-bundle": "1.1.*",
-        "doctrine/phpcr-odm": "dev-uuid-on-references",
+        "doctrine/phpcr-odm": "dev-uuid-on-references as 1.1.0",
         "doctrine/doctrine-bundle": "v1.2.0",
         "doctrine/orm": "2.4.*@dev",
         "phpcr/phpcr": "2.1.1",
