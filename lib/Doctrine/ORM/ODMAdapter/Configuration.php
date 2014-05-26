@@ -46,6 +46,17 @@ class Configuration
     private $managers;
 
     /**
+     * To hook on specific events for triggering all ObjectAdapterManager methods on it, we
+     * need some event listeners, you can add some own or use the given ones.
+     *
+     * @var array
+     */
+    private $referencingBaseEventListener = array(
+        ReferencingBase::DBAL_ORM => 'Doctrine\ORM\ODMAdapter\Event\OrmLifecycleListener',
+        ReferencingBase::PHPCR    => 'Doctrine\ORM\ODMAdapter\Event\PhpcrLifecycleListener',
+    );
+
+    /**
      * Sets if all object adapter metadata should be validated on read
      *
      * @param boolean $validateDoctrineMetadata
@@ -377,5 +388,37 @@ class Configuration
         }
 
         throw new ConfigurationException(sprintf('No manager found for type %s and manager name %s.', $type, $managerName));
+    }
+
+    /**
+     * @return array
+     */
+    public function getReferencingBaseEventListener()
+    {
+        return $this->referencingBaseEventListener;
+    }
+
+    /**
+     * @param array $referencingBaseEventListener
+     */
+    public function setReferencingBaseEventListener(array $referencingBaseEventListener)
+    {
+        $includedTypes = array(ReferencingBase::PHPCR, ReferencingBase::DBAL_ORM);
+        $this->referencingBaseEventListener = array();
+        foreach ($referencingBaseEventListener as $type => $value) {
+            if (in_array($type, $includedTypes)) {
+                $this->referencingBaseEventListener[$type] = $value;
+            }
+        }
+    }
+
+    /**
+     * @param string  $type the referencing base type for that event listener
+     * @return string       the FQCN of the listener
+     */
+    public function getReferencingBaseListenerByType($type) {
+        if (array_key_exists($type, $this->referencingBaseEventListener)) {
+            return $this->referencingBaseEventListener[$type];
+        }
     }
 }

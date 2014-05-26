@@ -41,6 +41,11 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
                                     ->disableOriginalConstructor()
                                     ->getMock();
 
+        $this->objectManager
+            ->expects($this->any())
+            ->method('getEventManager')
+            ->will($this->returnValue($this->eventManager));
+
         $configuration = new Configuration();
         $configuration->setManagers(
             array(

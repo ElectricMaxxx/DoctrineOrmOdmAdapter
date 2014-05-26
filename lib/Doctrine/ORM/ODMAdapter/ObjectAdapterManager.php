@@ -45,6 +45,8 @@ class ObjectAdapterManager
         $this->classMetadataFactory = new $classMetadataFactoryClass($this);
 
         $this->unitOfWork = new UnitOfWork($this);
+
+        $this->addListenersToEventManagers();
     }
 
     /**
@@ -178,5 +180,27 @@ class ObjectAdapterManager
     public function getUnitOfWork()
     {
         return $this->getUnitOfWork();
+    }
+
+    private function addListenersToEventManagers()
+    {
+        $managers = $this->configuration->getManagers();
+        $typeBaseMapping = array(
+            Reference::PHPCR => ReferencingBase::PHPCR,
+            Reference::DBAL_ORM => ReferencingBase::DBAL_ORM,
+        );
+
+        foreach ($managers as $referenceType => $managerList) {
+            if (!isset($typeBaseMapping[$referenceType])) {
+                continue;
+            }
+
+            $listerClassName = $this->configuration->getReferencingBaseListenerByType($typeBaseMapping[$referenceType]);
+            foreach ($managerList as $manager) {
+                /** @var EventManager $eventManager */
+                $eventManager = $manager->getEventManager();
+                $eventManager->addEventSubscriber(new $listerClassName($this));
+            }
+        }
     }
 }
