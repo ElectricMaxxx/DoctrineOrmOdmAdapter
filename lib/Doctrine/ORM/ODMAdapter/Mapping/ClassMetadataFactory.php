@@ -30,7 +30,7 @@ use Doctrine\ORM\ODMAdapter\Exception\MappingException;
     /**
      * {@inheritdoc}
      */
-    protected $cacheSalt = '\$PHPCRODMCLASSMETADATA';
+    protected $cacheSalt = '\$BRIDGECLASSMETADATA';
 
     /**
      * @var ObjectAdapterManager
