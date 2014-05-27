@@ -31,9 +31,7 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
         $this->documentManager = $this->getMockBuilder('Doctrine\ODM\PHPCR\DocumentManager')
                                       ->disableOriginalConstructor()
                                       ->getMock();
-        $this->objectManager = $this->getMockBuilder('Doctrine\Common\Persistence\ObjectManager')
-                                    ->disableOriginalConstructor()
-                                    ->getMock();
+        $this->objectManager = $this->getMock('Doctrine\ORM\EntityManagerInterface');
         $this->eventManager = $this->getMockBuilder('Doctrine\Common\EventManager')
                                    ->disableOriginalConstructor()
                                    ->getMock();
@@ -45,6 +43,15 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
             ->expects($this->any())
             ->method('getEventManager')
             ->will($this->returnValue($this->eventManager));
+
+        $this->documentManager
+            ->expects($this->any())
+            ->method('getEventManager')
+            ->will($this->returnValue($this->eventManager));
+
+        $this->eventManager
+            ->expects($this->any())
+            ->method('addEventSubscriber');
 
         $configuration = new Configuration();
         $configuration->setManagers(
