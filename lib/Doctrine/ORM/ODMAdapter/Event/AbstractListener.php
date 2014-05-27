@@ -23,18 +23,20 @@ abstract class AbstractListener implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        array('prePersist', 'preUpdate', 'preFlush', 'preRemove', 'onClear');
+        return array('prePersist', 'preUpdate', 'preFlush', 'preRemove', 'onClear');
     }
 
     /**
-     * Detects if an object is mapped or not.
+     * Detects if an object is mapped and if it isn't scheduled in the UoW as an reference to avoid
+     * circular references.
      *
      * @param $object
      * @return bool
      */
-    protected function isManagedByBridge($object)
+    protected function isReferenceable($object)
     {
         $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
-        return null === $classMetadata ? false : true;
+
+        return null === $classMetadata || $this->objectAdapterManager->isReferenceScheduled($object) ? false : true;
     }
-} 
+}

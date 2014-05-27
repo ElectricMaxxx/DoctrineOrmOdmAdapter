@@ -43,14 +43,13 @@ class EventManagerTest extends BaseFunctionalTestCase
         $object->id = 'test-id';
 
         $this->em->persist($object);
-        $this->objectAdapterManager->persistReference($object);
 
         $this->assertTrue($listener->preBindReference);
         $this->assertFalse($listener->postBindReference);
 
         // flush will fire postBindReference and all flush events
         $this->em->flush();
-        $this->objectAdapterManager->flushReference();
+
         $this->assertTrue($listener->postBindReference);
         $this->assertTrue($listener->onFlushReference);
         $this->assertTrue($listener->preFlushReference);
@@ -58,7 +57,6 @@ class EventManagerTest extends BaseFunctionalTestCase
 
         // clear will fire onClear
         $this->em->clear();
-        $this->objectAdapterManager->clear();
         $this->assertTrue($listener->onClear);
 
         // all others shouldn't be fired
@@ -68,8 +66,7 @@ class EventManagerTest extends BaseFunctionalTestCase
         $this->assertFalse($listener->postRemoveReference);
 
         /** @var ReferenceMappingObject $object */
-        $object = $this->em->find(get_class($object),$object->id);
-        $this->objectAdapterManager->findReference($object);
+        $object = $this->em->find(get_class($object), $object->id);
         /** @var InvertedReferenceMappingObject $referencedObject */
         $referencedObject = $object->referencedField;
 
@@ -77,7 +74,6 @@ class EventManagerTest extends BaseFunctionalTestCase
         $this->assertTrue($listener->postLoadReference);
 
         $this->em->remove($object);
-        $this->objectAdapterManager->removeReference($object);
 
         // preRemove should be there, postRemove not
         $this->assertTrue($listener->preRemoveReference);
@@ -85,7 +81,6 @@ class EventManagerTest extends BaseFunctionalTestCase
 
         // just when flush let postRemove be thrown
         $this->em->flush();
-        $this->objectAdapterManager->flushReference();
 
         $this->assertTrue($listener->postRemoveReference);
     }

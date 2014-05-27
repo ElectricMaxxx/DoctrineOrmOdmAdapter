@@ -168,7 +168,7 @@ class ObjectAdapterManager
      */
     public function getManagerByType($type, $managerName = 'default')
     {
-        return $this->configuration->getManagerByReferenceType($type, $managerName );
+        return $this->configuration->getManagerByReferenceType($type, $managerName);
     }
 
     /**
@@ -187,6 +187,10 @@ class ObjectAdapterManager
         return $this->getUnitOfWork();
     }
 
+    /**
+     * Every manager should hav its own event managers, so this library will hook on its events to trigger
+     * this methods here.
+     */
     private function addListenersToEventManagers()
     {
         $managers = $this->configuration->getManagers();
@@ -202,10 +206,40 @@ class ObjectAdapterManager
 
             $listerClassName = $this->configuration->getReferencingBaseListenerByType($typeBaseMapping[$referenceType]);
             foreach ($managerList as $manager) {
-                /** @var EventManager $eventManager */
-                $eventManager = $manager->getEventManager();
-                $eventManager->addEventSubscriber(new $listerClassName($this));
+                if (method_exists($manager, 'getEventManager')) {
+                    /** @var EventManager $eventManager */
+                    $eventManager = $manager->getEventManager();
+                    if (null === $eventManager) {
+                        continue;
+                    }
+
+                    $eventManager->addEventSubscriber(new $listerClassName($this));
+                }
             }
         }
+    }
+
+    /**
+     * Will figure out if a reference is still scheduled inside the UoW or not.
+     *
+     * @param $referencedObject
+     * @return bool
+     */
+    public function isReferenceScheduled($referencedObject)
+    {
+
+        $allScheduledReferences = $this->unitOfWork->getAllScheduledReferences();
+        $reflection = new \ReflectionClass($referencedObject);
+
+        foreach ($allScheduledReferences as $oid => $objects) {
+            foreach ($objects as $fieldName => $object) {
+                if ($reflection->isInstance($object)) {
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

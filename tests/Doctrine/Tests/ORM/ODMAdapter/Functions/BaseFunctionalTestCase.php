@@ -4,6 +4,7 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Functions;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ODM\PHPCR\DocumentManager;
@@ -107,8 +108,8 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 
         $config = new \Doctrine\ODM\PHPCR\Configuration();
         $config->setMetadataDriverImpl($metaDriver);
-
-        $this->dm = DocumentManager::create($session, $config);
+        $eventManager = null; #new EventManager();
+        $this->dm = DocumentManager::create($session, $config, $eventManager);
     }
 
     public function resetFunctionalNode(DocumentManager $dm)
@@ -157,7 +158,8 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 
         // obtaining the entity manager
         $this->connection = DriverManager::getConnection($params);
-        $this->em = EntityManager::create($params, $config);
+        $eventManager = null; #new EventManager();
+        $this->em = EntityManager::create($params, $config, $eventManager);
     }
 
     private function fetchDbParameters()

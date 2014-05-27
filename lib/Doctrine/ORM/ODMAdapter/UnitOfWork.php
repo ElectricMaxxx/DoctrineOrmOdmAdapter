@@ -168,13 +168,13 @@ class UnitOfWork
                 );
             }
 
+            $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
+            $this->scheduleReferenceForInsert($object, $referencedObject, $fieldName);
+
             $manager = $this->objectAdapterManager->getManager($object, $fieldName);
             $manager->persist($referencedObject);
 
             $this->syncCommonFields($object, $referencedObject, $classMetadata);
-
-            $this->referencedObjectState[spl_object_hash($referencedObject)] = self::STATE_REFERENCED;
-            $this->scheduleReferenceForInsert($object, $referencedObject, $fieldName);
         }
 
         $oid = spl_object_hash($object);
@@ -451,6 +451,7 @@ class UnitOfWork
                 );
             }
 
+
             $value['manager']->flush();
         }
 
@@ -665,6 +666,21 @@ class UnitOfWork
     }
 
     /**
+     * Will return a merged array of all scheduled references.
+     *
+     * @return array
+     */
+    public function getAllScheduledReferences()
+    {
+        $scheduledReferences = array();
+        $scheduledReferences = array_merge($scheduledReferences, $this->getScheduledReferencesForInsert());
+        $scheduledReferences = array_merge($scheduledReferences, $this->getScheduledReferencesForRemove());
+        $scheduledReferences = array_merge($scheduledReferences, $this->getScheduledReferencesForUpdate());
+
+        return $scheduledReferences;
+    }
+
+    /**
      * To commit all referenced Objects by its managers we need to sort them.
      *
      * @return array
@@ -697,7 +713,6 @@ class UnitOfWork
                 }
             }
         }
-
 
         return $managedList;
     }

@@ -35,10 +35,8 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->object->referencedField = $this->referencedObject;
 
         $this->em->persist($this->object);
-        $this->objectAdapterManager->persistReference($this->object);
+
         $this->em->flush();
-        $this->objectAdapterManager->flushReference();
-        $this->objectAdapterManager->clear();
         $this->em->clear();
     }
 
@@ -54,11 +52,8 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->object->referencedField = $this->referencedObject;
 
         $this->dm->persist($this->object);
-        $this->objectAdapterManager->persistReference($this->object);
         $this->dm->flush();
-        $this->objectAdapterManager->flushReference();
         $this->dm->clear();
-        $this->objectAdapterManager->clear();
     }
 
     public function testPersistObject()
@@ -95,19 +90,14 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
 
         $object = $this->em->find(get_class($this->object), $this->object->id);
 
-        $this->objectAdapterManager->findReference($object);
-
         $referencedObject = $object->referencedField;
         $this->assertNotNull($referencedObject);
 
         $referencedObject->docName = 'updated doc name';
 
 
-        $this->objectAdapterManager->persistReference($object);
         $this->em->flush();
-        $this->objectAdapterManager->flushReference();
         $this->em->clear();
-        $this->objectAdapterManager->clear();
 
         $object = $this->em->find(get_class($this->object), $this->object->id);
         $referencedObject = $this->dm->find(get_class($this->referencedObject), $this->referencedObject->id);
@@ -125,19 +115,13 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
 
         $object = $this->dm->find(get_class($this->object), $this->object->id);
 
-        $this->objectAdapterManager->findReference($object);
-
         $referencedObject = $object->referencedField;
         $this->assertNotNull($referencedObject);
 
         $referencedObject->entityName = 'updated entity name';
 
-
-        $this->objectAdapterManager->persistReference($object);
         $this->dm->flush();
-        $this->objectAdapterManager->flushReference();
         $this->dm->clear();
-        $this->objectAdapterManager->clear();
 
         $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
         $object = $this->dm->find(get_class($this->object), $this->object->id);
@@ -154,14 +138,10 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->persistObject();
 
         $object = $this->em->find(get_class($this->object), $this->object->id);
-        $this->objectAdapterManager->findReference($object);
 
         $this->em->remove($object);
-        $this->objectAdapterManager->removeReference($object);
         $this->em->flush();
-        $this->objectAdapterManager->flushReference();
         $this->em->clear();
-        $this->objectAdapterManager->clear();
 
         $object = $this->em->find(get_class($this->object), $this->object->id);
         $referencedObject = $this->dm->find(get_class($this->referencedObject), $this->referencedObject->id);
