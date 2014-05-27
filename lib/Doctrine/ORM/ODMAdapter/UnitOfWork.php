@@ -4,10 +4,10 @@
 namespace Doctrine\ORM\ODMAdapter;
 
 use Doctrine\Common\EventManager;
-use Doctrine\Common\Persistence\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\LifecycleEventArgs;
 use Doctrine\ORM\ODMAdapter\Event\ListenersInvoker;
 use Doctrine\ORM\ODMAdapter\Event;
+use Doctrine\ORM\ODMAdapter\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 
@@ -245,6 +245,19 @@ class UnitOfWork
             $referencedObject = $objectProperty->getValue($object);
             if (!$referencedObject) {
                 continue;
+            }
+
+            if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+                $classMetadata,
+                Event::preRemoveReference
+            )) {
+                $this->eventListenersInvoker->invoke(
+                    $classMetadata,
+                    Event::preRemoveReference,
+                    $object,
+                    new LifecycleEventArgs($this->objectAdapterManager, $referencedObject, $object),
+                    $invoke
+                );
             }
 
             // call the remove method on the right manager
@@ -637,7 +650,7 @@ class UnitOfWork
     }
 
     /**
-     * Gets an specific referenced object which is scheduled for update by its objects, that conains
+     * Gets an specific referenced object which is scheduled for remove, that contains
      * the reference and the field name.
      *
      * @param $object
@@ -765,7 +778,6 @@ class UnitOfWork
             $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
 
             foreach ($fields as $referencedObject) {
-
                 if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
                     $classMetadata,
                     Event::postRemoveReference

@@ -21,17 +21,22 @@ class ObjectAdapterManager
     /**
      * @var ClassMetadataFactory
      */
-    protected $classMetadataFactory;
+    private $classMetadataFactory;
 
     /**
      * @var Configuration
      */
-    protected $configuration;
+    private $configuration;
 
     /**
      * @var UnitOfWork
      */
-    protected $unitOfWork;
+    private $unitOfWork;
+
+    /**
+     * @var EventManager
+     */
+    private $eventManager;
 
     /**
      * @param Configuration $config

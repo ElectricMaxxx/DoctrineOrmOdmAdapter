@@ -15,11 +15,11 @@ final class Event {
     const preUpdateReference = 'preUpdateReference';
     const postUpdateReference = 'postUpdateReference';
     const preRemoveReference = 'preRemoveReference';
-    const postRemoveReference = 'preRemoveReference';
+    const postRemoveReference = 'postRemoveReference';
     const loadClassMetadata = 'loadClassMetadata';
-    const preFlushReference = 'preFlush';
-    const onFlushReference = 'onFlush';
-    const postFlushReference = 'postFlush';
+    const preFlushReference = 'preFlushReference';
+    const onFlushReference = 'onFlushReference';
+    const postFlushReference = 'postFlushReference';
     const onClear = 'onClear';
 
     public static $lifecycleCallbacks = array();
