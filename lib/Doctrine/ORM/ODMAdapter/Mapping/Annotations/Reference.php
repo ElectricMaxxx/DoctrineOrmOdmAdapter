@@ -30,6 +30,10 @@ class Reference
      */
     public $name;
 
+    /**
+     * @var string
+     */
+    public $manager;
 
     /**
      * @var array

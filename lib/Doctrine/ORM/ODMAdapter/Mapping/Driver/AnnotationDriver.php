@@ -83,6 +83,9 @@ class AnnotationDriver extends AbstractAnnotationDriver implements MappingDriver
         if (isset($annotation->name)) {
             $mapping['name'] = $annotation->name;
         }
+        if (isset($annotation->manager)) {
+            $mapping['manager'] = $annotation->manager;
+        }
 
         if (!isset($mapping['name'])) {
             throw new MappingException('Attribute name needs to be set for reference mapping');

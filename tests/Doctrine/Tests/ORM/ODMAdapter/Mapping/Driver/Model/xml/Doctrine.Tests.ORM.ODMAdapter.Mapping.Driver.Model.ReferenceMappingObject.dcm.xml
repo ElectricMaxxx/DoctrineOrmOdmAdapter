@@ -11,7 +11,8 @@
                 target-object="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document"
                 referenced-by="uuid"
                 inversed-by="uuid"
-                name="referencedField">
+                name="referencedField"
+                manager="manager">
             <common-field referenced-by="docName" inversed-by="entityName" />
         </reference-phpcr>
 

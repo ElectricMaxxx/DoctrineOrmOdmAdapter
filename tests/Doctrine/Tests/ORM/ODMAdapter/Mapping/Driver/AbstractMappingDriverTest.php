@@ -151,6 +151,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $expectedMapping['type'] = Reference::PHPCR;
         $expectedMapping['property'] = 'referencedField';
         $expectedMapping['name'] = 'referencedField';
+        $expectedMapping['manager'] = 'manager';
 
         $this->assertEquals($expectedMapping, $class->mappings['referencedField']);
     }
@@ -170,6 +171,7 @@ abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase
         $expectedMapping['type'] = Reference::DBAL_ORM;
         $expectedMapping['property'] = 'referencedField';
         $expectedMapping['name'] = 'referencedField';
+        $expectedMapping['manager'] = 'manager';
 
         $this->assertEquals($expectedMapping, $class->mappings['referencedField']);
     }

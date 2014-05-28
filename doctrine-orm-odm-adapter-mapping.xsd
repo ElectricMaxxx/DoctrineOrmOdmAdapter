@@ -35,6 +35,7 @@
         <xs:attribute name="target-object" type="xs:string" default="null" />
         <xs:attribute name="referenced-by" type="xs:string" use="required" />
         <xs:attribute name="inversed-by" type="xs:string" use="required" />
+        <xs:attribute name="manager" type="xs:string" default="default" />
     </xs:complexType>
 
 

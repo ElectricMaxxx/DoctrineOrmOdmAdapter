@@ -11,7 +11,8 @@
                 target-object="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object"
                 referenced-by="id"
                 inversed-by="objectId"
-                name="referencedField">
+                name="referencedField"
+                manager="manager">
             <common-field referenced-by="entityName" inversed-by="docName" />
         </reference-dbal-orm>
 

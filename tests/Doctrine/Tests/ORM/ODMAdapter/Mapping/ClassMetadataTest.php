@@ -92,6 +92,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testReferenceMapping
      * @param ClassMetadata $cm
+     * @return \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata
      */
     public function testMapReferenceDocument(ClassMetadata $cm)
     {
@@ -102,6 +103,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
             'target-object' => 'document',
             'fieldName'       => 'referencedField',
             'inversed-entity' => 'entity',
+            'manager'         => 'manager',
         ));
 
         $this->assertTrue(isset($cm->mappings['referencedField']));
@@ -112,9 +114,10 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'fieldName'       => 'referencedField',
                 'referenced-by'   => 'uuid',
                 'inversed-by'     => 'uuid',
-                'target-object' => 'document',
+                'target-object'   => 'document',
                 'inversed-entity' => 'entity',
                 'property'        => 'referencedField',
+                'manager'         => 'manager',
             ),
             $cm->mappings['referencedField']
         );
@@ -141,6 +144,7 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
                 'target-object' => 'document',
                 'inversed-entity' => 'entity',
                 'property'        => 'referencedField',
+                'manager'         => 'manager',
             ),
             $cm->getReferencedObject('referencedField')
         );

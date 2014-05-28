@@ -347,6 +347,10 @@ class ClassMetadata implements CommonClassMetadata
             );
         }
 
+        if (!isset($mapping['manager'])) {
+            $mapping['manager'] = 'default';
+        }
+
         $mapping = $this->validateAndCompleteFieldMapping($mapping, $inherit, false, false);
 
         $this->referencedObjects[$mapping['property']] = $mapping;
