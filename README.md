@@ -145,12 +145,12 @@ Yaml
 
 ```yml
 
-Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
-  referencedField:
-      type: reference-phpcr
-      referenced-by: uuid
-      inversed-by: uuid
-      target-object: Document
+    Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
+      referencedField:
+          type: reference-phpcr
+          referenced-by: uuid
+          inversed-by: uuid
+          target-object: Document
 
 ```
 
@@ -303,14 +303,14 @@ or in Yaml
 
 ```yml
 
-Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
-  referencedField:
-      type: reference-phpcr
-      referenced-by: uuid
-      inversed-by: uuid
-      target-object: Document
-      common-field:
-          - {referenced-by: title, inversed-by: title, sync-type: from-reference}
+    Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
+      referencedField:
+          type: reference-phpcr
+          referenced-by: uuid
+          inversed-by: uuid
+          target-object: Document
+          common-field:
+              - {referenced-by: title, inversed-by: title, sync-type: from-reference}
 
 ```
 
