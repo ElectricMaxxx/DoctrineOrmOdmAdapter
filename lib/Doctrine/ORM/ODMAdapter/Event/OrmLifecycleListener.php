@@ -13,7 +13,7 @@ class OrmLifecycleListener extends AbstractListener
     {
         $object = $event->getEntity();
         if ($this->isReferenceable($object)) {
-            print("ORM persist\n");
+            #print("ORM persist\n");
             $this->objectAdapterManager->persistReference($object);
         }
 
@@ -23,8 +23,7 @@ class OrmLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
-            print("ORM update\n");
-            $this->objectAdapterManager->persistReference($object);
+            #$this->objectAdapterManager->persistReference($object);
         }
     }
 
@@ -32,7 +31,6 @@ class OrmLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
-            print("ORM load\n");
             $this->objectAdapterManager->findReference($object);
         }
     }
@@ -41,20 +39,17 @@ class OrmLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
-            print("ORM remove\n");
             $this->objectAdapterManager->removeReference($object);
         }
     }
 
     public function onClear(OnClearEventArgs $event)
     {
-        print("ORM clear\n");
         $this->objectAdapterManager->clear();
     }
 
     public function preFlush(PreFlushEventArgs $event)
     {
-        print("ORM flush\n");
         $this->objectAdapterManager->flushReference();
     }
 }

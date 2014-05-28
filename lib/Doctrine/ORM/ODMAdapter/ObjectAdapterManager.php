@@ -256,12 +256,11 @@ class ObjectAdapterManager
      */
     public function isReferenced($referencedObject)
     {
-
         $allScheduledReferences = $this->unitOfWork->getAllScheduledReferences();
         $reflection = new \ReflectionClass($referencedObject);
 
-        foreach ($allScheduledReferences as $oid => $objects) {
-            foreach ($objects as $fieldName => $object) {
+        foreach ($allScheduledReferences as $objects) {
+            foreach ($objects as $object) {
                 if ($reflection->isInstance($object)) {
 
                     return true;

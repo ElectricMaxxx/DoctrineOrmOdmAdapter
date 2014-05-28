@@ -74,8 +74,8 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
     {
         $this->persistInvertedObject();
 
-        $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
         $object = $this->dm->find(null, $this->object->id);
+        $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
 
         $this->assertNotNull($object);
         $this->assertNotNull($referencedObject);
@@ -94,7 +94,6 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->assertNotNull($referencedObject);
 
         $referencedObject->docName = 'updated doc name';
-
 
         $this->em->flush();
         $this->em->clear();
@@ -123,8 +122,8 @@ class ObjectAdapterManagerTest extends BaseFunctionalTestCase
         $this->dm->flush();
         $this->dm->clear();
 
-        $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
         $object = $this->dm->find(get_class($this->object), $this->object->id);
+        $referencedObject = $this->em->find(get_class($this->referencedObject), $this->referencedObject->id);
 
         $this->assertNotNull($object);
         $this->assertNotNull($referencedObject);

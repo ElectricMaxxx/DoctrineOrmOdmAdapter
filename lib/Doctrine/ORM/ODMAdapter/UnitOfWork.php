@@ -154,7 +154,6 @@ class UnitOfWork
 
         switch ($objectState) {
             case self::OBJECT_STATE_MANAGED:    // this object is still managed and got its reference
-                print("updated\n");
                 $this->updateReference($object, $classMetadata);
                 break;
             case self::OBJECT_STATE_NEW:           // complete new reference
@@ -718,11 +717,10 @@ class UnitOfWork
     /**
      * To commit all referenced Objects by its managers we need to sort them.
      *
-     * @param bool $markVisisted
      * @throws Exception\UnitOfWorkException
      * @return array
      */
-    public function getScheduledReferencesByManager($markVisisted = false)
+    public function getScheduledReferencesByManager()
     {
         $managedList = array();
         $scheduledLists = array(
@@ -870,12 +868,12 @@ class UnitOfWork
      */
     public function hasReferencedObject($referencedObject)
     {
-        $roid = spl_object_hash($referencedObject);
-        if (isset($this->referencedObjects[$roid])) {
-            return true;
-        }
+        $referenceReflection = new \ReflectionClass($referencedObject);
+        $references = array_filter($this->referencedObjects, function($reference) use ($referenceReflection) {
+            return $referenceReflection->isInstance($reference['referencedObject']);
+        });
 
-        return false;
+        return count($references) > 0;
     }
 
     /**
@@ -905,6 +903,8 @@ class UnitOfWork
                         $invoke
                     );
                 }
+
+                $this->syncCommonFields($reference['object'], $reference['referencedObject'], $classMetadata);
 
                 $this->scheduleReferenceForUpdate($reference['object'], $reference['referencedObject'], $reference['fieldName']);
             }
