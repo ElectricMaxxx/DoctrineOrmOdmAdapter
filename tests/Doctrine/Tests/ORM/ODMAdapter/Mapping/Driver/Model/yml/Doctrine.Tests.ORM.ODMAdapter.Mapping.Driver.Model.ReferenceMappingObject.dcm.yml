@@ -1,0 +1,9 @@
+Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
+  referencedField:
+      type: reference-phpcr
+      referenced-by: uuid
+      inversed-by: uuid
+      target-object: Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Document
+      manager: manager
+      common-field:
+          - {referenced-by: docName, inversed-by: entityName, sync-type: from-reference}

@@ -39,40 +39,40 @@ Configuration
 
 ```php
 
- use Doctrine\Common\Annotations\AnnotationReader;
- use Doctrine\Common\Cache\ArrayCache;
- use Doctrine\Common\EventManager;
- use Doctrine\ODM\PHPCR\DocumentManager;
- use Doctrine\ORM\EntityManager;
- use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
- use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
- use Doctrine\Common\EventManager;
+     use Doctrine\Common\Annotations\AnnotationReader;
+     use Doctrine\Common\Cache\ArrayCache;
+     use Doctrine\Common\EventManager;
+     use Doctrine\ODM\PHPCR\DocumentManager;
+     use Doctrine\ORM\EntityManager;
+     use Doctrine\ORM\ODMAdapter\Mapping\Driver\AnnotationDriver;
+     use Doctrine\ORM\ODMAdapter\ObjectAdapterManager;
+     use Doctrine\Common\EventManager;
 
- // caching and annotation read
- $cache = new ArrayCache();
- $reader = new AnnotationReader($cache);
+     // caching and annotation read
+     $cache = new ArrayCache();
+     $reader = new AnnotationReader($cache);
 
- // AnnotationDriver as example, Yaml and Xml available too
- $annotationDriver = new AnnotationDriver($reader);
- $annotationDriver->addPaths(array(__DIR__ . "/Models"));
+     // AnnotationDriver as example, Yaml and Xml available too
+     $annotationDriver = new AnnotationDriver($reader);
+     $annotationDriver->addPaths(array(__DIR__ . "/Models"));
 
- // configuration for the manager
- $configuration = new Configuration();
- $configuration->setManagers(
-    array(
-        'reference-phpcr' => array(
-            'default'  => $documentManager,
-        ),
-        'reference-dbal-orm' => array(
-            'default'  => $entityManager,
-        ),
-    )
- );
- $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
- $configuration->setMetadataDriverImpl($annotationDriver);
+     // configuration for the manager
+     $configuration = new Configuration();
+     $configuration->setManagers(
+        array(
+            'reference-phpcr' => array(
+                'default'  => $documentManager,
+            ),
+            'reference-dbal-orm' => array(
+                'default'  => $entityManager,
+            ),
+        )
+     );
+     $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
+     $configuration->setMetadataDriverImpl($annotationDriver);
 
- // create the ObjectAdapterManager with the configuration and optional event manager
- $this->objectAdapterManager = new ObjectAdapterManager($configuration, new EventManager());
+     // create the ObjectAdapterManager with the configuration and optional event manager
+     $this->objectAdapterManager = new ObjectAdapterManager($configuration, new EventManager());
 
 ```
 
@@ -188,7 +188,7 @@ lives in. At the moment there are two different types available:
 
 The body of those types got same attributes for all:
  - referenced-by -> the identifier to reference the object
- (`$manager->find(null, $ide))` should work)
+ (`$manager->find(null, $id))` should work)
  - inversed-by -> the field to store the value of the referenced objects
  field (referenced-by)
  target-object -> the FQCN of the referenced object
@@ -207,51 +207,51 @@ on the `ObjectAdapterManager`. Just take the library's own as example:
 
 ```php
 
- <?php
+     <?php
 
- namespace Doctrine\ORM\ODMAdapter\Event;
+     namespace Doctrine\ORM\ODMAdapter\Event;
 
- use Doctrine\Common\Persistence\Event\ManagerEventArgs;
- use Doctrine\ORM\Event\PreFlushEventArgs;
- use Doctrine\ORM\Event\LifecycleEventArgs;
- use Doctrine\ORM\Event\OnClearEventArgs;
+     use Doctrine\Common\Persistence\Event\ManagerEventArgs;
+     use Doctrine\ORM\Event\PreFlushEventArgs;
+     use Doctrine\ORM\Event\LifecycleEventArgs;
+     use Doctrine\ORM\Event\OnClearEventArgs;
 
- class OrmLifecycleListener extends AbstractListener
- {
-     public function prePersist(LifecycleEventArgs $event)
+     class OrmLifecycleListener extends AbstractListener
      {
-         $object = $event->getEntity();
-         if ($this->isReferenceable($object)) {
-             $this->objectAdapterManager->persistReference($object);
+         public function prePersist(LifecycleEventArgs $event)
+         {
+             $object = $event->getEntity();
+             if ($this->isReferenceable($object)) {
+                 $this->objectAdapterManager->persistReference($object);
+             }
+         }
+
+         public function postLoad(LifecycleEventArgs $event)
+         {
+             $object = $event->getObject();
+             if ($this->isReferenceable($object)) {
+                 $this->objectAdapterManager->findReference($object);
+             }
+         }
+
+         public function preRemove(LifecycleEventArgs $event)
+         {
+             $object = $event->getObject();
+             if ($this->isReferenceable($object)) {
+                 $this->objectAdapterManager->removeReference($object);
+             }
+         }
+
+         public function onClear(OnClearEventArgs $event)
+         {
+             $this->objectAdapterManager->clear();
+         }
+
+         public function preFlush(PreFlushEventArgs $event)
+         {
+             $this->objectAdapterManager->flushReference();
          }
      }
-
-     public function postLoad(LifecycleEventArgs $event)
-     {
-         $object = $event->getObject();
-         if ($this->isReferenceable($object)) {
-             $this->objectAdapterManager->findReference($object);
-         }
-     }
-
-     public function preRemove(LifecycleEventArgs $event)
-     {
-         $object = $event->getObject();
-         if ($this->isReferenceable($object)) {
-             $this->objectAdapterManager->removeReference($object);
-         }
-     }
-
-     public function onClear(OnClearEventArgs $event)
-     {
-         $this->objectAdapterManager->clear();
-     }
-
-     public function preFlush(PreFlushEventArgs $event)
-     {
-         $this->objectAdapterManager->flushReference();
-     }
- }
 
 ```
 

@@ -50,15 +50,15 @@ class BuiltinObjectAdaptersDriver implements MappingDriver
     /**
      * {@inheritdoc}
      */
-    public function loadMetadataForClass($className, ClassMetadata $class)
+    public function loadMetadataForClass($className, ClassMetadata $classMetadata)
     {
         if (strpos($className, self::NAME_SPACE) === 0) {
-            $this->builtinDriver->loadMetadataForClass($className, $class);
+            $this->builtinDriver->loadMetadataForClass($className, $classMetadata);
 
             return;
         }
 
-        $this->wrappedDriver->loadMetadataForClass($className, $class);
+        $this->wrappedDriver->loadMetadataForClass($className, $classMetadata);
     }
 
     /**

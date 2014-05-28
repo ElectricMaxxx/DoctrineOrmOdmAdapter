@@ -48,14 +48,14 @@ class XmlDriver extends FileDriver{
      * Loads the metadata for the specified class into the provided container.
      *
      * @param string $className
-     * @param ClassMetadata $class
+     * @param ClassMetadata $classMetadata
      * @throws \Doctrine\ORM\ODMAdapter\Exception\MappingException
      *
      * @return void
      */
-    public function loadMetadataForClass($className, ClassMetadata $class)
+    public function loadMetadataForClass($className, ClassMetadata $classMetadata)
     {
-        /** @var $class \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata */
+        /** @var $classMetadata \Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata */
         try {
             $xmlRoot = $this->getElement($className);
         } catch (DoctrineMappingException $e) {
@@ -81,7 +81,7 @@ class XmlDriver extends FileDriver{
 
         // not supported types won't be parsed
         if ($rootElement instanceof \SimpleXMLElement) {
-            $this->extractReferencedObjects($rootElement, $class, $className, $mapping);
+            $this->extractReferencedObjects($rootElement, $classMetadata, $className, $mapping);
         }
     }
 

@@ -1,0 +1,9 @@
+Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\InvertedReferenceMappingObject:
+  referencedField:
+      type: reference-dbal-orm
+      referenced-by: id
+      inversed-by: objectId
+      target-object: Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object
+      manager: manager
+      common-field:
+          - {referenced-by: entityName, inversed-by: docName, sync-type: from-reference}
