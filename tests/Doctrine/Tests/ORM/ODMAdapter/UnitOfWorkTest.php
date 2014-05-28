@@ -76,6 +76,7 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
                 'target-object' => get_class($testReferencedObject),
                 'fieldName'     => 'referencedField',
                 'sync-type'     => 'from-reference',
+                'manager'       => 'manager',
             ),
         );
         $commonFieldMappings = array(

@@ -23,9 +23,6 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
      */
     private $objectAdapterManager;
 
-    private $ormRegistry;
-    private $phpcrRegistry;
-
     public function setUp()
     {
         $this->documentManager = $this->getMockBuilder('Doctrine\ODM\PHPCR\DocumentManager')
@@ -77,6 +74,15 @@ class ObjectAdapterManagerTest extends \PHPUnit_Framework_TestCase
     public function testGetMangerByTypeThrowsException()
     {
         $this->objectAdapterManager->getManagerByType('some-type');
+    }
+
+    /**
+     * @expectedException \Doctrine\ORM\ODMAdapter\Exception\ConfigurationException
+     * @expectedExceptionMessage No manager found for type some-type and manager name manager.
+     */
+    public function testGetManagerByTypeAndNameThrowsException()
+    {
+        $this->objectAdapterManager->getManagerByType('some-type', 'manager');
     }
 
     /**

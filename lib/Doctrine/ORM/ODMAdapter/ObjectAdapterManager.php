@@ -172,17 +172,20 @@ class ObjectAdapterManager
     public function getManager($object, $fieldName)
     {
         $classMetdata = $this->getClassMetadata(get_class($object));
-        $type = $classMetdata->getReferencedType($fieldName);
-        if (!$type) {
+        $reference = $classMetdata->getReferencedObject($fieldName);
+
+        if (!$reference) {
             throw new MappingException(sprintf('No reference mapping on %s', get_class($object)));
         }
 
-        // todo implement a manager mapping
+        $type = $reference['type'];
+        $managerName = $reference['manager'];
+
         /** @var ManagerRegistry $manager */
-        $manager = $this->configuration->getManagerByReferenceType($type);
+        $manager = $this->configuration->getManagerByReferenceType($type,  $managerName);
         if (!$manager) {
             throw new MappingException(
-                sprintf('No manager found for mapped reference type %s and manager name %s.', $type, 'default')
+                sprintf('No manager found for mapped reference type %s and manager name %s.', $type, $managerName)
             );
         }
 
