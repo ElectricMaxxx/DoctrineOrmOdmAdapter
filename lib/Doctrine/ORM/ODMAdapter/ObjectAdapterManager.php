@@ -9,6 +9,7 @@ use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory;
+use Exception;
 
 /**
  * The ObjectAdapterManager will combine persistence operation
@@ -97,14 +98,24 @@ class ObjectAdapterManager
         $this->unitOfWork->loadReferences($object);
     }
 
+    /**
+     * When the UoW does not have cleared anymore it will do it now.
+     */
     public function flushReference()
     {
-        $this->unitOfWork->commit();
+        if (!$this->getUnitOfWork()->hasFlushed()) {
+            $this->unitOfWork->commit();
+        }
     }
 
+    /**
+     * When the UoW does not have cleared anymore it will do it now.
+     */
     public function clear()
     {
-        $this->unitOfWork->clear();
+        if (!$this->getUnitOfWork()->hasCleared()) {
+            $this->unitOfWork->clear();
+        }
     }
 
     /**
@@ -114,6 +125,23 @@ class ObjectAdapterManager
     public function getClassMetadata($className)
     {
         return $this->classMetadataFactory->getMetadataFor($className);
+    }
+
+    /**
+     * Method checks if there is a class metadata available for this class name.
+     *
+     * @param $className
+     * @return bool
+     */
+    public function hasValidMapping($className)
+    {
+        $valid = false;
+        try {
+            $this->getClassMetadata($className);
+            $valid = true;
+        } catch (MappingException $e) {}
+
+        return $valid;
     }
 
     /**
@@ -138,7 +166,7 @@ class ObjectAdapterManager
      *
      * @param object $object
      * @param $fieldName
-     * @throws Exception\MappingException
+     * @throws MappingException
      * @return ObjectManager|DocumentManager
      */
     public function getManager($object, $fieldName)
@@ -180,11 +208,11 @@ class ObjectAdapterManager
     }
 
     /**
-     * @return mixed
+     * @return UnitOfWork
      */
     public function getUnitOfWork()
     {
-        return $this->getUnitOfWork();
+        return $this->unitOfWork;
     }
 
     /**
@@ -220,12 +248,13 @@ class ObjectAdapterManager
     }
 
     /**
-     * Will figure out if a reference is still scheduled inside the UoW or not.
+     * Will figure out if a reference is still scheduled inside the UoW or just mapped
+     * as an referenced object.
      *
      * @param $referencedObject
      * @return bool
      */
-    public function isReferenceScheduled($referencedObject)
+    public function isReferenced($referencedObject)
     {
 
         $allScheduledReferences = $this->unitOfWork->getAllScheduledReferences();
@@ -240,6 +269,6 @@ class ObjectAdapterManager
             }
         }
 
-        return false;
+        return $this->unitOfWork->hasReferencedObject($referencedObject);
     }
 }

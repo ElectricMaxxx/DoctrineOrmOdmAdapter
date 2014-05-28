@@ -16,7 +16,7 @@
 
     <testsuites>
         <testsuite name="Project Test Suite">
-            <file>/home/maximilian/websites/doctrine/DoctrineOrmOdmAdapter/tests/Doctrine/Tests/ORM/ODMAdapter/Functions/EventManagerTest.php</file>
+            <file>/home/maximilian/websites/doctrine/doctrine-orm-odm-adapter/tests/Doctrine/Tests/ORM/ODMAdapter/Functions/EventManagerTest.php</file>
             <!--<directory>./</directory> -->
         </testsuite>
     </testsuites>

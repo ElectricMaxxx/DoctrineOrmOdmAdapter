@@ -74,4 +74,19 @@ class TestEventListener {
     {
         $this->onClear = true;
     }
+
+    public function reset()
+    {
+        $this->preBindReference = false;
+        $this->postBindReference = false;
+        $this->postLoadReference = false;
+        $this->preUpdateReference = false;
+        $this->postUpdateReference = false;
+        $this->preRemoveReference = false;
+        $this->postRemoveReference = false;
+        $this->preFlushReference = false;
+        $this->postFlushReference = false;
+        $this->onFlushReference = false;
+        $this->onClear = false;
+    }
 } 

@@ -11,7 +11,7 @@ class PhpcrLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
-            print("HOOK-persistPHPCR\n");
+            print("PHPCR persist\n");
             $this->objectAdapterManager->persistReference($object);
         }
 
@@ -21,7 +21,17 @@ class PhpcrLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
+            print("PHPCR update\n");
             $this->objectAdapterManager->persistReference($object);
+        }
+    }
+
+    public function postLoad(LifecycleEventArgs $event)
+    {
+        $object = $event->getObject();
+        if ($this->isReferenceable($object)) {
+            print("PHPCR load\n");
+            $this->objectAdapterManager->findReference($object);
         }
     }
 
@@ -29,19 +39,20 @@ class PhpcrLifecycleListener extends AbstractListener
     {
         $object = $event->getObject();
         if ($this->isReferenceable($object)) {
+            print("PHPCR remove\n");
             $this->objectAdapterManager->removeReference($object);
         }
     }
 
     public function onClear(ManagerEventArgs $event)
     {
-        die("clear");
+        print("PHPCR clear\n");
         $this->objectAdapterManager->clear();
     }
 
     public function preFlush(ManagerEventArgs $event)
     {
-        die('hier');
+        print("PHPCR flush\n");
         $this->objectAdapterManager->flushReference();
     }
 }

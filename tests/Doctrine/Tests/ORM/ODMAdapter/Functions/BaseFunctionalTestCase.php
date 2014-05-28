@@ -108,7 +108,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 
         $config = new \Doctrine\ODM\PHPCR\Configuration();
         $config->setMetadataDriverImpl($metaDriver);
-        $eventManager = null; #new EventManager();
+        $eventManager = new EventManager();
         $this->dm = DocumentManager::create($session, $config, $eventManager);
     }
 
@@ -158,7 +158,7 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
 
         // obtaining the entity manager
         $this->connection = DriverManager::getConnection($params);
-        $eventManager = null; #new EventManager();
+        $eventManager = new EventManager();
         $this->em = EntityManager::create($params, $config, $eventManager);
     }
 

@@ -666,16 +666,16 @@
         },
         {
             "name": "phpcr/phpcr-utils",
-            "version": "dev-master",
+            "version": "1.1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpcr/phpcr-utils.git",
-                "reference": "42ce1a6f15ca2d7cc93960d125c93dbc5d918780"
+                "reference": "37d49532fd344ed7e25a12dc5cb98d9958dd9397"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpcr/phpcr-utils/zipball/42ce1a6f15ca2d7cc93960d125c93dbc5d918780",
-                "reference": "42ce1a6f15ca2d7cc93960d125c93dbc5d918780",
+                "url": "https://api.github.com/repos/phpcr/phpcr-utils/zipball/37d49532fd344ed7e25a12dc5cb98d9958dd9397",
+                "reference": "37d49532fd344ed7e25a12dc5cb98d9958dd9397",
                 "shasum": ""
             },
             "require": {
@@ -686,7 +686,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.2-dev"
+                    "dev-master": "1.1-dev"
                 }
             },
             "autoload": {
@@ -725,7 +725,7 @@
                 "contentrepository",
                 "phpcr"
             ],
-            "time": "2014-05-24 10:44:55"
+            "time": "2014-05-24 10:44:29"
         },
         {
             "name": "symfony/console",
@@ -936,17 +936,17 @@
         },
         {
             "name": "doctrine/phpcr-bundle",
-            "version": "dev-master",
+            "version": "1.1.x-dev",
             "target-dir": "Doctrine/Bundle/PHPCRBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrinePHPCRBundle.git",
-                "reference": "a71760a18b2e6451aac9b059e98221af09168a3a"
+                "reference": "bb6689570cec4b15af63d8d2cfaaf85e5559c4fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrinePHPCRBundle/zipball/a71760a18b2e6451aac9b059e98221af09168a3a",
-                "reference": "a71760a18b2e6451aac9b059e98221af09168a3a",
+                "url": "https://api.github.com/repos/doctrine/DoctrinePHPCRBundle/zipball/bb6689570cec4b15af63d8d2cfaaf85e5559c4fc",
+                "reference": "bb6689570cec4b15af63d8d2cfaaf85e5559c4fc",
                 "shasum": ""
             },
             "require": {
@@ -974,7 +974,7 @@
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.2-dev"
+                    "dev-master": "1.1-dev"
                 }
             },
             "autoload": {
@@ -1004,7 +1004,7 @@
                 "persistence",
                 "phpcr"
             ],
-            "time": "2014-05-24 10:49:32"
+            "time": "2014-05-24 10:48:58"
         },
         {
             "name": "doctrine/phpcr-odm",
@@ -1193,12 +1193,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "99a530363b6cf50efc18e1a7cbb12d42b6b22a0b"
+                "reference": "58401826c8cfc8fd689b60026e91c337df374bca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/99a530363b6cf50efc18e1a7cbb12d42b6b22a0b",
-                "reference": "99a530363b6cf50efc18e1a7cbb12d42b6b22a0b",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/58401826c8cfc8fd689b60026e91c337df374bca",
+                "reference": "58401826c8cfc8fd689b60026e91c337df374bca",
                 "shasum": ""
             },
             "require": {
@@ -1250,7 +1250,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-05-19 02:25:07"
+            "time": "2014-05-26 14:55:24"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1515,12 +1515,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit-mock-objects.git",
-                "reference": "4dada9d8762055e292d79142adbdde56c113b21a"
+                "reference": "faf167fdda13caedf90c2d76d3a6cb23802cdac3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/4dada9d8762055e292d79142adbdde56c113b21a",
-                "reference": "4dada9d8762055e292d79142adbdde56c113b21a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/faf167fdda13caedf90c2d76d3a6cb23802cdac3",
+                "reference": "faf167fdda13caedf90c2d76d3a6cb23802cdac3",
                 "shasum": ""
             },
             "require": {
@@ -1564,7 +1564,7 @@
                 "mock",
                 "xunit"
             ],
-            "time": "2014-05-09 09:09:30"
+            "time": "2014-05-26 09:56:12"
         },
         {
             "name": "psr/log",
@@ -1933,12 +1933,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Debug.git",
-                "reference": "4f8214a60993984f7c89b1d1a44e9a3358878dd5"
+                "reference": "8c3626a4acd2daee0e6d93af9c5dbc42960d477e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Debug/zipball/4f8214a60993984f7c89b1d1a44e9a3358878dd5",
-                "reference": "4f8214a60993984f7c89b1d1a44e9a3358878dd5",
+                "url": "https://api.github.com/repos/symfony/Debug/zipball/8c3626a4acd2daee0e6d93af9c5dbc42960d477e",
+                "reference": "8c3626a4acd2daee0e6d93af9c5dbc42960d477e",
                 "shasum": ""
             },
             "require": {
@@ -1981,7 +1981,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "http://symfony.com",
-            "time": "2014-05-23 14:36:49"
+            "time": "2014-05-26 15:36:48"
         },
         {
             "name": "symfony/dependency-injection",
@@ -2357,12 +2357,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpKernel.git",
-                "reference": "d7cbd06293512b8a553afc5bba7ccb313375fb57"
+                "reference": "02b23b482e68a5fe741cc9b36d3e31ac5ae52530"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/d7cbd06293512b8a553afc5bba7ccb313375fb57",
-                "reference": "d7cbd06293512b8a553afc5bba7ccb313375fb57",
+                "url": "https://api.github.com/repos/symfony/HttpKernel/zipball/02b23b482e68a5fe741cc9b36d3e31ac5ae52530",
+                "reference": "02b23b482e68a5fe741cc9b36d3e31ac5ae52530",
                 "shasum": ""
             },
             "require": {
@@ -2378,7 +2378,6 @@
                 "symfony/config": "~2.0",
                 "symfony/console": "~2.2",
                 "symfony/dependency-injection": "~2.0",
-                "symfony/filesystem": "~2.4",
                 "symfony/finder": "~2.0",
                 "symfony/process": "~2.0",
                 "symfony/routing": "~2.2",
@@ -2391,7 +2390,6 @@
                 "symfony/config": "",
                 "symfony/console": "",
                 "symfony/dependency-injection": "",
-                "symfony/filesystem": "",
                 "symfony/finder": ""
             },
             "type": "library",
@@ -2423,7 +2421,7 @@
             ],
             "description": "Symfony HttpKernel Component",
             "homepage": "http://symfony.com",
-            "time": "2014-05-23 14:36:49"
+            "time": "2014-05-26 16:43:36"
         },
         {
             "name": "symfony/process",

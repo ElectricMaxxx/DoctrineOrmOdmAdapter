@@ -65,11 +65,30 @@ class EventManagerTest extends BaseFunctionalTestCase
         $this->assertFalse($listener->preRemoveReference);
         $this->assertFalse($listener->postRemoveReference);
 
+        $listener->reset();
+
         /** @var ReferenceMappingObject $object */
         $object = $this->em->find(get_class($object), $object->id);
+        // btw postLoadReference should be fired too
+        $this->assertTrue($listener->postLoadReference);
+
         /** @var InvertedReferenceMappingObject $referencedObject */
         $referencedObject = $object->referencedField;
+        $referencedObject->docName = 'updated doc name';
 
+        // after persisting a changed object preUpdate event should come
+        $this->em->persist($object);
+
+        // when flushed the postUpdate should be fired
+        $this->em->flush();
+        $this->em->clear();
+        $this->assertTrue($listener->preUpdateReference);
+        $this->assertTrue($listener->postUpdateReference);
+
+        $listener->reset();
+
+        /** @var ReferenceMappingObject $object */
+        $object = $this->em->find(get_class($object), $object->id);
         // btw postLoadReference should be fired too
         $this->assertTrue($listener->postLoadReference);
 

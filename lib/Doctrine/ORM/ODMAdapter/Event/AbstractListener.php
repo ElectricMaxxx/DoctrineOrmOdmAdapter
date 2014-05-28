@@ -23,7 +23,7 @@ abstract class AbstractListener implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return array('prePersist', 'preUpdate', 'preFlush', 'preRemove', 'onClear');
+        return array('prePersist', 'preUpdate', 'preFlush', 'postLoad', 'preRemove', 'onClear');
     }
 
     /**
@@ -35,8 +35,8 @@ abstract class AbstractListener implements EventSubscriber
      */
     protected function isReferenceable($object)
     {
-        $classMetadata = $this->objectAdapterManager->getClassMetadata(get_class($object));
-
-        return null === $classMetadata || $this->objectAdapterManager->isReferenceScheduled($object) ? false : true;
+        return !$this->objectAdapterManager->hasValidMapping(get_class($object))
+                || $this->objectAdapterManager->isReferenced($object)
+                ? false : true;
     }
 }
