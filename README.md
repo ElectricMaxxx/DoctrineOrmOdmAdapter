@@ -145,8 +145,12 @@ Yaml
 
 ```yml
 
-todo implement the yaml driver
-
+Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
+  referencedField:
+      type: reference-phpcr
+      referenced-by: uuid
+      inversed-by: uuid
+      target-object: Document
 
 ```
 
@@ -298,6 +302,15 @@ per property (Btw: you can do several references to different doctrines in one c
 or in Yaml
 
 ```yml
+
+Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
+  referencedField:
+      type: reference-phpcr
+      referenced-by: uuid
+      inversed-by: uuid
+      target-object: Document
+      common-field:
+          - {referenced-by: title, inversed-by: title, sync-type: from-reference}
 
 ```
 
