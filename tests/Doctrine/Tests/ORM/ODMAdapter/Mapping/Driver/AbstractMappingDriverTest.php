@@ -4,7 +4,6 @@ namespace Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver;
 
 use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
-use Doctrine\ORM\ODMAdapter\Mapping\Model\ReferencedOneDocument;
 use Doctrine\ORM\ODMAdapter\Reference;
 
 abstract class AbstractMappingDriverTest extends \PHPUnit_Framework_TestCase

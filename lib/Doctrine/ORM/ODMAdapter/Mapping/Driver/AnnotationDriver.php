@@ -93,8 +93,8 @@ class AnnotationDriver extends AbstractAnnotationDriver implements MappingDriver
 
         $mapping['fieldName'] = (string) $mapping['name'];
 
-        if (isset($annotation->commonField)) {
-            $this->extractCommonField($annotation->commonField, $class, $className, $mapping['fieldName']);
+        if (isset($annotation->commonFields)) {
+            $this->extractCommonField($annotation->commonFields, $class, $className, $mapping['fieldName']);
         }
 
         $class->mapReferencedObject($mapping);

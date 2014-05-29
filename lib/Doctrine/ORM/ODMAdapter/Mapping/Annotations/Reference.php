@@ -38,5 +38,5 @@ class Reference
     /**
      * @var array
      */
-    public $commonField;
+    public $commonFields;
 }
