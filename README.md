@@ -33,9 +33,9 @@ Usage
 Configuration
 ~~~~~~~~~~~~~
 
- To create a a new instance of an `ObjectAdapterManager` you will need to setup some simple
- configurations. The class will work without that, but you won't have any managers to
- persist your referenced objects:
+To create a a new instance of an `ObjectAdapterManager` you will need to setup some simple
+configurations. The class will work without that, but you won't have any managers to
+persist your referenced objects:
 
 ```php
 
