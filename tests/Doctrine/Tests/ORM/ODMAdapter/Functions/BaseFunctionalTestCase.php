@@ -192,7 +192,8 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
         $annotationDriver = new AnnotationDriver($reader);
         $annotationDriver->addPaths(array(__DIR__ . "/../../../Models"));
         $configuration->setMetadataDriverImpl($annotationDriver);
-        $this->objectAdapterManager = new ObjectAdapterManager($configuration);
+        $this->objectAdapterManager = ObjectAdapterManager::create($configuration);
+        $this->objectAdapterManager->addListenersToEventManagers();
     }
 
     private function createBaseTables()

@@ -51,8 +51,6 @@ class ObjectAdapterManager
         $this->classMetadataFactory = new $classMetadataFactoryClass($this);
 
         $this->unitOfWork = new UnitOfWork($this);
-
-        $this->addListenersToEventManagers();
     }
 
     /**
@@ -219,10 +217,10 @@ class ObjectAdapterManager
     }
 
     /**
-     * Every manager should hav its own event managers, so this library will hook on its events to trigger
+     * Every manager should have its own event managers, so this library will hook on its events to trigger
      * this methods here.
      */
-    private function addListenersToEventManagers()
+    public function addListenersToEventManagers()
     {
         $managers = $this->configuration->getManagers();
         $typeBaseMapping = array(

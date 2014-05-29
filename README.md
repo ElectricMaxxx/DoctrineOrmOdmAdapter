@@ -72,7 +72,10 @@ persist your referenced objects:
      $configuration->setMetadataDriverImpl($annotationDriver);
 
      // create the ObjectAdapterManager with the configuration and optional event manager
-     $this->objectAdapterManager = new ObjectAdapterManager($configuration, new EventManager());
+     $objectAdapterManager = ObjectAdapterManager::create($configuration, new EventManager());
+
+     // makes it possible to use the library's own event subscribers for the managers lifecycle events
+     $objectAdapterManager->addListenersToEventManagers();
 
 ```
 
