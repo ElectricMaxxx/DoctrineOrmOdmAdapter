@@ -70,8 +70,8 @@ class YamlDriver extends FileDriver
 
         $mapping['fieldName'] = (string) $mapping['name'];
 
-        if (isset($root['common-field'])) {
-            $this->extractCommonFields($root['common-field'], $class, $className, $targetReferencedObjectField);
+        if (isset($root['common-fields'])) {
+            $this->extractCommonFields($root['common-fields'], $class, $className, $targetReferencedObjectField);
         }
 
         $class->mapReferencedObject($mapping);

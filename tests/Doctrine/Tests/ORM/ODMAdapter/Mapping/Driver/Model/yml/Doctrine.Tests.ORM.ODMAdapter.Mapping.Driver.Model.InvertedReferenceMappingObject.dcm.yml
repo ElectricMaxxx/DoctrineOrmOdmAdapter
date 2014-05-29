@@ -5,5 +5,5 @@ Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\InvertedReferenceMappingObjec
       inversed-by: objectId
       target-object: Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object
       manager: manager
-      common-field:
+      common-fields:
           - {referenced-by: entityName, inversed-by: docName, sync-type: from-reference}
