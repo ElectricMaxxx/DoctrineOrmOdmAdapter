@@ -120,7 +120,7 @@ Mapping
 But the mapping of this library should help in such a situation. You can
 do it in Xml:
 
-```xml
+```
 
     <?xml version="1.0" encoding="UTF-8"?>
     <doctrine-mapping
@@ -143,7 +143,7 @@ do it in Xml:
 
 Yaml
 
-```yml
+```
 
     Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
       referencedField:
@@ -286,7 +286,7 @@ data, but you will got some performance boosts.
 You can do that mapping inside your reference, cause one reference mapping is done
 per property (Btw: you can do several references to different doctrines in one class)
 
-```xml
+```
 
     <reference-phpcr
             target-object="Document"
@@ -300,7 +300,7 @@ per property (Btw: you can do several references to different doctrines in one c
 
 or in Yaml
 
-```yml
+```
 
     Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\ReferenceMappingObject:
       referencedField:
