@@ -80,13 +80,12 @@ class AnnotationDriver extends AbstractAnnotationDriver implements MappingDriver
         if (isset($annotation->inversedBy)) {
             $mapping['inversed-by'] = $annotation->inversedBy;
         }
-        if (isset($annotation->name)) {
-            $mapping['name'] = $annotation->name;
-        }
         if (isset($annotation->manager)) {
             $mapping['manager'] = $annotation->manager;
         }
-
+        if (isset($mapping['fieldName'])) {
+            $mapping['name'] = $mapping['fieldName'];
+        }
         if (!isset($mapping['name'])) {
             throw new MappingException('Attribute name needs to be set for reference mapping');
         }

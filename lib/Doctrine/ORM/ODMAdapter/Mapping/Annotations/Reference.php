@@ -28,11 +28,6 @@ class Reference
     /**
      * @var string
      */
-    public $name;
-
-    /**
-     * @var string
-     */
     public $manager;
 
     /**

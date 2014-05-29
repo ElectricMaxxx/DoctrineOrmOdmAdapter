@@ -18,7 +18,6 @@ class InvertedReferenceMappingObject
      *  referencedBy="id",
      *  inversedBy="objectId",
      *  targetObject="Doctrine\Tests\ORM\ODMAdapter\Mapping\Driver\Model\Object",
-     *  name="referencedField",
      *  manager="manager",
      *  commonFields={
      *      @ODMAdapter\CommonField(referencedBy="entityName", inversedBy="docName")

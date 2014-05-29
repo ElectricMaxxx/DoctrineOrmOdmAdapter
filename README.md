@@ -64,7 +64,7 @@ Configuration
                 'default'  => $documentManager,
             ),
             'reference-dbal-orm' => array(
-                'default'  => $entityManager,
+                'defaulKt'  => $entityManager,
             ),
         )
      );
@@ -172,7 +172,6 @@ or Annotations
           *  referencedBy="uuid",
           *  inversedBy="uuid",
           *  targetObject="Document",
-          *  name="document",
           *  manager="default"
           * )
           */
@@ -309,7 +308,7 @@ or in Yaml
           referenced-by: uuid
           inversed-by: uuid
           target-object: Document
-          common-field:
+          common-fields:
               - {referenced-by: title, inversed-by: title, sync-type: from-reference}
 
 ```
@@ -323,8 +322,7 @@ or in xml
      *  referencedBy="uuid",
      *  inversedBy="uuid",
      *  targetObject="Document",
-     *  name="document",
-     *  commonField={
+     *  commonFields={
      *      @ODMAdapter\CommonField(referencedBy="docName", inversedBy="entityName", syncType="from-reference")
      *  }
      * )
