@@ -1,5 +1,5 @@
 What the hell is he doing here?
--------------------------------
+===============================
 
 [![Build Status](https://secure.travis-ci.org/ElectricMaxxx/DoctrineOrmOdmAdapter.png)](http://travis-ci.org/ElectricMaxxx/DoctrineOrmOdmAdapter)
 
@@ -28,10 +28,10 @@ Current state:
  * [x] Bundle to use that library
 
 Usage
------
+=====
 
 Configuration
-~~~~~~~~~~~~~
+-------------
 
 To create a a new instance of an `ObjectAdapterManager` you will need to setup some simple
 configurations. The class will work without that, but you won't have any managers to
@@ -115,7 +115,7 @@ But how should that example work? We can do some custom event hooking
 for every use case or just persist the referenced objects manually.
 
 Mapping
-~~~~~~~
+-------
 
 But the mapping of this library should help in such a situation. You can
 do it in Xml:
@@ -260,7 +260,7 @@ on the `ObjectAdapterManager`. Just take the library's own as example:
 
 
 Common fields
-~~~~~~~~~~~~~
+-------------
 
 That field are fields, that should have same content on both objects.
 The referencing and the referenced one.
