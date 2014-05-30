@@ -137,8 +137,9 @@ class ObjectAdapterManager
         try {
             $this->getClassMetadata($className);
             $valid = true;
-        } catch (MappingException $e) {}
+        } catch (\Exception $e) {
 
+        }
         return $valid;
     }
 
