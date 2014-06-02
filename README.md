@@ -21,11 +21,11 @@ Current state:
  * [x] ClassMetadataFactory + Test
  * [x] XmlDriver + Test
  * [x] AnnotationDriver + Test
- * [ ] YmlDriver + Test
+ * [x] YmlDriver + Test
  * [x] DocumentAdapter + Test
  * [x] Kind of UnitOfWork for handling hard work
  * [x] implement the lifecycle events
- * [x] Bundle to use that library
+ * [x] Bundle to use that library (https://github.com/ElectricMaxxx/DoctrineOrmPhpcrAdapterBundle)
 
 Usage
 =====
