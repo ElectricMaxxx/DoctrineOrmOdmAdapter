@@ -10,6 +10,7 @@ use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use Doctrine\ORM\Proxy\Proxy;
 
 /**
  * Unit of work class
@@ -359,6 +360,11 @@ class UnitOfWork
             return;
         }
 
+        // we do not need to sync any referenced objects that are not initialized proxies
+        if ($referencedObject instanceof Proxy && !$referencedObject->__isInitialized()) {
+            return;
+        }
+
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjets as $fieldName => $reference) {
             $commonFieldMappings = $classMetadata->getCommonFields();
@@ -420,14 +426,7 @@ class UnitOfWork
             $objectProperty->setAccessible(true);
             $objectProperty->setValue($object, $referencedObject);
 
-            // add this referenced Object to the map of referenced objects
-            $roid = spl_object_hash($referencedObject);
-            $this->referencedObjects[$roid] = array(
-                'fieldName'        => $fieldName,
-                'object'           => $object,
-                'referencedObject' => $referencedObject,
-            );
-            $this->referencedObjectState[$roid] = self::STATE_REFERENCED;
+            $this->registerReference($referencedObject, $object, $fieldName);
 
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
                 $classMetadata,
@@ -531,7 +530,6 @@ class UnitOfWork
             $this->eventManager->dispatchEvent(Event::onClear, new ManagerEventArgs($this->objectAdapterManager));
         }
     }
-
 
     /**
      * Schedule all referenced objects, which needs to be inserted.
@@ -909,6 +907,37 @@ class UnitOfWork
                 $this->scheduleReferenceForUpdate($reference['object'], $reference['referencedObject'], $reference['fieldName']);
             }
         }
-
     }
+
+    /**
+     * A reference will be registered to a map.
+     *
+     * That map contain arrays with the referenced object object hash as key,
+     * the referenced/referencing object and the field name as fields.
+     *
+     * @param object $referencedObject
+     * @param object $object
+     * @param string $fieldName
+     */
+    private function registerReference($referencedObject, $object, $fieldName)
+    {
+        $roid = spl_object_hash($referencedObject);
+        $this->referencedObjects[$roid] = array(
+            'fieldName'        => $fieldName,
+            'object'           => $object,
+            'referencedObject' => $referencedObject,
+        );
+        $this->referencedObjectState[$roid] = self::STATE_REFERENCED;
+    }
+
+    /**
+     * A getter for the referenced objects map.
+     *
+     * @return array
+     */
+    public function getReferencedObjects()
+    {
+        return $this->referencedObjects;
+    }
+
 }
