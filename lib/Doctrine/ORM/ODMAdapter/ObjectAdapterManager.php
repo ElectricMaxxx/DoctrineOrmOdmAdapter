@@ -217,8 +217,9 @@ class ObjectAdapterManager
     }
 
     /**
-     * Every manager should have its own event managers, so this library will hook on its events to trigger
-     * this methods here.
+     * By using that method the library's own event subscribers will be
+     * registered to event managers of matching mangeres set into the
+     * configuration.
      */
     public function addListenersToEventManagers()
     {
