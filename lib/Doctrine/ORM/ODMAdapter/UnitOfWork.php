@@ -360,8 +360,8 @@ class UnitOfWork
             return;
         }
 
-        // we do not need to sync any referenced objects that are not initialized proxies
-        if (method_exists($object, '__isInitialized') && !$referencedObject->__isInitialized()) {
+        // neither a sleeping proxy of the object or referenced objects is good for reflections or the sync process
+        if ($this->objectAdapterManager->isSleepingProxy($object) || $this->objectAdapterManager->isSleepingProxy($referencedObject)) {
             return;
         }
 

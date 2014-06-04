@@ -5,6 +5,7 @@ namespace Doctrine\ORM\ODMAdapter;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ODM\PHPCR\DocumentManager;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
@@ -272,5 +273,16 @@ class ObjectAdapterManager
         }
 
         return $this->unitOfWork->hasReferencedObject($referencedObject);
+    }
+
+    /**
+     * Detects if a object is a proxy with no initializing.
+     *
+     * @param $object
+     * @return bool
+     */
+    public function isSleepingProxy($object)
+    {
+        return $object instanceof Proxy && !$object->__isInitialized();
     }
 }
