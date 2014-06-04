@@ -461,6 +461,10 @@ class UnitOfWorkTest extends \PHPUnit_Framework_TestCase
         $this->UoW->loadReferences($object);
 
         $this->assertEquals($testReferencedObject, $object->referencedField);
+
+        // the referenced object needs to be mapped, but not scheduled for remove/update/insert
+        $this->assertCount(1, $this->UoW->getReferencedObjects());
+        $this->assertCount(0, $this->UoW->getAllScheduledReferences());
     }
 
     public function testLoadInvertedReference()
