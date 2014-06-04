@@ -27,7 +27,7 @@ class PhpcrLifecycleListener extends AbstractListener
     public function postLoad(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
-        if ($this->isReferenceable($object)) {
+        if ($this->isReferenceable($object) && !$this->objectAdapterManager->isSleepingProxy($object)) {
             $this->objectAdapterManager->findReference($object);
         }
     }
