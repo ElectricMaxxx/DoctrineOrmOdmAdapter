@@ -361,7 +361,7 @@ class UnitOfWork
         }
 
         // we do not need to sync any referenced objects that are not initialized proxies
-        if ($referencedObject instanceof Proxy && !$referencedObject->__isInitialized()) {
+        if (method_exists($object, '__isInitialized') && !$referencedObject->__isInitialized()) {
             return;
         }
 
@@ -867,7 +867,7 @@ class UnitOfWork
     public function hasReferencedObject($referencedObject)
     {
         $referenceReflection = new \ReflectionClass($referencedObject);
-        $references = array_filter($this->referencedObjects, function($reference) use ($referenceReflection) {
+        $references = array_filter($this->getReferencedObjects(), function($reference) use ($referenceReflection) {
             return $referenceReflection->isInstance($reference['referencedObject']);
         });
 

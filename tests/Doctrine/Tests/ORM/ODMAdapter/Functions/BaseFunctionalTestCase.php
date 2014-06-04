@@ -192,6 +192,10 @@ class BaseFunctionalTestCase extends \PHPUnit_Framework_TestCase
         $annotationDriver = new AnnotationDriver($reader);
         $annotationDriver->addPaths(array(__DIR__ . "/../../../Models"));
         $configuration->setMetadataDriverImpl($annotationDriver);
+        $configuration->setProxyDir(__DIR__.'/cache');
+        $configuration->setAutoGenerateProxyClasses(true);
+        $configuration->setProxyNamespace('__Test__');
+        $configuration->setClassMetadataFactoryName('Doctrine\ORM\ODMAdapter\Mapping\ClassMetadataFactory');
         $this->objectAdapterManager = ObjectAdapterManager::create($configuration);
         $this->objectAdapterManager->addListenersToEventManagers();
     }

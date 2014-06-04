@@ -262,9 +262,9 @@ class ObjectAdapterManager
         $allScheduledReferences = $this->unitOfWork->getAllScheduledReferences();
         $reflection = new \ReflectionClass($referencedObject);
 
-        foreach ($allScheduledReferences as $objects) {
-            foreach ($objects as $object) {
-                if ($reflection->isInstance($object)) {
+        foreach ($allScheduledReferences as $references) {
+            foreach ($references as $reference) {
+                if ($reflection->isInstance($reference)) {
 
                     return true;
                 }

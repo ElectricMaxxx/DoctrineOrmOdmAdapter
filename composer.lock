@@ -1,7 +1,8 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
     "hash": "e142d21a3b584792a967b4a76413327d",
     "packages": [
@@ -499,12 +500,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackalope/jackalope.git",
-                "reference": "b013652c80851e6743c1890455d3506130808f3b"
+                "reference": "77ab65819809d04643c86b7ebc1dbcf0261b162f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackalope/jackalope/zipball/b013652c80851e6743c1890455d3506130808f3b",
-                "reference": "b013652c80851e6743c1890455d3506130808f3b",
+                "url": "https://api.github.com/repos/jackalope/jackalope/zipball/77ab65819809d04643c86b7ebc1dbcf0261b162f",
+                "reference": "77ab65819809d04643c86b7ebc1dbcf0261b162f",
                 "shasum": ""
             },
             "require": {
@@ -544,7 +545,7 @@
             "keywords": [
                 "phpcr"
             ],
-            "time": "2014-05-25 09:34:01"
+            "time": "2014-06-02 06:01:48"
         },
         {
             "name": "jackalope/jackalope-doctrine-dbal",
@@ -864,12 +865,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/doctrine2.git",
-                "reference": "63c5758070dd39a9a4dcf6e97025f712850d7e7f"
+                "reference": "859465b6919967a45eabcfd5b26036988a30ffc1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/63c5758070dd39a9a4dcf6e97025f712850d7e7f",
-                "reference": "63c5758070dd39a9a4dcf6e97025f712850d7e7f",
+                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/859465b6919967a45eabcfd5b26036988a30ffc1",
+                "reference": "859465b6919967a45eabcfd5b26036988a30ffc1",
                 "shasum": ""
             },
             "require": {
@@ -932,7 +933,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2014-04-21 05:07:57"
+            "time": "2014-06-03 19:43:21"
         },
         {
             "name": "doctrine/phpcr-bundle",
@@ -1012,12 +1013,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ElectricMaxxx/phpcr-odm.git",
-                "reference": "7597dfc814436dd3ea262817ca1ad112faf10244"
+                "reference": "0f6f9540a2255561f7b43350c924dbcac6478ae7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ElectricMaxxx/phpcr-odm/zipball/7597dfc814436dd3ea262817ca1ad112faf10244",
-                "reference": "7597dfc814436dd3ea262817ca1ad112faf10244",
+                "url": "https://api.github.com/repos/ElectricMaxxx/phpcr-odm/zipball/0f6f9540a2255561f7b43350c924dbcac6478ae7",
+                "reference": "0f6f9540a2255561f7b43350c924dbcac6478ae7",
                 "shasum": ""
             },
             "require": {
@@ -1025,7 +1026,7 @@
                 "php": ">=5.3.3",
                 "phpcr/phpcr": "2.1.1",
                 "phpcr/phpcr-implementation": "~2.1.0",
-                "phpcr/phpcr-utils": "~1.1.0"
+                "phpcr/phpcr-utils": ">=1.1.0,<1.3.x-dev"
             },
             "require-dev": {
                 "liip/rmt": "dev-master",
@@ -1078,7 +1079,7 @@
             "support": {
                 "source": "https://github.com/ElectricMaxxx/phpcr-odm/tree/uuid-on-references"
             },
-            "time": "2014-05-23 06:54:15"
+            "time": "2014-05-30 06:43:29"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -1441,12 +1442,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "1d6b554732382879045e11c56decd4be76130720"
+                "reference": "e93a39198c8b7e4ce7bc24f1305451e3f32dd8d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1d6b554732382879045e11c56decd4be76130720",
-                "reference": "1d6b554732382879045e11c56decd4be76130720",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e93a39198c8b7e4ce7bc24f1305451e3f32dd8d8",
+                "reference": "e93a39198c8b7e4ce7bc24f1305451e3f32dd8d8",
                 "shasum": ""
             },
             "require": {
@@ -1507,7 +1508,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-05-24 10:48:51"
+            "time": "2014-05-30 23:53:36"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1933,12 +1934,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Debug.git",
-                "reference": "8c3626a4acd2daee0e6d93af9c5dbc42960d477e"
+                "reference": "88fce721305e8391e83452212a56ee98746cf2d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Debug/zipball/8c3626a4acd2daee0e6d93af9c5dbc42960d477e",
-                "reference": "8c3626a4acd2daee0e6d93af9c5dbc42960d477e",
+                "url": "https://api.github.com/repos/symfony/Debug/zipball/88fce721305e8391e83452212a56ee98746cf2d6",
+                "reference": "88fce721305e8391e83452212a56ee98746cf2d6",
                 "shasum": ""
             },
             "require": {
@@ -1981,7 +1982,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "http://symfony.com",
-            "time": "2014-05-26 15:36:48"
+            "time": "2014-06-03 08:31:36"
         },
         {
             "name": "symfony/dependency-injection",
@@ -1990,12 +1991,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/DependencyInjection.git",
-                "reference": "5dfb4c2b74c4976efe1efa783370da656a2dd742"
+                "reference": "4040578469625dc4d3c3c70f583bb995c764c434"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/DependencyInjection/zipball/5dfb4c2b74c4976efe1efa783370da656a2dd742",
-                "reference": "5dfb4c2b74c4976efe1efa783370da656a2dd742",
+                "url": "https://api.github.com/repos/symfony/DependencyInjection/zipball/4040578469625dc4d3c3c70f583bb995c764c434",
+                "reference": "4040578469625dc4d3c3c70f583bb995c764c434",
                 "shasum": ""
             },
             "require": {
@@ -2014,7 +2015,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.5-dev"
+                    "dev-master": "2.6-dev"
                 }
             },
             "autoload": {
@@ -2040,7 +2041,7 @@
             ],
             "description": "Symfony DependencyInjection Component",
             "homepage": "http://symfony.com",
-            "time": "2014-05-12 09:28:39"
+            "time": "2014-05-23 14:36:49"
         },
         {
             "name": "symfony/doctrine-bridge",
@@ -2302,12 +2303,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/HttpFoundation.git",
-                "reference": "70a81c9000d30b5dfd03afd992b7d42eb831104b"
+                "reference": "d17938f07e168c4e5bb35c209d3c289ccff15d80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/70a81c9000d30b5dfd03afd992b7d42eb831104b",
-                "reference": "70a81c9000d30b5dfd03afd992b7d42eb831104b",
+                "url": "https://api.github.com/repos/symfony/HttpFoundation/zipball/d17938f07e168c4e5bb35c209d3c289ccff15d80",
+                "reference": "d17938f07e168c4e5bb35c209d3c289ccff15d80",
                 "shasum": ""
             },
             "require": {
@@ -2348,7 +2349,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "http://symfony.com",
-            "time": "2014-05-23 14:36:49"
+            "time": "2014-05-26 19:02:51"
         },
         {
             "name": "symfony/http-kernel",
