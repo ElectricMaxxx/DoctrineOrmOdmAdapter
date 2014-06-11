@@ -207,6 +207,19 @@ class UnitOfWork
         $oid = spl_object_hash($object);
         $this->objects[$oid] = $object;
         $this->objectState[$oid] = self::OBJECT_STATE_MANAGED;
+
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+            $classMetadata,
+            Event::postReferencing
+        )) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::postReferencing,
+                $object,
+                new Event\ReferencingLifecycleEventArgs($this->objectAdapterManager, $object),
+                $invoke
+            );
+        }
     }
 
     /**
