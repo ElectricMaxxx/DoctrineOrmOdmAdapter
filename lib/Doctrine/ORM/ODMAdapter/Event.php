@@ -22,5 +22,9 @@ final class Event {
     const postFlushReference = 'postFlushReference';
     const onClear = 'onClear';
 
+    const preReferencing = 'preReferencing';
+    const postLoadReferencing = 'postLoadReferencing';
+    const preRemoveReferencing = 'preRemoveReferencing';
+
     public static $lifecycleCallbacks = array();
 }

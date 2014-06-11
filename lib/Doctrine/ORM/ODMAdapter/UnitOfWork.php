@@ -10,7 +10,6 @@ use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
-use Doctrine\ORM\Proxy\Proxy;
 
 /**
  * Unit of work class
@@ -172,6 +171,19 @@ class UnitOfWork
      */
     private function persistNew($object, $classMetadata)
     {
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+            $classMetadata,
+            Event::preReferencing
+        )) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::preReferencing,
+                $object,
+                new Event\ReferencingLifecycleEventArgs($this->objectAdapterManager, $object),
+                $invoke
+            );
+        }
+
         foreach ($this->extractReferencedObjects($object, $classMetadata) as $fieldName => $referencedObject) {
             if ($invoke = $this->eventListenersInvoker->getSubscribedSystems($classMetadata, Event::preBindReference)) {
                 $this->eventListenersInvoker->invoke(
@@ -286,6 +298,19 @@ class UnitOfWork
         $oid = spl_object_hash($object);
         $this->objects[$oid] = $object;
         $this->objectState[spl_object_hash($object)] = self::OBJECT_STATE_MANAGED;
+
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+            $classMetadata,
+            Event::preRemoveReferencing
+        )) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::preRemoveReferencing,
+                $object,
+                new Event\ReferencingLifecycleEventArgs($this->objectAdapterManager, $object),
+                $invoke
+            );
+        }
     }
 
     /**
@@ -440,6 +465,19 @@ class UnitOfWork
                     $invoke
                 );
             }
+        }
+
+        if ($invoke = $this->eventListenersInvoker->getSubscribedSystems(
+            $classMetadata,
+            Event::postLoadReferencing
+        )) {
+            $this->eventListenersInvoker->invoke(
+                $classMetadata,
+                Event::postLoadReferencing,
+                $object,
+                new Event\ReferencingLifecycleEventArgs($this->objectAdapterManager, $object),
+                $invoke
+            );
         }
     }
 
