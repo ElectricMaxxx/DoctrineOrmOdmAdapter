@@ -23,6 +23,7 @@ final class Event {
     const onClear = 'onClear';
 
     const preReferencing = 'preReferencing';
+    const postReferencing = 'postReferencing';
     const postLoadReferencing = 'postLoadReferencing';
     const preRemoveReferencing = 'preRemoveReferencing';
 
