@@ -452,17 +452,34 @@ class UnitOfWork
 
         $objectReflection = new \ReflectionClass($object);
         foreach ($referencedObjects as $fieldName => $reference) {
-            $objectProperty = $objectReflection->getProperty($reference['inversed-by']);
-            $objectProperty->setAccessible(true);
-            $objectValue = $objectProperty->getValue($object);
+
+            // try to get the object value
+            if ($objectReflection->hasProperty($reference['inversed-by'])) {
+                $objectProperty = $objectReflection->getProperty($reference['inversed-by']);
+                $objectProperty->setAccessible(true);
+                $objectValue = $objectProperty->getValue($object);
+            } elseif (method_exists($object, 'get'.ucfirst($reference['inversed-by']))) {
+                $objectValue = $object->{'get'.ucfirst($reference['inversed-by'])}();
+            }
+
+            if (!$objectValue) {
+                continue;
+            }
+
 
             $referencedObject = $this->objectAdapterManager
-                                     ->getManager($object, $fieldName)
-                                     ->getReference($reference['target-object'], $objectValue);
+                ->getManager($object, $fieldName)
+                ->getReference($reference['target-object'], $objectValue);
 
-            $objectProperty = $objectReflection->getProperty($fieldName);
-            $objectProperty->setAccessible(true);
-            $objectProperty->setValue($object, $referencedObject);
+            // try to set the referenced object
+            if ($objectReflection->hasProperty($fieldName)) {
+                $objectProperty = $objectReflection->getProperty($fieldName);
+                $objectProperty->setAccessible(true);
+                $objectProperty->setValue($object, $referencedObject);
+            } elseif (method_exists($object, 'set'.ucfirst($fieldName))) {
+                $object->{'set'.ucfirst($fieldName)}($referencedObject);
+            }
+
 
             $this->registerReference($referencedObject, $object, $fieldName);
 
