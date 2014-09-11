@@ -418,9 +418,15 @@ class UnitOfWork
             $referencedObjectReflection = new \ReflectionClass($referencedObject);
 
             foreach ($commonFieldMappings as $commonField) {
+                if (!$referencedObjectReflection->hasProperty($commonField['referenced-by'])) {
+                    continue;
+                }
                 $referencedObjectProperty = $referencedObjectReflection->getProperty($commonField['referenced-by']);
                 $referencedObjectProperty->setAccessible(true);
 
+                if (!$objectReflection->hasProperty($commonField['inversed-by'])) {
+                    continue;
+                }
                 $objectProperty = $objectReflection->getProperty($commonField['inversed-by']);
                 $objectProperty->setAccessible(true);
 
