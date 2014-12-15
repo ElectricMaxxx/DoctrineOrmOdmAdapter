@@ -4,6 +4,7 @@ namespace Doctrine\ORM\ODMAdapter\Event;
 
 use Doctrine\Common\Persistence\Event\ManagerEventArgs;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Common\Persistence\Event\OnClearEventArgs;
 
 class PhpcrLifecycleListener extends AbstractListener
 {
@@ -40,7 +41,7 @@ class PhpcrLifecycleListener extends AbstractListener
         }
     }
 
-    public function onClear(ManagerEventArgs $event)
+    public function onClear(OnClearEventArgs $event)
     {
         $this->objectAdapterManager->clear();
     }
