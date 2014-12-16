@@ -1,5 +1,10 @@
 <?php
 
+if (!getenv('REPORT_DEPRECATION')) {
+    error_reporting(E_ALL ^ E_USER_DEPRECATED);
+}
+
+
 $file = __DIR__.'/../vendor/autoload.php';
 if (file_exists($file)) {
     $autoload = require $file;
