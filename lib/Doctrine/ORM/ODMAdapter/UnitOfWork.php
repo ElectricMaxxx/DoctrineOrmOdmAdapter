@@ -10,6 +10,8 @@ use Doctrine\ORM\ODMAdapter\Event;
 use Doctrine\ORM\ODMAdapter\Event\ManagerEventArgs;
 use Doctrine\ORM\ODMAdapter\Exception\UnitOfWorkException;
 use Doctrine\ORM\ODMAdapter\Mapping\ClassMetadata;
+use PHPCR\ItemNotFoundException;
+use PHPCR\Util\UUIDHelper;
 
 /**
  * Unit of work class
@@ -472,6 +474,24 @@ class UnitOfWork
                 continue;
             }
 
+            if (UUIDHelper::isUUID($objectValue)) {
+                // DocumentManager::getReference() does not work correctly if called with an uuid instead of an id,
+                // so if we have an uuid here, we have to fetch the node first (which unfortunately is not optimal
+                // from a performance point of view) to get the correct id of the document.
+                // (DocumentManager::getReference() seems to work first - but it will initialize the id field with the
+                // uuid and this will cause errors later, e.g. when accessing other referenced documents of the loaded
+                // document - it is simply not possible to use it correctly with an uuid)
+                try {
+                    $referencedNode = $this->objectAdapterManager
+                        ->getManager($object, $fieldName)
+                        ->getPhpcrSession()
+                        ->getNodeByIdentifier($objectValue);
+
+                    $objectValue = $referencedNode->getPath();
+                } catch (ItemNotFoundException $e) {
+                    continue;
+                }
+            }
 
             $referencedObject = $this->objectAdapterManager
                 ->getManager($object, $fieldName)
