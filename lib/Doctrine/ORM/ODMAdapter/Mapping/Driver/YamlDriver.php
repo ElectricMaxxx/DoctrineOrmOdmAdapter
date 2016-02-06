@@ -6,6 +6,7 @@ namespace Doctrine\ORM\ODMAdapter\Mapping\Driver;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\ORM\ODMAdapter\Exception\MappingException;
+use InvalidArgumentException;
 use Symfony\Component\Yaml\Yaml;
 use Doctrine\Common\Persistence\Mapping\MappingException as DoctrineMappingException;
 
@@ -38,7 +39,7 @@ class YamlDriver extends FileDriver
             return;
         }
 
-        foreach($element as $fieldName => $reference) {
+        foreach ($element as $fieldName => $reference) {
             $this->extractReferencedObjects($reference, $classMetadata, $className, $fieldName);
         }
     }
@@ -49,7 +50,11 @@ class YamlDriver extends FileDriver
      */
     protected function loadMappingFile($file)
     {
-        return Yaml::parse($file);
+        if (!is_file($file)) {
+            throw new InvalidArgumentException(sprintf('File "%s" not found', $file));
+        }
+
+        return Yaml::parse(file_get_contents($file));
     }
 
     /**

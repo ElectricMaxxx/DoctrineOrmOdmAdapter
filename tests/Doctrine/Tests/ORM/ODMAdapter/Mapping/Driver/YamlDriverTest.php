@@ -13,6 +13,7 @@ class YamlDriverTest extends AbstractMappingDriverTest
     protected function loadDriver()
     {
         $location = __DIR__ . '/Model/yml';
+
         return new YamlDriver($location);
     }
 
