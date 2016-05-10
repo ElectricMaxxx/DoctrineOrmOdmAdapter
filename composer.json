@@ -17,19 +17,19 @@
         "jackalope/jackalope-doctrine-dbal": "^1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "4.1.*",
+        "phpunit/phpunit": "^4.1",
         "symfony/yaml": "~2.0",
         "liip/rmt": "dev-master",
-        "doctrine/phpcr-bundle": "1.1.*",
+        "doctrine/phpcr-bundle": "^1.1",
         "doctrine/phpcr-odm": "dev-uuid-on-references as 1.1.0",
-        "doctrine/doctrine-bundle": "v1.2.0",
-        "doctrine/orm": "2.4.*@dev",
-        "phpcr/phpcr": "2.1.1",
-        "phpcr/phpcr-implementation": "~2.1.0",
-        "phpcr/phpcr-utils": "~1.1.0"
+        "doctrine/doctrine-bundle": "^1.2",
+        "doctrine/orm": "^2.4",
+        "phpcr/phpcr": "^2.1",
+        "phpcr/phpcr-implementation": "^2.1",
+        "phpcr/phpcr-utils": "^1.1"
     },
     "suggest":{
-        "symfony/yaml": "~2.0"
+        "symfony/yaml": "^2.0"
     },
     "autoload": {
         "psr-4": { "Doctrine\\ORM\\ODMAdapter\\": "lib/Doctrine/ORM/ODMAdapter" }

@@ -1,7 +1,8 @@
 nbproject
 *~
 tests/phpunit.xml
-
+tests/phpunit_doctrine_dbal.xml
+cli-config.doctrine_dbal.php
 /cli-config.php
 jackrabbit/
 
@@ -10,5 +11,3 @@ vendor/
 
 composer.lock
 composer.phar
-
-tests/phpunit.xml
